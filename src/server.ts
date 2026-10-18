@@ -1,5 +1,4 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,8 +9,6 @@ import { errorHandlerMiddleware } from './interfaces/http/middlewares/error-hand
 import { dbPool, testDbConnection } from './infrastructure/database/connection.js';
 import { TenantSchemaManager } from './infrastructure/database/tenant-schema-manager.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const publicPath = path.resolve(process.cwd(), 'public');
 
 const app = express();
