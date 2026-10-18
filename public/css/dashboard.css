@@ -340,5 +340,55 @@
   .quick-action-item {
     padding: 10px 12px;
   }
+
+  .revenue-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 11px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES DASHBOARD: SMARTPHONES PEQUEÑOS (<= 480px)
+   ========================================================================== */
+@media (max-width: 480px) {
+  .dashboard-container {
+    gap: 12px;
+  }
+
+  .revenue-card {
+    padding: 14px 12px;
+  }
+
+  .revenue-title-group h3 {
+    font-size: 15px;
+  }
+
+  .chart-wrapper {
+    height: 160px;
+  }
+
+  .quick-actions-card, .today-summary-card, .forecast-card {
+    padding: 14px 12px;
+  }
+
+  .today-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-box {
+    padding: 8px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .forecast-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 }
 

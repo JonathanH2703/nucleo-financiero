@@ -763,52 +763,110 @@ html, body {
    MEDIA QUERIES: MÓVILES Y PANTALLAS TÁCTILES (<= 768px)
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Banner superior compacto */
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: inline-flex !important;
+  }
+
+  /* Banner superior compacto en una sola línea elegante */
   .dev-env-banner {
-    height: auto;
-    padding: 6px 12px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    height: 32px;
+    padding: 0 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     font-size: 10px;
+    gap: 8px;
+  }
+
+  .dev-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   .dev-env-banner .tenant-indicator {
-    width: 100%;
-    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    width: auto;
+  }
+
+  .dev-banner-user {
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dev-env-banner .btn-switch-tenant {
+    padding: 2px 7px;
+    font-size: 10px;
+    white-space: nowrap;
   }
 
   .app-container {
-    height: calc(100% - 48px);
+    height: calc(100% - 32px);
     padding-bottom: 56px; /* Espacio para la barra de navegación inferior móvil */
   }
 
-  /* Ajustes en el Topbar móvil */
+  /* Ajustes en el Topbar móvil: fila fija limpia sin colisiones */
   .topbar {
-    padding: 8px 12px;
-    height: auto;
+    padding: 0 12px;
+    height: 52px;
     min-height: 52px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 8px;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .topbar-left {
     gap: 8px;
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .topbar-titles-box {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .topbar-view-title {
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 700;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .topbar-view-subtitle {
     font-size: 10px;
-    max-width: 150px;
+    max-width: 130px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-muted);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   /* Ocultar elementos secundarios de topbar en móviles */
@@ -817,22 +875,21 @@ html, body {
     display: none !important;
   }
 
-  .module-switcher-pill {
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-
-  .btn-theme-toggle #theme-btn-label {
-    display: none;
+  .btn-theme-toggle {
+    padding: 6px 8px;
+    font-size: 13px;
   }
 
   .btn-logout {
-    padding: 4px 8px;
+    padding: 5px 10px;
     font-size: 11px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
   }
 
   .view-content {
-    padding: 14px 12px;
+    padding: 12px 10px;
   }
 
   /* Activar Barra Inferior Móvil */
@@ -893,13 +950,21 @@ html, body {
     gap: 4px;
   }
 
-  .btn-logout {
-    font-size: 10px;
-    padding: 3px 6px;
+  .dev-banner-user {
+    display: none;
   }
 
-  .module-switcher-pill span:not(:first-child) {
+  .topbar-view-subtitle {
     display: none;
+  }
+
+  .topbar-view-title {
+    font-size: 13px;
+  }
+
+  .btn-logout {
+    font-size: 10px;
+    padding: 4px 8px;
   }
 }
 

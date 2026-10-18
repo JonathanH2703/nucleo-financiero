@@ -197,14 +197,14 @@ class App {
     this.root.innerHTML = `
       <!-- Banner de Entorno de Desarrollo -->
       <div class="dev-env-banner">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="badge-pill">Modo Demostración</span>
-          <span><b>Aislamiento Activo:</b> Schema PostgreSQL <code>"${tenant.slug}"</code></span>
+        <div class="dev-banner-left">
+          <span class="badge-pill">Demo</span>
+          <span class="dev-banner-schema">Schema: <code>${tenant.slug}</code></span>
         </div>
         <div class="tenant-indicator">
-          <span>Conectado como: <b>${user.nombre}</b> (<span style="color: ${roleBadgeColor}; font-weight: 700;">${user.rol.nombre}</span>)</span>
-          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant">
-            🔄 Cambiar Empresa
+          <span class="dev-banner-user"><b>${user.nombre}</b> (<span style="color: ${roleBadgeColor}; font-weight: 700;">${user.rol.nombre}</span>)</span>
+          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant" title="Cambiar Empresa">
+            🔄 <span class="desktop-only">Cambiar</span> Empresa
           </button>
         </div>
       </div>
@@ -258,23 +258,23 @@ class App {
           <header class="topbar">
             <div class="topbar-left">
               <button type="button" class="btn-hamburger" id="btn-hamburger" title="Abrir menú de navegación">☰</button>
-              <div>
+              <div class="topbar-titles-box">
                 <div class="topbar-view-title">${this.getViewTitle(view)}</div>
-                <div class="topbar-view-subtitle">${tenant.name} · ${tenant.nit}</div>
+                <div class="topbar-view-subtitle">${tenant.name}</div>
               </div>
 
-              <!-- Píldora Selectora de Módulo o Indicador de Área -->
+              <!-- Píldora Selectora de Módulo (visible solo en escritorio para evitar colisiones en móvil) -->
               ${
                 canSwitchModule
                   ? `
-                <button type="button" class="module-switcher-pill ${isPosModule ? 'pos-mode' : ''}" id="topbar-module-pill" title="Alternar entre Gestión y Punto de Venta">
-                  <span>${isPosModule ? '☕ Núcleo Punto de Venta' : '🌐 Núcleo Gestión'}</span>
+                <button type="button" class="module-switcher-pill desktop-only ${isPosModule ? 'pos-mode' : ''}" id="topbar-module-pill" title="Alternar entre Gestión y Punto de Venta">
+                  <span>${isPosModule ? '☕ Punto de Venta' : '🌐 Gestión'}</span>
                   <span style="font-size: 10px;">▼</span>
                 </button>
               `
                   : `
-                <div class="module-switcher-pill ${isPosModule ? 'pos-mode' : ''}" style="cursor: default;" title="Módulo operativo asignado a tu perfil">
-                  <span>${isPosModule ? '☕ Punto de Venta Operativo' : '🌐 Gestión Administrativa'}</span>
+                <div class="module-switcher-pill desktop-only ${isPosModule ? 'pos-mode' : ''}" style="cursor: default;" title="Módulo operativo">
+                  <span>${isPosModule ? '☕ Punto de Venta' : '🌐 Gestión'}</span>
                 </div>
               `
               }
@@ -283,7 +283,7 @@ class App {
             <div class="topbar-right">
               <div class="topbar-location">
                 <span>📍</span>
-                <span>${tenant.sucursales[0] || 'Sede Principal — Bogotá'}</span>
+                <span>${tenant.sucursales[0] || 'Sede Principal'}</span>
               </div>
 
               <div class="topbar-timer">
@@ -293,10 +293,10 @@ class App {
 
               <!-- Selector Rápido de Tema (Claro / Oscuro / Sistema) -->
               <div class="theme-switcher-wrapper">
-                <button type="button" class="btn-theme-toggle" id="btn-theme-quick-toggle" title="Cambiar tema visual (Claro / Oscuro / Sistema)">
+                <button type="button" class="btn-theme-toggle" id="btn-theme-quick-toggle" title="Cambiar tema visual">
                   <span id="theme-btn-icon">${themeIcon}</span>
-                  <span id="theme-btn-label">${themeLabel}</span>
-                  <span style="font-size: 9px; opacity: 0.7;">▼</span>
+                  <span id="theme-btn-label" class="desktop-only">${themeLabel}</span>
+                  <span class="desktop-only" style="font-size: 9px; opacity: 0.7;">▼</span>
                 </button>
                 <div class="theme-dropdown-menu" id="theme-dropdown-menu" style="display: none;">
                   <div class="theme-dropdown-item ${themeSetting === 'light' ? 'active' : ''}" data-theme-val="light">
@@ -311,12 +311,13 @@ class App {
                 </div>
               </div>
 
-              <button type="button" class="btn-icon" title="Notificaciones DIAN" onclick="alert('Sistema de notificaciones DIAN: Todos los servicios operativos.')">
+              <button type="button" class="btn-icon desktop-only" title="Notificaciones DIAN" onclick="alert('Sistema de notificaciones DIAN: Todos los servicios operativos.')">
                 🔔
               </button>
 
-              <button type="button" class="btn-logout" id="btn-topbar-logout">
-                Cerrar Sesión
+              <button type="button" class="btn-logout" id="btn-topbar-logout" title="Cerrar Sesión">
+                <span class="desktop-only">Cerrar Sesión</span>
+                <span class="mobile-only">Salir</span>
               </button>
             </div>
           </header>
@@ -339,25 +340,25 @@ class App {
   static getViewTitle(view) {
     switch (view) {
       case 'dashboard':
-        return 'NÚCLEO Dashboard Ejecutivo';
+        return 'Dashboard';
       case 'facturacion':
-        return 'NÚCLEO Facturación Electrónica DIAN';
+        return 'Facturación DIAN';
       case 'pos':
-        return 'NÚCLEO Comanda y Punto de Venta POS';
+        return 'Punto de Venta POS';
       case 'rbac':
-        return 'NÚCLEO Roles y Permisos (RBAC)';
+        return 'Roles & Permisos';
       case 'ajustes':
-        return 'NÚCLEO Ajustes y Preferencias';
+        return 'Ajustes';
       case 'contabilidad':
-        return 'NÚCLEO Contabilidad y Declaraciones DIAN';
+        return 'Contabilidad';
       case 'clientes':
-        return 'NÚCLEO Directorio de Clientes CRM';
+        return 'Clientes CRM';
       case 'inventario':
-        return 'NÚCLEO Control de Inventario y Kardex';
+        return 'Inventario';
       case 'reportes':
-        return 'NÚCLEO Inteligencia de Negocio y Reportes';
+        return 'Reportes';
       case 'acceso_denegado':
-        return 'NÚCLEO Control de Acceso RBAC';
+        return 'Control de Acceso';
       default:
         return 'NÚCLEO Financiero';
     }
@@ -405,13 +406,28 @@ class App {
     }
   }
 
+  static getShortNavTitle(id, fullTitle) {
+    switch (id) {
+      case 'pos': return 'POS';
+      case 'dashboard': return 'Dashboard';
+      case 'facturacion': return 'Facturas';
+      case 'contabilidad': return 'Contabilidad';
+      case 'rbac': return 'Roles';
+      case 'ajustes': return 'Ajustes';
+      case 'inventario': return 'Inventario';
+      case 'clientes': return 'Clientes';
+      case 'reportes': return 'Reportes';
+      default: return fullTitle.split(' ')[0];
+    }
+  }
+
   static buildMobileBottomNav(currentView) {
     // Tomar los primeros 4 módulos permitidos para la barra inferior
     const mobileItems = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id)).slice(0, 4);
     return mobileItems.map((item) => `
       <button class="mobile-nav-btn ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
         <span class="icon">${item.icon}</span>
-        <span>${item.title.split(' ')[0]}</span>
+        <span>${this.getShortNavTitle(item.id, item.title)}</span>
       </button>
     `).join('');
   }
