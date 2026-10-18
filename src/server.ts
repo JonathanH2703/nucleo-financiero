@@ -35,6 +35,119 @@ app.use((req, res, next) => {
   next();
 });
 
+// Página raíz profesional del API
+app.get('/', (_req, res) => {
+  res.status(200).send(`<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Núcleo Financiero — API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 680px;
+      padding: 48px 40px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+    .logo { font-size: 48px; margin-bottom: 8px; }
+    h1 { font-size: 28px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+    .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34, 197, 94, 0.15); color: #4ade80;
+      padding: 4px 12px; border-radius: 20px; font-size: 12px;
+      font-weight: 600; margin-bottom: 24px;
+    }
+    .badge::before { content: ''; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-bottom: 12px; font-weight: 600; }
+    .endpoints { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+    .endpoint {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 8px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px;
+    }
+    .method {
+      font-size: 10px; font-weight: 700; padding: 2px 8px;
+      border-radius: 4px; min-width: 36px; text-align: center;
+    }
+    .get { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .post { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .path { color: #c4b5fd; }
+    .desc { margin-left: auto; color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 11px; }
+    .footer { color: #475569; font-size: 12px; text-align: center; margin-top: 20px; }
+    a { color: #818cf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🏛️</div>
+    <h1>Núcleo Financiero</h1>
+    <p class="subtitle">API Multi-Tenant · ERP · POS · Facturación DIAN</p>
+    <div class="badge">SERVICIO ACTIVO</div>
+    
+    <p class="section-title">Endpoints principales</p>
+    <div class="endpoints">
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a class="path" href="${env.API_PREFIX}/health">${env.API_PREFIX}/health</a>
+        <span class="desc">Estado</span>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="path">${env.API_PREFIX}/auth/login-pin</span>
+        <span class="desc">Auth PIN</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="path">${env.API_PREFIX}/pos/catalogo</span>
+        <span class="desc">Catálogo</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="path">${env.API_PREFIX}/pos/comandas</span>
+        <span class="desc">Comandas</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="path">${env.API_PREFIX}/facturacion/documentos</span>
+        <span class="desc">Facturas</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <span class="path">${env.API_PREFIX}/auth/roles</span>
+        <span class="desc">RBAC</span>
+      </div>
+    </div>
+    
+    <p class="section-title">Header requerido para peticiones</p>
+    <div class="endpoint" style="margin-bottom: 24px;">
+      <span class="method" style="background:rgba(251,191,36,0.2);color:#fbbf24;">HDR</span>
+      <span class="path">x-tenant-slug: restaurante_origen</span>
+    </div>
+    
+    <p class="footer">v1.0.0 · Node.js + Express + PostgreSQL Multi-Tenant · <a href="${env.API_PREFIX}/health">Healthcheck →</a></p>
+  </div>
+</body>
+</html>`);
+});
+
 // Rutas de la API
 app.use(env.API_PREFIX, apiRouter);
 
