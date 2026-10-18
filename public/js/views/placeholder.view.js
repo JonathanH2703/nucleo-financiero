@@ -34,13 +34,13 @@ export class PlaceholderView {
         </div>
 
         <!-- Tarjeta de Contenido con Datos de Muestra -->
-        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 24px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 12px;">
               <span style="font-size: 26px;">${config.icon}</span>
               <div>
-                <h3 style="font-size: 18px; font-weight: 800; color: #0f172a;">${config.title}</h3>
-                <p style="font-size: 13px; color: #64748b;">${config.desc} · ${state.currentTenant.name}</p>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">${config.title}</h3>
+                <p style="font-size: 13px; color: var(--text-muted);">${config.desc} · ${state.currentTenant.name}</p>
               </div>
             </div>
 

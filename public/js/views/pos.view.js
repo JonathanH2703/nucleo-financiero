@@ -59,10 +59,12 @@ export class PosView {
             <button class="pos-cat-pill active" data-cat="TODAS">Todas</button>
           </div>
 
-          <!-- Grilla de Productos -->
-          <div class="pos-product-grid" id="pos-product-grid">
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
-              ⏳ Cargando catálogo especializado de ${state.currentTenant.name}...
+          <!-- Grilla de Productos con Scroll Dedicado -->
+          <div class="pos-product-grid-wrapper">
+            <div class="pos-product-grid" id="pos-product-grid">
+              <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                ⏳ Cargando catálogo especializado de ${state.currentTenant.name}...
+              </div>
             </div>
           </div>
         </div>
@@ -320,7 +322,7 @@ export class PosView {
             </div>
             <div class="item-qty-control">
               <button class="btn-qty btn-minus" data-id="${item.id}">-</button>
-              <span style="font-size: 13px; font-weight: 700; min-width: 16px; text-align: center;">${item.quantity}</span>
+              <span class="item-qty-value">${item.quantity}</span>
               <button class="btn-qty btn-plus" data-id="${item.id}">+</button>
               <span class="item-total-price">$ ${itemSubtotal.toLocaleString('es-CO')}</span>
             </div>

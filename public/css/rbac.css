@@ -183,7 +183,7 @@
 }
 
 .rbac-matrix-table tr.module-row {
-  background-color: #f8fafc;
+  background-color: var(--table-header-bg);
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-muted);

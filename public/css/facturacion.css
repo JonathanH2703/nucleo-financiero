@@ -130,7 +130,7 @@
 }
 
 .invoices-table thead {
-  background-color: #fafbfc;
+  background-color: var(--table-header-bg);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .invoices-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: var(--table-row-hover);
 }
 
 .invoices-table td {

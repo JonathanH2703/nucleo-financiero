@@ -1,5 +1,6 @@
 /**
  * APLICACIÓN PRINCIPAL (APP ROUTER & SHELL) — NÚCLEO FINANCIERO
+ * Arquitectura modular con soporte reactivo para Multi-Tenant, Punto de Venta (POS) y Motor de Temas.
  */
 
 import { state } from './state.js';
@@ -10,6 +11,7 @@ import { PosView } from './views/pos.view.js';
 import { RbacView } from './views/rbac.view.js';
 import { ContabilidadView } from './views/contabilidad.view.js';
 import { PlaceholderView } from './views/placeholder.view.js';
+import { AjustesView } from './views/ajustes.view.js';
 
 class App {
   static init() {
@@ -17,7 +19,13 @@ class App {
 
     // Suscribirse a cambios de estado para reactividad
     state.subscribe((event, payload) => {
-      if (event === 'view_changed' || event === 'user_changed' || event === 'tenant_changed' || event === 'module_changed') {
+      if (
+        event === 'view_changed' ||
+        event === 'user_changed' ||
+        event === 'tenant_changed' ||
+        event === 'module_changed' ||
+        event === 'theme_changed'
+      ) {
         this.render();
       }
     });
@@ -39,7 +47,7 @@ class App {
             <span class="tenant-name-highlight">${state.currentTenant.name}</span>
           </div>
         </div>
-        <div id="login-view-mount"></div>
+        <div id="login-view-mount" style="flex: 1; min-height: 0; overflow-y: auto;"></div>
       `;
       LoginView.mount(document.getElementById('login-view-mount'));
       return;
@@ -55,6 +63,19 @@ class App {
       ? user.nombre.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
       : 'CM';
 
+    // Configuración del botón de tema en Topbar
+    const themeSetting = state.themeSetting; // 'light' | 'dark' | 'system'
+    const effectiveTheme = state.getEffectiveTheme(); // 'light' | 'dark'
+    let themeIcon = '☀️';
+    let themeLabel = 'Claro';
+    if (themeSetting === 'dark') {
+      themeIcon = '🌙';
+      themeLabel = 'Oscuro';
+    } else if (themeSetting === 'system') {
+      themeIcon = '💻';
+      themeLabel = effectiveTheme === 'dark' ? 'Auto (Oscuro)' : 'Auto (Claro)';
+    }
+
     this.root.innerHTML = `
       <!-- Banner de Entorno de Desarrollo -->
       <div class="dev-env-banner">
@@ -63,8 +84,8 @@ class App {
           <span><b>Aislamiento Activo:</b> Schema PostgreSQL <code>"${tenant.slug}"</code></span>
         </div>
         <div class="tenant-indicator">
-          <span>Conectado como: <b>${user.nombre}</b> (<span style="color:#fde047;">${user.rol.nombre}</span>)</span>
-          <button type="button" id="btn-quick-switch-tenant" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 8px;">
+          <span>Conectado como: <b>${user.nombre}</b> (<span style="color: var(--primary-600); font-weight: 700;">${user.rol.nombre}</span>)</span>
+          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant">
             🔄 Cambiar Empresa
           </button>
         </div>
@@ -156,7 +177,7 @@ class App {
               <span class="nav-badge-wip">WIP</span>
             </div>
 
-            <div class="nav-section-title">Seguridad y Control</div>
+            <div class="nav-section-title">Seguridad y Preferencias</div>
 
             <div class="nav-item ${view === 'rbac' ? 'active' : ''}" data-nav="rbac">
               <span class="nav-item-icon">🛡️</span>
@@ -165,11 +186,19 @@ class App {
                 <span class="nav-item-sub">Matriz RBAC y usuarios</span>
               </div>
             </div>
+
+            <div class="nav-item ${view === 'ajustes' ? 'active' : ''}" data-nav="ajustes">
+              <span class="nav-item-icon">⚙️</span>
+              <div>
+                <span>Ajustes & Tema</span>
+                <span class="nav-item-sub">Personalizar apariencia</span>
+              </div>
+            </div>
           </nav>
 
           <!-- Pie del Sidebar con el Usuario en Sesión -->
           <div class="sidebar-footer">
-            <div class="user-profile-widget" id="user-profile-trigger">
+            <div class="user-profile-widget" id="user-profile-trigger" title="Ver perfil y permisos">
               <div class="user-avatar-circle">${userInitials}</div>
               <div class="user-info-text">
                 <span class="user-name">${user.nombre}</span>
@@ -207,6 +236,26 @@ class App {
                 <span>7h 57m</span>
               </div>
 
+              <!-- Selector Rápido de Tema (Claro / Oscuro / Sistema) -->
+              <div class="theme-switcher-wrapper">
+                <button type="button" class="btn-theme-toggle" id="btn-theme-quick-toggle" title="Cambiar tema visual (Claro / Oscuro / Sistema)">
+                  <span id="theme-btn-icon">${themeIcon}</span>
+                  <span id="theme-btn-label">${themeLabel}</span>
+                  <span style="font-size: 9px; opacity: 0.7;">▼</span>
+                </button>
+                <div class="theme-dropdown-menu" id="theme-dropdown-menu" style="display: none;">
+                  <div class="theme-dropdown-item ${themeSetting === 'light' ? 'active' : ''}" data-theme-val="light">
+                    <span>☀️</span> <span>Modo Claro</span>
+                  </div>
+                  <div class="theme-dropdown-item ${themeSetting === 'dark' ? 'active' : ''}" data-theme-val="dark">
+                    <span>🌙</span> <span>Modo Oscuro</span>
+                  </div>
+                  <div class="theme-dropdown-item ${themeSetting === 'system' ? 'active' : ''}" data-theme-val="system">
+                    <span>💻</span> <span>Sistema (Auto)</span>
+                  </div>
+                </div>
+              </div>
+
               <button type="button" class="btn-icon" title="Notificaciones DIAN" onclick="alert('Sistema de notificaciones DIAN: Todos los servicios operativos.')">
                 🔔
               </button>
@@ -217,8 +266,8 @@ class App {
             </div>
           </header>
 
-          <!-- Vista Activa -->
-          <div class="view-content" id="active-view-mount" style="${view === 'pos' ? 'padding: 0;' : ''}"></div>
+          <!-- Vista Activa (pos-active elimina paddings y scroll exterior para el POS) -->
+          <div class="view-content ${view === 'pos' ? 'pos-active' : ''}" id="active-view-mount"></div>
         </main>
       </div>
     `;
@@ -237,6 +286,8 @@ class App {
         return 'NÚCLEO Comanda y Punto de Venta POS';
       case 'rbac':
         return 'NÚCLEO Roles y Permisos (RBAC)';
+      case 'ajustes':
+        return 'NÚCLEO Ajustes y Preferencias';
       case 'contabilidad':
         return 'NÚCLEO Contabilidad y Declaraciones DIAN';
       case 'clientes':
@@ -266,6 +317,9 @@ class App {
         break;
       case 'rbac':
         RbacView.mount(mountPoint);
+        break;
+      case 'ajustes':
+        AjustesView.mount(mountPoint);
         break;
       case 'contabilidad':
         ContabilidadView.mount(mountPoint);
@@ -304,6 +358,35 @@ class App {
         } else {
           state.setModule('gestion');
           state.setView('dashboard');
+        }
+      });
+    }
+
+    // Selector rápido de Tema en Topbar
+    const btnThemeToggle = document.getElementById('btn-theme-quick-toggle');
+    const themeDropdown = document.getElementById('theme-dropdown-menu');
+
+    if (btnThemeToggle && themeDropdown) {
+      btnThemeToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = themeDropdown.style.display === 'flex';
+        themeDropdown.style.display = isOpen ? 'none' : 'flex';
+      });
+
+      // Opciones del dropdown de temas
+      themeDropdown.querySelectorAll('.theme-dropdown-item').forEach((opt) => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const themeVal = opt.getAttribute('data-theme-val');
+          state.setTheme(themeVal);
+          themeDropdown.style.display = 'none';
+        });
+      });
+
+      // Cerrar dropdown al hacer clic afuera
+      document.addEventListener('click', () => {
+        if (themeDropdown.style.display === 'flex') {
+          themeDropdown.style.display = 'none';
         }
       });
     }

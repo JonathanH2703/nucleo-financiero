@@ -1,16 +1,20 @@
 /**
  * GESTOR DE ESTADO REACTIVO (STORE) — NÚCLEO FINANCIERO
+ * Maneja el estado global, autenticación, tenants, módulo activo, carrito POS y motor de temas (Claro / Oscuro / Sistema).
  */
 
 import { DEMO_TENANTS } from './demo-fixtures.js';
 
 class AppState {
   constructor() {
-    // Cargar estado inicial desde sessionStorage si existe
+    // Cargar estado inicial desde sessionStorage y localStorage
     const savedTenantSlug = sessionStorage.getItem('nf_tenant_slug') || 'restaurante_origen';
     const savedUserJson = sessionStorage.getItem('nf_user');
     const savedModule = sessionStorage.getItem('nf_module') || 'gestion'; // 'gestion' | 'pos'
     const savedView = sessionStorage.getItem('nf_view') || 'login';
+    
+    // Tema: 'light' (predeterminado "deja todo claro") | 'dark' | 'system'
+    this.themeSetting = localStorage.getItem('nf_theme') || 'light';
 
     this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
     this.currentUser = savedUserJson ? JSON.parse(savedUserJson) : null;
@@ -23,6 +27,64 @@ class AppState {
 
     // Lista de oyentes para reactividad
     this.listeners = [];
+
+    // Inicializar y aplicar el tema
+    this.initThemeSystem();
+  }
+
+  initThemeSystem() {
+    this.applyTheme(this.themeSetting, false);
+
+    // Escuchar cambios en la configuración del navegador / sistema operativo
+    if (window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = (e) => {
+        if (this.themeSetting === 'system') {
+          const resolved = e.matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', resolved);
+          document.body.setAttribute('data-theme', resolved);
+          this.notify('theme_changed', { setting: 'system', effective: resolved });
+        }
+      };
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handler);
+      } else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handler);
+      }
+    }
+  }
+
+  setTheme(theme) {
+    if (theme !== 'light' && theme !== 'dark' && theme !== 'system') {
+      theme = 'light';
+    }
+    this.themeSetting = theme;
+    localStorage.setItem('nf_theme', theme);
+    this.applyTheme(theme, true);
+  }
+
+  applyTheme(theme, notify = true) {
+    let resolvedTheme = theme;
+    if (theme === 'system') {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      resolvedTheme = prefersDark ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-theme', resolvedTheme);
+    document.documentElement.setAttribute('data-theme-setting', theme);
+    document.body.setAttribute('data-theme', resolvedTheme);
+
+    if (notify) {
+      this.notify('theme_changed', { setting: theme, effective: resolvedTheme });
+    }
+  }
+
+  getEffectiveTheme() {
+    if (this.themeSetting === 'system') {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return this.themeSetting;
   }
 
   subscribe(listener) {
