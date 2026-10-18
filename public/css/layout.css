@@ -643,3 +643,263 @@ html, body {
   color: var(--badge-gray-text);
   border: 1px solid var(--badge-gray-border);
 }
+
+/* ==========================================================================
+   ELEMENTOS RESPONSIVOS: HAMBURGER, BACKDROP Y BOTTOM NAV
+   ========================================================================== */
+
+/* Botón Hamburger para desplegar el Sidebar en tablets y móviles */
+.btn-hamburger {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.btn-hamburger:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
+}
+
+/* Botón para cerrar Sidebar en modo móvil */
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+}
+
+.sidebar-close-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-subtle);
+}
+
+/* Backdrop oscuro para cuando el sidebar está abierto en móvil */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Barra de Navegación Inferior Móvil (Mobile Bottom Bar) */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Contenedor genérico para tablas responsivas con scroll horizontal táctil */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES: TABLETS Y LAPTOPS PEQUEÑOS (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .btn-hamburger {
+    display: inline-flex;
+  }
+
+  .sidebar-close-btn {
+    display: inline-block;
+  }
+
+  /* El sidebar pasa a ser un Drawer off-canvas */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 2500;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .main-viewport {
+    width: 100%;
+  }
+
+  .topbar {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES: MÓVILES Y PANTALLAS TÁCTILES (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Banner superior compacto */
+  .dev-env-banner {
+    height: auto;
+    padding: 6px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .dev-env-banner .tenant-indicator {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-container {
+    height: calc(100% - 48px);
+    padding-bottom: 56px; /* Espacio para la barra de navegación inferior móvil */
+  }
+
+  /* Ajustes en el Topbar móvil */
+  .topbar {
+    padding: 8px 12px;
+    height: auto;
+    min-height: 52px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .topbar-left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topbar-view-title {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .topbar-view-subtitle {
+    font-size: 10px;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Ocultar elementos secundarios de topbar en móviles */
+  .topbar-location,
+  .topbar-timer {
+    display: none !important;
+  }
+
+  .module-switcher-pill {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .btn-theme-toggle #theme-btn-label {
+    display: none;
+  }
+
+  .btn-logout {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .view-content {
+    padding: 14px 12px;
+  }
+
+  /* Activar Barra Inferior Móvil */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 2200;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 2px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+  }
+
+  .mobile-nav-btn .icon {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .mobile-nav-btn.active {
+    color: var(--primary-600);
+    font-weight: 700;
+  }
+
+  .mobile-nav-btn:hover {
+    color: var(--text-main);
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES: SMARTPHONES PEQUEÑOS (<= 480px)
+   ========================================================================== */
+@media (max-width: 480px) {
+  .topbar-right {
+    gap: 4px;
+  }
+
+  .btn-logout {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .module-switcher-pill span:not(:first-child) {
+    display: none;
+  }
+}
+

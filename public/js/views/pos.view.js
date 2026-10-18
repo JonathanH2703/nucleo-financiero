@@ -70,10 +70,13 @@ export class PosView {
         </div>
 
         <!-- Columna Derecha: Comanda / Orden Activa -->
-        <div class="pos-order-column">
+        <div class="pos-order-column" id="pos-order-column">
           <div class="order-header-box">
             <div class="order-title-row">
-              <h3>Comanda · ${state.selectedTable}</h3>
+              <div style="display: flex; align-items: center;">
+                <button type="button" class="btn-close-mobile-order" id="btn-close-mobile-order">← Catálogo</button>
+                <h3>Comanda · ${state.selectedTable}</h3>
+              </div>
               <span id="order-units-count" style="font-size: 12px; color: #f59e0b; font-weight: 700;">0 ítems</span>
             </div>
             <p class="order-subtitle">Descuenta inventario en tiempo real del área operativa</p>
@@ -124,6 +127,18 @@ export class PosView {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Barra flotante móvil para abrir la comanda -->
+      <div class="pos-mobile-order-bar" id="pos-mobile-order-bar">
+        <div class="pos-mobile-order-info">
+          <div class="icon">🛏️</div>
+          <div>
+            <div style="font-size: 12px; font-weight: 700;">${state.selectedTable}</div>
+            <div class="pos-mobile-bar-total" id="mobile-bar-total">$ 0</div>
+          </div>
+        </div>
+        <button type="button" class="btn-mobile-open-order" id="btn-mobile-open-order">📋 Ver Comanda</button>
       </div>
     `;
 
@@ -289,6 +304,8 @@ export class PosView {
 
     if (!itemsList) return;
 
+    const mobileBarTotal = document.getElementById('mobile-bar-total');
+
     if (state.cartItems.length === 0) {
       itemsList.innerHTML = `
         <div class="empty-order-placeholder">
@@ -302,6 +319,7 @@ export class PosView {
       taxEl.textContent = '$ 0';
       tipEl.textContent = '$ 0';
       totalEl.textContent = '$ 0';
+      if (mobileBarTotal) mobileBarTotal.textContent = '$ 0';
       return;
     }
 
@@ -340,6 +358,7 @@ export class PosView {
     taxEl.textContent = `$ ${tax.toLocaleString('es-CO')}`;
     tipEl.textContent = `$ ${tip.toLocaleString('es-CO')}`;
     totalEl.textContent = `$ ${total.toLocaleString('es-CO')}`;
+    if (mobileBarTotal) mobileBarTotal.textContent = `$ ${total.toLocaleString('es-CO')}`;
 
     // Handlers de cantidad
     itemsList.querySelectorAll('.btn-minus').forEach((btn) => {
@@ -376,6 +395,23 @@ export class PosView {
       });
     });
 
+    // Abrir y cerrar comanda modal en móvil
+    const btnOpenMobile = document.getElementById('btn-mobile-open-order');
+    const btnCloseMobile = document.getElementById('btn-close-mobile-order');
+    const orderColumn = document.getElementById('pos-order-column');
+
+    if (btnOpenMobile && orderColumn) {
+      btnOpenMobile.addEventListener('click', () => {
+        orderColumn.classList.add('mobile-open');
+      });
+    }
+
+    if (btnCloseMobile && orderColumn) {
+      btnCloseMobile.addEventListener('click', () => {
+        orderColumn.classList.remove('mobile-open');
+      });
+    }
+
     // Enviar a Cocina KDS
     const btnKds = document.getElementById('btn-send-kds');
     if (btnKds) {
@@ -403,6 +439,9 @@ export class PosView {
           alert(`✅ ¡Pago registrado con éxito!\nComprobante fiscal FE-2026 emitido a Consumidor Final.`);
           state.clearCart();
           this.renderCart();
+          if (orderColumn) {
+            orderColumn.classList.remove('mobile-open');
+          }
         }
       });
     }

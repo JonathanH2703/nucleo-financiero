@@ -65,6 +65,15 @@ export class LoginView {
         <!-- COLUMNA DERECHA: Formulario de Acceso y Modo Demostración -->
         <div class="login-form-side">
           <div class="login-form-card">
+            <!-- Branding visible únicamente en móvil/tablet -->
+            <div class="login-mobile-brand">
+              <div class="login-brand-logo-icon">🏛️</div>
+              <div class="login-brand-logo-text">
+                <h2>Núcleo Financiero</h2>
+                <p>Claridad Empresarial</p>
+              </div>
+            </div>
+
             <div class="login-form-header">
               <h2 class="login-form-title">Iniciar sesión</h2>
               <p class="login-form-subtitle">Accede con tus credenciales corporativas o usa el modo de prueba</p>

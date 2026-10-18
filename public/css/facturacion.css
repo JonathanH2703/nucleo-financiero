@@ -258,3 +258,67 @@
   cursor: pointer;
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   MEDIA QUERIES FACTURACIÓN: TABLETS (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .facturacion-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .invoices-table-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .invoices-table {
+    min-width: 700px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES FACTURACIÓN: MÓVILES (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .facturacion-header-card {
+    padding: 14px 16px;
+  }
+
+  .facturacion-title-group h2 {
+    font-size: 15px;
+  }
+
+  .facturacion-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .table-filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-pills-row {
+    width: 100%;
+  }
+
+  .invoices-table {
+    min-width: 600px;
+    font-size: 12px;
+  }
+
+  .invoices-table th,
+  .invoices-table td {
+    padding: 10px 12px;
+  }
+
+  .invoice-modal-card {
+    width: 95%;
+    max-height: 85vh;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+  }
+}
+

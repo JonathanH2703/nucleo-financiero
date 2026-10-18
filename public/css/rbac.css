@@ -188,3 +188,57 @@
   text-transform: uppercase;
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   MEDIA QUERIES RBAC: TABLETS (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .rbac-modules-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .rbac-matrix-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rbac-matrix-table {
+    min-width: 600px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES RBAC: MÓVILES (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .rbac-user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .rbac-avatar-large {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .rbac-user-details h3 {
+    font-size: 15px;
+  }
+
+  .rbac-modules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rbac-module-box {
+    padding: 14px 16px;
+  }
+
+  .rbac-matrix-table th,
+  .rbac-matrix-table td {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+}
+

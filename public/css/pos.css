@@ -515,3 +515,198 @@ html[data-theme="dark"] .summary-total-line .amount {
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(245, 158, 11, 0.4);
 }
+
+/* ==========================================================================
+   ELEMENTOS DE OPERACIÓN POS EN MÓVILES (SMARTPHONE Y TABLET VERTICAL)
+   ========================================================================== */
+
+/* Barra flotante inferior para ver la comanda en móvil */
+.pos-mobile-order-bar {
+  display: none;
+  position: fixed;
+  bottom: 56px; /* Arriba de la barra de navegación móvil */
+  left: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  z-index: 2100;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pos-mobile-order-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pos-mobile-order-info .icon {
+  font-size: 22px;
+  background: rgba(245, 158, 11, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pos-mobile-bar-total {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: #fbbf24;
+  font-size: 14px;
+}
+
+.btn-mobile-open-order {
+  background: var(--accent-pos);
+  color: #0f172a;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+}
+
+/* Botón para volver al catálogo desde la comanda en pantalla completa móvil */
+.btn-close-mobile-order {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.btn-close-mobile-order:hover {
+  background: var(--bg-subtle);
+}
+
+/* ==========================================================================
+   MEDIA QUERIES POS: TABLETS (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .pos-order-column {
+    width: 310px;
+  }
+
+  .pos-catalog-column {
+    padding: 12px 14px;
+  }
+
+  .pos-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .pos-top-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES POS: MÓVILES (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .pos-view-container {
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+  }
+
+  .pos-catalog-column {
+    width: 100%;
+    border-right: none;
+    padding: 10px 10px 80px 10px; /* Padding extra inferior para no tapar con la barra flotante */
+  }
+
+  /* La columna de comanda en móvil es un panel de pantalla completa modal */
+  .pos-order-column {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2600;
+    background: var(--pos-order-bg);
+  }
+
+  .pos-order-column.mobile-open {
+    display: flex;
+  }
+
+  .pos-mobile-order-bar {
+    display: flex;
+  }
+
+  .btn-close-mobile-order {
+    display: inline-flex;
+  }
+
+  .pos-client-pill {
+    display: none;
+  }
+
+  .pos-status-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .pos-mode-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES POS: SMARTPHONES PEQUEÑOS (<= 480px)
+   ========================================================================== */
+@media (max-width: 480px) {
+  .pos-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .pos-product-card {
+    padding: 10px 8px;
+  }
+
+  .pos-product-name {
+    font-size: 12px;
+  }
+
+  .pos-product-price {
+    font-size: 13px;
+  }
+
+  .pos-modes-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pos-mode-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+
+  .pos-mode-btn span:first-child {
+    font-size: 14px;
+  }
+}
+

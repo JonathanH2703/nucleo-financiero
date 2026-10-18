@@ -121,16 +121,16 @@ class App {
     if (!state.currentUser || state.currentView === 'login') {
       this.root.innerHTML = `
         <div class="dev-env-banner">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="badge-pill">Entorno de Desarrollo</span>
-            <span>Plataforma Núcleo Financiero — Multi-Tenant PostgreSQL (Neon Cloud)</span>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="badge-pill">Entorno Dev</span>
+            <span>Schema: <code>${state.currentTenant.slug}</code></span>
           </div>
           <div class="tenant-indicator">
-            <span>Empresa seleccionada:</span>
+            <span>Empresa:</span>
             <span class="tenant-name-highlight">${state.currentTenant.name}</span>
           </div>
         </div>
-        <div id="login-view-mount" style="flex: 1; min-height: 0; overflow-y: auto;"></div>
+        <div id="login-view-mount" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;"></div>
       `;
       LoginView.mount(document.getElementById('login-view-mount'));
       return;
@@ -211,7 +211,10 @@ class App {
 
       <div class="app-container">
         <!-- Sidebar Izquierda con Navegación Dinámica según Rol -->
-        <aside class="sidebar">
+        <!-- Backdrop oscuro para sidebar drawer en móvil/tablet -->
+        <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+        <aside class="sidebar" id="app-sidebar">
           <div class="sidebar-header">
             <div class="sidebar-brand">
               <div class="brand-icon-box">🏛️</div>
@@ -219,6 +222,7 @@ class App {
                 <div class="brand-title">NÚCLEO</div>
                 <div class="brand-subtitle">Claridad empresarial</div>
               </div>
+              <button type="button" class="sidebar-close-btn" id="btn-sidebar-close" title="Cerrar menú">✕</button>
             </div>
           </div>
 
@@ -253,6 +257,7 @@ class App {
           <!-- Barra Superior (Topbar de Figma) -->
           <header class="topbar">
             <div class="topbar-left">
+              <button type="button" class="btn-hamburger" id="btn-hamburger" title="Abrir menú de navegación">☰</button>
               <div>
                 <div class="topbar-view-title">${this.getViewTitle(view)}</div>
                 <div class="topbar-view-subtitle">${tenant.name} · ${tenant.nit}</div>
@@ -320,6 +325,11 @@ class App {
           <div class="view-content ${view === 'pos' ? 'pos-active' : ''}" id="active-view-mount"></div>
         </main>
       </div>
+
+      <!-- Barra de Navegación Inferior Móvil (filtrada por RBAC) -->
+      <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        ${this.buildMobileBottomNav(view)}
+      </nav>
     `;
 
     this.bindShellEvents();
@@ -395,7 +405,47 @@ class App {
     }
   }
 
+  static buildMobileBottomNav(currentView) {
+    // Tomar los primeros 4 módulos permitidos para la barra inferior
+    const mobileItems = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id)).slice(0, 4);
+    return mobileItems.map((item) => `
+      <button class="mobile-nav-btn ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
+        <span class="icon">${item.icon}</span>
+        <span>${item.title.split(' ')[0]}</span>
+      </button>
+    `).join('');
+  }
+
+  static toggleSidebar(open) {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar || !backdrop) return;
+    if (open) {
+      sidebar.classList.add('mobile-open');
+      backdrop.classList.add('active');
+    } else {
+      sidebar.classList.remove('mobile-open');
+      backdrop.classList.remove('active');
+    }
+  }
+
   static bindShellEvents() {
+    // Hamburger y Sidebar Drawer
+    const btnHamburger = document.getElementById('btn-hamburger');
+    if (btnHamburger) {
+      btnHamburger.addEventListener('click', () => this.toggleSidebar(true));
+    }
+
+    const btnSidebarClose = document.getElementById('btn-sidebar-close');
+    if (btnSidebarClose) {
+      btnSidebarClose.addEventListener('click', () => this.toggleSidebar(false));
+    }
+
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', () => this.toggleSidebar(false));
+    }
+
     // Navegación Sidebar (solo los elementos permitidos)
     document.querySelectorAll('.nav-item').forEach((item) => {
       item.addEventListener('click', () => {
@@ -408,6 +458,22 @@ class App {
           state.setModule('gestion');
         }
 
+        state.setView(targetView);
+        // Cerrar sidebar en móvil al navegar
+        this.toggleSidebar(false);
+      });
+    });
+
+    // Navegación inferior móvil
+    document.querySelectorAll('.mobile-nav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.getAttribute('data-mobile-nav');
+        const targetMod = btn.getAttribute('data-mobile-mod');
+        if (targetMod === 'pos' || targetView === 'pos') {
+          state.setModule('pos');
+        } else {
+          state.setModule('gestion');
+        }
         state.setView(targetView);
       });
     });
