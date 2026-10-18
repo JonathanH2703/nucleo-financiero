@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import cors from 'cors';
@@ -9,7 +10,23 @@ import { errorHandlerMiddleware } from './interfaces/http/middlewares/error-hand
 import { dbPool, testDbConnection } from './infrastructure/database/connection.js';
 import { TenantSchemaManager } from './infrastructure/database/tenant-schema-manager.js';
 
-const publicPath = path.resolve(process.cwd(), 'public');
+function getPublicDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), 'public'),
+    path.resolve(process.cwd(), 'dist/public'),
+    path.resolve(__dirname, '../public'),
+    path.resolve(__dirname, 'public'),
+    path.resolve(__dirname, '../../public'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(path.join(c, 'index.html'))) {
+      return c;
+    }
+  }
+  return candidates[0];
+}
+
+const publicPath = getPublicDir();
 
 const app = express();
 
@@ -45,10 +62,26 @@ app.use((req, res, next) => {
   next();
 });
 
+const sendSpaIndex = (_req: express.Request, res: express.Response) => {
+  const indexPath = path.join(publicPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  return res.status(200).send(`<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Núcleo Financiero — API & ERP</title></head>
+<body style="font-family:sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;height:100vh;">
+  <div style="text-align:center;max-width:600px;padding:32px;background:#1e293b;border-radius:12px;">
+    <h1>🏛️ Núcleo Financiero</h1>
+    <p>API y base de datos multi-tenant activas.</p>
+    <p><a href="${env.API_PREFIX}/health" style="color:#60a5fa;">Verificar Healthcheck →</a></p>
+  </div>
+</body>
+</html>`);
+};
+
 // Servir frontend SPA en la raíz
-app.get('/', (_req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'));
-});
+app.get('/', sendSpaIndex);
 
 app.get('/api-docs-old', (_req, res) => {
   res.status(200).send(`<!DOCTYPE html>
@@ -170,7 +203,7 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith(env.API_PREFIX)) {
     return next();
   }
-  res.sendFile(path.join(publicPath, 'index.html'));
+  return sendSpaIndex(req, res);
 });
 
 // Middleware centralizado de errores
