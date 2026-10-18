@@ -1,0 +1,260 @@
+/* ==========================================================================
+   FACTURACIÓN ELECTRÓNICA DIAN — NÚCLEO FINANCIERO (FIGMA DESIGN)
+   ========================================================================== */
+
+.facturacion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.facturacion-header-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.facturacion-title-group h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.facturacion-title-group p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.facturacion-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Barra de Filtros y Búsqueda */
+.table-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.filter-pill:hover {
+  border-color: var(--primary-500);
+  color: var(--text-main);
+}
+
+.filter-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.search-box-wrapper {
+  position: relative;
+  min-width: 280px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 14px 8px 36px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* Tabla de Facturas Fiscales */
+.invoices-table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.invoices-table thead {
+  background-color: #fafbfc;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.invoices-table th {
+  padding: 12px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.invoices-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--transition-fast);
+}
+
+.invoices-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.invoices-table td {
+  padding: 14px 18px;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.invoice-number-link {
+  font-weight: 700;
+  color: var(--primary-600);
+  text-decoration: none;
+  font-family: var(--font-mono);
+}
+
+.invoice-number-link:hover {
+  text-decoration: underline;
+}
+
+.client-name-cell {
+  font-weight: 600;
+  color: var(--text-main);
+  display: block;
+}
+
+.client-nit-cell {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.amount-cell {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.amount-iva {
+  color: #2563eb;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.amount-total {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.btn-table-action {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-table-action:hover {
+  border-color: var(--primary-500);
+  color: var(--primary-600);
+  background-color: #eff6ff;
+}
+
+/* Modal de Detalle de Factura DIAN */
+.invoice-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.invoice-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.invoice-modal-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  width: 90%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  padding: 32px;
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+}

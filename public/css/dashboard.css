@@ -1,0 +1,282 @@
+/* ==========================================================================
+   DASHBOARD VIEW — NÚCLEO FINANCIERO (FIGMA DESIGN)
+   ========================================================================== */
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Fila Superior: Gráfico de Ingresos + Acciones Rápidas */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* Tarjeta del Gráfico Principal de Ingresos */
+.revenue-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.revenue-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.revenue-title-group h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.revenue-title-group p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.revenue-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.real { background-color: #10b981; }
+.legend-dot.proyectado { background-color: #3b82f6; }
+
+/* Lienzo o SVG del gráfico */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  margin-top: 10px;
+}
+
+/* Columna de Acciones Rápidas y Resumen del Día */
+.dashboard-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quick-actions-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.quick-action-item:hover {
+  transform: translateY(-1px);
+}
+
+.quick-action-item.blue {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #dbeafe;
+}
+
+.quick-action-item.green {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.quick-action-item.yellow {
+  background-color: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-icon {
+  font-size: 18px;
+}
+
+.action-text h4 {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.action-text p {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.action-arrow {
+  font-size: 14px;
+}
+
+/* Resumen del Día (Hoy) */
+.today-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.today-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-light);
+  margin-bottom: 14px;
+}
+
+.today-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.stat-value.highlight {
+  color: #059669;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Fila Inferior: Proyección de Ingresos Q4 2026 */
+.forecast-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.forecast-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.forecast-header p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.forecast-link {
+  font-size: 13px;
+  color: var(--primary-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.forecast-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.forecast-col-box {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background-color: #fafbfc;
+}
+
+.forecast-col-box.real {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.forecast-col-status {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 8px;
+}
+
+.status-real { background: #ecfdf5; color: #059669; }
+.status-proy { background: #eff6ff; color: #2563eb; }
+
+.forecast-col-month {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.forecast-col-amount {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 4px;
+}
+
+.forecast-col-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}

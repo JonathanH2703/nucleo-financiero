@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -8,13 +10,24 @@ import { errorHandlerMiddleware } from './interfaces/http/middlewares/error-hand
 import { dbPool, testDbConnection } from './infrastructure/database/connection.js';
 import { TenantSchemaManager } from './infrastructure/database/tenant-schema-manager.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicPath = path.resolve(process.cwd(), 'public');
+
 const app = express();
 
 // Middlewares globales de seguridad y parsing
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Servidor de archivos estáticos del frontend de desarrollo
+app.use(express.static(publicPath));
 
 // Logging básico de peticiones
 app.use((req, res, next) => {
@@ -35,8 +48,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Página raíz profesional del API
+// Servir frontend SPA en la raíz
 app.get('/', (_req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+app.get('/api-docs-old', (_req, res) => {
   res.status(200).send(`<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -150,6 +167,14 @@ app.get('/', (_req, res) => {
 
 // Rutas de la API
 app.use(env.API_PREFIX, apiRouter);
+
+// Fallback SPA: Redirigir cualquier ruta que no sea de la API al frontend
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith(env.API_PREFIX)) {
+    return next();
+  }
+  res.sendFile(path.join(publicPath, 'index.html'));
+});
 
 // Middleware centralizado de errores
 app.use(errorHandlerMiddleware);

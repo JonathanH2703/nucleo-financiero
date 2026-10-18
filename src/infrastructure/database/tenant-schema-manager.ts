@@ -367,66 +367,195 @@ export class TenantSchemaManager {
       ON CONFLICT DO NOTHING;
     `);
 
-    // D. Áreas Operativas Universales
-    await client.query(`
-      INSERT INTO "${schemaName}".areas_operativas (id, nombre, descripcion) VALUES
-      ('area_salon', 'Salón Principal', 'Mesas de atención y salón general'),
-      ('area_barra', 'Barra y Bebidas', 'Atención rápida en barra'),
-      ('area_cajas', 'Mostrador y Cajas', 'Punto de cobro rápido y escaneo de productos'),
-      ('area_vitrina', 'Vitrina Take-Away', 'Despacho al paso y productos de vitrina')
-      ON CONFLICT (id) DO NOTHING;
-    `);
+    // D. Áreas Operativas y Puntos de Atención según el tipo de negocio
+    if (schemaName.includes('panaderia')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".areas_operativas (id, nombre, descripcion) VALUES
+        ('area_mostrador', 'Mostrador Principal', 'Atención al cliente y despacho de panadería'),
+        ('area_vitrina', 'Vitrina Take-Away', 'Exhibición de pastelería fina y postres'),
+        ('area_terraza', 'Mesas y Cafetería', 'Consumo en sitio y café')
+        ON CONFLICT (id) DO NOTHING;
 
-    // E. Puntos de Atención (Mesas / Cajas / Vitrinas)
-    await client.query(`
-      INSERT INTO "${schemaName}".puntos_atencion (id, area_id, nombre, codigo, tipo, capacidad, estado) VALUES
-      ('pto_m1', 'area_salon', 'Mesa 01', 'M-01', 'MESA', 4, 'LIBRE'),
-      ('pto_m2', 'area_salon', 'Mesa 02', 'M-02', 'MESA', 4, 'OCUPADO'),
-      ('pto_m3', 'area_salon', 'Mesa 03', 'M-03', 'MESA', 6, 'LIBRE'),
-      ('pto_caja1', 'area_cajas', 'Caja Mostrador 01', 'CJ-01', 'MOSTRADOR', 1, 'LIBRE'),
-      ('pto_vitrina1', 'area_vitrina', 'Vitrina Despacho', 'VT-01', 'VITRINA', 1, 'LIBRE')
-      ON CONFLICT (id) DO NOTHING;
-    `);
+        INSERT INTO "${schemaName}".puntos_atencion (id, area_id, nombre, codigo, tipo, capacidad, estado) VALUES
+        ('pto_caja1', 'area_mostrador', 'Caja Mostrador 01', 'CJ-01', 'MOSTRADOR', 1, 'LIBRE'),
+        ('pto_vitrina', 'area_vitrina', 'Vitrina Pastelería', 'VT-01', 'VITRINA', 1, 'LIBRE'),
+        ('pto_m1', 'area_terraza', 'Mesa Café 01', 'CF-01', 'MESA', 2, 'LIBRE'),
+        ('pto_m2', 'area_terraza', 'Mesa Café 02', 'CF-02', 'MESA', 4, 'OCUPADO')
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else if (schemaName.includes('mercados')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".areas_operativas (id, nombre, descripcion) VALUES
+        ('area_cajas', 'Pista de Cajas Escáner', 'Línea de pago rápido con código de barras'),
+        ('area_drogueria', 'Droguería y Mostrador', 'Dispensación farmacéutica y asesoría'),
+        ('area_pasillos', 'Pasillos de Retail', 'Abarrotes y autoservicio')
+        ON CONFLICT (id) DO NOTHING;
 
-    // F. Usuarios Demostrativos con PIN (Carlos Mendoza PIN 123456 como en Figma)
+        INSERT INTO "${schemaName}".puntos_atencion (id, area_id, nombre, codigo, tipo, capacidad, estado) VALUES
+        ('pto_caja1', 'area_cajas', 'Caja Rápida 01', 'CR-01', 'MOSTRADOR', 1, 'LIBRE'),
+        ('pto_caja2', 'area_cajas', 'Caja Principal 02', 'CP-02', 'MOSTRADOR', 1, 'OCUPADO'),
+        ('pto_drogueria', 'area_drogueria', 'Mostrador Farmacia 01', 'MF-01', 'MOSTRADOR', 1, 'LIBRE')
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else if (schemaName.includes('andina') || schemaName.includes('comercializadora')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".areas_operativas (id, nombre, descripcion) VALUES
+        ('area_bodega', 'Despacho Bodega Principal', 'Carga de bultos y logística mayorista'),
+        ('area_ventas', 'Oficina Ventas B2B', 'Atención ejecutiva y cotizaciones corporativas'),
+        ('area_caja', 'Caja Tesorería', 'Recaudo de cartera y transferencias')
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".puntos_atencion (id, area_id, nombre, codigo, tipo, capacidad, estado) VALUES
+        ('pto_ventas1', 'area_ventas', 'Módulo Ventas 01', 'V-01', 'MOSTRADOR', 1, 'LIBRE'),
+        ('pto_bodega1', 'area_bodega', 'Rampa de Despacho 01', 'RP-01', 'MOSTRADOR', 1, 'LIBRE')
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else {
+      // Restaurante & Bar Origen (por defecto)
+      await client.query(`
+        INSERT INTO "${schemaName}".areas_operativas (id, nombre, descripcion) VALUES
+        ('area_salon', 'Salón Principal', 'Mesas de atención y salón general'),
+        ('area_barra', 'Barra y Bebidas', 'Atención rápida en barra'),
+        ('area_cajas', 'Mostrador y Cajas', 'Punto de cobro rápido y escaneo de productos'),
+        ('area_vitrina', 'Vitrina Take-Away', 'Despacho al paso y productos de vitrina')
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".puntos_atencion (id, area_id, nombre, codigo, tipo, capacidad, estado) VALUES
+        ('pto_m1', 'area_salon', 'Mesa 01', 'M-01', 'MESA', 4, 'LIBRE'),
+        ('pto_m2', 'area_salon', 'Mesa 02', 'M-02', 'MESA', 4, 'OCUPADO'),
+        ('pto_m3', 'area_salon', 'Mesa 03', 'M-03', 'MESA', 6, 'LIBRE'),
+        ('pto_caja1', 'area_cajas', 'Caja Mostrador 01', 'CJ-01', 'MOSTRADOR', 1, 'LIBRE'),
+        ('pto_vitrina1', 'area_vitrina', 'Vitrina Despacho', 'VT-01', 'VITRINA', 1, 'LIBRE')
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    }
+
+    // F. Usuarios Demostrativos con PIN (Aislamiento de personal por empresa)
+    // El Super Admin Carlos Mendoza existe en todos los tenants con PIN 123456
     await client.query(`
       INSERT INTO "${schemaName}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo) VALUES
-      ('usr_carlos', 'Carlos Mendoza', 'carlos.mendoza@nucleo.co', '123456', 'rol_super_admin', 'area_salon', true),
-      ('usr_laura', 'Laura Gómez', 'laura.caja@nucleo.co', '112233', 'rol_cajero', 'area_cajas', true),
-      ('usr_david', 'David Rueda', 'david.salon@nucleo.co', '445566', 'rol_mesero', 'area_salon', true),
-      ('usr_roberto', 'Chef Roberto Díaz', 'chef.roberto@nucleo.co', '778899', 'rol_cocinero', 'area_barra', true),
-      ('usr_maria', 'María Fernanda Ortiz', 'maria.contable@nucleo.co', '998877', 'rol_contador', NULL, true)
+      ('usr_carlos', 'Carlos Mendoza', 'carlos.mendoza@nucleo.co', '123456', 'rol_super_admin', NULL, true)
       ON CONFLICT (email) DO NOTHING;
     `);
 
-    // G. Categorías Universales
-    await client.query(`
-      INSERT INTO "${schemaName}".categorias (id, nombre, icono, color, orden) VALUES
-      ('cat_entradas', 'Entradas y Aperitivos', 'utensils', '#f59e0b', 1),
-      ('cat_fuertes', 'Platos Fuertes y Especiales', 'dinner', '#ef4444', 2),
-      ('cat_bebidas', 'Bebidas e Hidratación', 'glass', '#3b82f6', 3),
-      ('cat_cocteles', 'Licores y Cócteles', 'wine', '#8b5cf6', 4),
-      ('cat_panaderia', 'Panadería y Pastelería', 'cake', '#d97706', 5),
-      ('cat_abarrotes', 'Abarrotes y Despensa', 'shopping-cart', '#10b981', 6)
-      ON CONFLICT (id) DO NOTHING;
-    `);
+    if (schemaName.includes('panaderia')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo) VALUES
+        ('usr_valentina', 'Valentina Torres', 'valentina.nogal@nucleo.co', '101010', 'rol_admin_negocio', 'area_mostrador', true),
+        ('usr_juan', 'Juan Pablo Rey (Maestro Pastelero)', 'juan.pastelero@nucleo.co', '202020', 'rol_cocinero', 'area_vitrina', true),
+        ('usr_sofia', 'Sofía Martínez', 'sofia.caja@nucleo.co', '303030', 'rol_cajero', 'area_mostrador', true)
+        ON CONFLICT (email) DO NOTHING;
+      `);
+    } else if (schemaName.includes('mercados')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo) VALUES
+        ('usr_andres', 'Andrés Felipe Ruiz', 'andres.mercados@nucleo.co', '404040', 'rol_gerente_operativo', 'area_cajas', true),
+        ('usr_camila', 'Camila Castro', 'camila.caja@nucleo.co', '505050', 'rol_cajero', 'area_cajas', true),
+        ('usr_jorge', 'Jorge Méndez (Jefe Bodega)', 'jorge.bodega@nucleo.co', '606060', 'rol_admin_negocio', 'area_pasillos', true)
+        ON CONFLICT (email) DO NOTHING;
+      `);
+    } else if (schemaName.includes('andina') || schemaName.includes('comercializadora')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo) VALUES
+        ('usr_ricardo', 'Ricardo Morales', 'ricardo.andina@nucleo.co', '707070', 'rol_admin_negocio', 'area_ventas', true),
+        ('usr_maria', 'María Fernanda Ortiz', 'maria.contable@nucleo.co', '998877', 'rol_contador', 'area_caja', true)
+        ON CONFLICT (email) DO NOTHING;
+      `);
+    } else {
+      // Restaurante Origen
+      await client.query(`
+        INSERT INTO "${schemaName}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo) VALUES
+        ('usr_laura', 'Laura Gómez', 'laura.caja@nucleo.co', '112233', 'rol_cajero', 'area_cajas', true),
+        ('usr_david', 'David Rueda', 'david.salon@nucleo.co', '445566', 'rol_mesero', 'area_salon', true),
+        ('usr_roberto', 'Chef Roberto Díaz', 'chef.roberto@nucleo.co', '778899', 'rol_cocinero', 'area_barra', true),
+        ('usr_maria', 'María Fernanda Ortiz', 'maria.contable@nucleo.co', '998877', 'rol_contador', NULL, true)
+        ON CONFLICT (email) DO NOTHING;
+      `);
+    }
 
-    // H. Catálogo Universal de Productos (Mockup de Figma)
-    await client.query(`
-      INSERT INTO "${schemaName}".productos 
-      (id, categoria_id, nombre, descripcion, precio_base, tipo_impuesto, unidad_medida, requiere_kds, stock_actual) VALUES
-      ('p1', 'cat_entradas', 'Ceviche de Camarón', 'Camarones frescos maridados con cítricos', 28500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p2', 'cat_entradas', 'Tabla de Antipasto', 'Selección de quesos y carnes curadas', 35000, 'IMPOCONSUMO_8', 'UNIDAD', false, 18),
-      ('p3', 'cat_fuertes', 'Lomo al Trapo', 'Corte premium de lomo fino 350g', 68000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p4', 'cat_fuertes', 'Salmón a la Plancha', 'Filete de salmón noruego con espárragos', 58500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p5', 'cat_bebidas', 'Cerveza Artesanal IPA', 'Botella 330ml 6.5% ABV', 14000, 'IMPOCONSUMO_8', 'UNIDAD', false, 18),
-      ('p6', 'cat_bebidas', 'Limonada de Coco', 'Bebida natural cremosa', 12500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p7', 'cat_cocteles', 'Negroni Clásico', 'Gin, Campari, Vermouth Rosso', 28000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p8', 'cat_cocteles', 'Maracuyá Sour', 'Pisco con pulpa natural', 24000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
-      ('p9', 'cat_panaderia', 'Croissant de Almendras', 'Hojaldre artesanal con crema de almendras', 7500, 'IVA_19', 'UNIDAD', false, 30),
-      ('p10', 'cat_abarrotes', 'Café Especial Origen 500g', 'Café tostado en grano origen Huila', 32000, 'EXENTO', 'UNIDAD', false, 40)
-      ON CONFLICT (id) DO NOTHING;
-    `);
+    // G. Categorías y H. Catálogo de Productos Especializados
+    if (schemaName.includes('panaderia')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".categorias (id, nombre, icono, color, orden) VALUES
+        ('cat_panaderia', 'Panadería Artesanal', 'bread-slice', '#d97706', 1),
+        ('cat_pasteleria', 'Pastelería Fina y Postres', 'birthday-cake', '#ec4899', 2),
+        ('cat_bebidas', 'Cafés y Bebidas Calientes', 'coffee', '#854d0e', 3),
+        ('cat_desayunos', 'Desayunos & Combos', 'egg', '#f59e0b', 4)
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".productos 
+        (id, categoria_id, nombre, descripcion, precio_base, tipo_impuesto, unidad_medida, stock_actual) VALUES
+        ('p_pan1', 'cat_panaderia', 'Croissant de Almendras', 'Hojaldre artesanal francés con almendras tostadas', 7500, 'IVA_19', 'UNIDAD', 25),
+        ('p_pan2', 'cat_panaderia', 'Pan de Bono Tradicional', 'Elaborado con queso campesino y almidón de yuca', 3200, 'EXENTO', 'UNIDAD', 40),
+        ('p_pan3', 'cat_panaderia', 'Almojábana Casera', 'Masa suave de cuajada fresca', 3500, 'EXENTO', 'UNIDAD', 35),
+        ('p_pan4', 'cat_pasteleria', 'Torta de Zanahoria & Nuez', 'Porción individual con frosting de queso crema', 9800, 'IVA_19', 'UNIDAD', 18),
+        ('p_pan5', 'cat_pasteleria', 'Hojaldre de Arequipe', 'Capas crujientes rellenas de dulce de leche', 6000, 'IVA_19', 'UNIDAD', 20),
+        ('p_pan6', 'cat_bebidas', 'Café Espresso Doble', 'Extracción intensa grano origen Huila', 5500, 'EXENTO', 'UNIDAD', 50),
+        ('p_pan7', 'cat_bebidas', 'Capuccino Vainilla', 'Espuma cremosa con toque de vainilla natural', 7200, 'EXENTO', 'UNIDAD', 30),
+        ('p_pan8', 'cat_desayunos', 'Empanada de Pollo Artesanal', 'Masa crocante con pechuga desmechada', 4500, 'IVA_19', 'UNIDAD', 45)
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else if (schemaName.includes('mercados')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".categorias (id, nombre, icono, color, orden) VALUES
+        ('cat_despensa', 'Abarrotes y Despensa', 'shopping-cart', '#10b981', 1),
+        ('cat_lacteos', 'Lácteos y Huevos', 'cheese', '#3b82f6', 2),
+        ('cat_farmacia', 'Droguería y Cuidado Personal', 'first-aid', '#ef4444', 3),
+        ('cat_aseo', 'Aseo y Limpieza', 'pump-soap', '#6366f1', 4)
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".productos 
+        (id, categoria_id, nombre, descripcion, precio_base, tipo_impuesto, unidad_medida, stock_actual) VALUES
+        ('p_mer1', 'cat_despensa', 'Arroz Diana Premium 1kg', 'Grano seleccionado blanco fortificado', 4800, 'EXENTO', 'UNIDAD', 120),
+        ('p_mer2', 'cat_despensa', 'Aceite Premier 1000ml', 'Aceite vegetal refinado comestible', 14900, 'IVA_19', 'UNIDAD', 60),
+        ('p_mer3', 'cat_lacteos', 'Leche Entera Alquería 1L', 'Bolsa pasteurizada con nutrientes esenciales', 4200, 'EXENTO', 'UNIDAD', 90),
+        ('p_mer4', 'cat_lacteos', 'Huevos AA Cubeta x30', 'Huevos frescos de gallina campesina', 18500, 'EXENTO', 'UNIDAD', 45),
+        ('p_mer5', 'cat_farmacia', 'Acetaminofén 500mg x20', 'Analgésico y antipirético tableta recubierta', 5500, 'EXENTO', 'UNIDAD', 80),
+        ('p_mer6', 'cat_farmacia', 'Alcohol Antiséptico 700ml', 'Desinfectante tópico al 70%', 7900, 'IVA_19', 'UNIDAD', 50),
+        ('p_mer7', 'cat_aseo', 'Jabón Rey Barra 300g', 'Tradicional jabón multiusos azul', 3000, 'IVA_19', 'UNIDAD', 150),
+        ('p_mer8', 'cat_aseo', 'Detergente en Polvo 1kg', 'Fórmula biodegradable limpieza profunda', 8900, 'IVA_19', 'UNIDAD', 75)
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else if (schemaName.includes('andina') || schemaName.includes('comercializadora')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".categorias (id, nombre, icono, color, orden) VALUES
+        ('cat_granos_b2b', 'Granos al Por Mayor', 'boxes', '#059669', 1),
+        ('cat_insumos', 'Insumos Agroindustriales', 'tractor', '#2563eb', 2),
+        ('cat_embalaje', 'Embalaje y Logística', 'pallet', '#d97706', 3)
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".productos 
+        (id, categoria_id, nombre, descripcion, precio_base, tipo_impuesto, unidad_medida, stock_actual) VALUES
+        ('p_and1', 'cat_granos_b2b', 'Bulto Arroz 50kg', 'Saco industrial de arroz blanco calidad 1A', 195000, 'EXENTO', 'BULTO', 40),
+        ('p_and2', 'cat_granos_b2b', 'Bulto Azúcar Blanco 50kg', 'Azúcar refinado sulfitado uso masivo', 185000, 'IVA_19', 'BULTO', 35),
+        ('p_and3', 'cat_insumos', 'Caja Aceite Industrial 12x1L', 'Caja corrugada con botellas PET selladas', 162000, 'IVA_19', 'CAJA', 60),
+        ('p_and4', 'cat_insumos', 'Harina Trigo Extra Bulto 25kg', 'Especial panificación alta proteína', 89000, 'EXENTO', 'BULTO', 50),
+        ('p_and5', 'cat_embalaje', 'Estiba Plástica Reforzada', 'Dimensiones 1.20 x 1.00m carga pesada', 75000, 'IVA_19', 'UNIDAD', 100)
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    } else {
+      // Restaurante & Bar Origen
+      await client.query(`
+        INSERT INTO "${schemaName}".categorias (id, nombre, icono, color, orden) VALUES
+        ('cat_entradas', 'Entradas y Aperitivos', 'utensils', '#f59e0b', 1),
+        ('cat_fuertes', 'Platos Fuertes y Especiales', 'dinner', '#ef4444', 2),
+        ('cat_bebidas', 'Bebidas e Hidratación', 'glass', '#3b82f6', 3),
+        ('cat_cocteles', 'Licores y Cócteles', 'wine', '#8b5cf6', 4)
+        ON CONFLICT (id) DO NOTHING;
+
+        INSERT INTO "${schemaName}".productos 
+        (id, categoria_id, nombre, descripcion, precio_base, tipo_impuesto, unidad_medida, requiere_kds, stock_actual) VALUES
+        ('p1', 'cat_entradas', 'Ceviche de Camarón', 'Camarones frescos maridados con cítricos', 28500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
+        ('p2', 'cat_entradas', 'Tabla de Antipasto', 'Selección de quesos y carnes curadas', 35000, 'IMPOCONSUMO_8', 'UNIDAD', false, 18),
+        ('p3', 'cat_fuertes', 'Lomo al Trapo', 'Corte premium de lomo fino 350g', 68000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
+        ('p4', 'cat_fuertes', 'Salmón a la Plancha', 'Filete de salmón noruego con espárragos', 58500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
+        ('p5', 'cat_bebidas', 'Cerveza Artesanal IPA', 'Botella 330ml 6.5% ABV', 14000, 'IMPOCONSUMO_8', 'UNIDAD', false, 18),
+        ('p6', 'cat_bebidas', 'Limonada de Coco', 'Bebida natural cremosa', 12500, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
+        ('p7', 'cat_cocteles', 'Negroni Clásico', 'Gin, Campari, Vermouth Rosso', 28000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18),
+        ('p8', 'cat_cocteles', 'Maracuyá Sour', 'Pisco con pulpa natural', 24000, 'IMPOCONSUMO_8', 'UNIDAD', true, 18)
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    }
 
     // I. Directorio de Terceros / Clientes DIAN Realistas (Mockup Figma)
     await client.query(`
@@ -469,25 +598,27 @@ export class TenantSchemaManager {
       ON CONFLICT (numero_completo) DO NOTHING;
     `);
 
-    // K. Comanda y Pedidos en Cola KDS (Mesa 02 del Figma)
-    await client.query(`
-      INSERT INTO "${schemaName}".ventas_comandas (
-        id, numero_comanda, modo_atencion, punto_atencion_id, estado,
-        cliente_nombre, cliente_nit, subtotal, descuento, propina_sugerida,
-        impuesto_consumo, iva, total, created_at
-      ) VALUES (
-        'cmd_mesa_02', 'CMD-000002', 'MESA_SERVICIO', 'pto_m2', 'EN_PREPARACION',
-        'Consumidor Final', '222222222222', 87000, 0, 8700, 6960, 0, 102660, NOW() - INTERVAL '15 minutes'
-      ) ON CONFLICT (numero_comanda) DO NOTHING;
+    // K. Comanda Activa Demostrativa
+    if (schemaName.includes('restaurante')) {
+      await client.query(`
+        INSERT INTO "${schemaName}".ventas_comandas (
+          id, numero_comanda, modo_atencion, punto_atencion_id, estado,
+          cliente_nombre, cliente_nit, subtotal, descuento, propina_sugerida,
+          impuesto_consumo, iva, total, created_at
+        ) VALUES (
+          'cmd_mesa_02', 'CMD-000002', 'MESA_SERVICIO', 'pto_m2', 'EN_PREPARACION',
+          'Consumidor Final', '222222222222', 87000, 0, 8700, 6960, 0, 102660, NOW() - INTERVAL '15 minutes'
+        ) ON CONFLICT (numero_comanda) DO NOTHING;
 
-      INSERT INTO "${schemaName}".items_comanda (
-        id, comanda_id, producto_id, nombre_producto, cantidad, precio_unitario,
-        tipo_impuesto, notas_cocina, requiere_kds, estado_preparacion
-      ) VALUES
-      ('it_kds_1', 'cmd_mesa_02', 'p1', 'Ceviche de Camarón', 1, 28500, 'IMPOCONSUMO_8', 'Sin picante', true, 'EN_COCINA'),
-      ('it_kds_2', 'cmd_mesa_02', 'p4', 'Salmón a la Plancha', 1, 58500, 'IMPOCONSUMO_8', 'Término medio con espárragos', true, 'PENDIENTE')
-      ON CONFLICT (id) DO NOTHING;
-    `);
+        INSERT INTO "${schemaName}".items_comanda (
+          id, comanda_id, producto_id, nombre_producto, cantidad, precio_unitario,
+          tipo_impuesto, notas_cocina, requiere_kds, estado_preparacion
+        ) VALUES
+        ('it_kds_1', 'cmd_mesa_02', 'p1', 'Ceviche de Camarón', 1, 28500, 'IMPOCONSUMO_8', 'Sin picante', true, 'EN_COCINA'),
+        ('it_kds_2', 'cmd_mesa_02', 'p4', 'Salmón a la Plancha', 1, 58500, 'IMPOCONSUMO_8', 'Término medio con espárragos', true, 'PENDIENTE')
+        ON CONFLICT (id) DO NOTHING;
+      `);
+    }
   }
 }
 
