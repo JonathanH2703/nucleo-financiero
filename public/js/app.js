@@ -1,6 +1,7 @@
 /**
  * APLICACIÓN PRINCIPAL (APP ROUTER & SHELL) — NÚCLEO FINANCIERO
- * Arquitectura modular con soporte reactivo para Multi-Tenant, Punto de Venta (POS) y Motor de Temas.
+ * Arquitectura modular con Control de Acceso Basado en Roles (RBAC),
+ * Navegación dinámica filtrada por perfil, Multi-Tenant y Motor de Temas.
  */
 
 import { state } from './state.js';
@@ -12,6 +13,88 @@ import { RbacView } from './views/rbac.view.js';
 import { ContabilidadView } from './views/contabilidad.view.js';
 import { PlaceholderView } from './views/placeholder.view.js';
 import { AjustesView } from './views/ajustes.view.js';
+import { RestrictedView } from './views/restricted.view.js';
+import { ROLE_DEFINITIONS } from './demo-fixtures.js';
+
+// Catálogo maestro de navegación del sistema
+const MASTER_NAV_ITEMS = [
+  {
+    category: 'Operación y Salón',
+    id: 'pos',
+    icon: '☕',
+    title: 'Punto de Venta',
+    subtitle: 'POS, Mesas & Comandas',
+    module: 'pos',
+  },
+  {
+    category: 'Gestión Administrativa',
+    id: 'dashboard',
+    icon: '📊',
+    title: 'Dashboard',
+    subtitle: 'Resumen ejecutivo',
+    module: 'gestion',
+  },
+  {
+    category: 'Gestión Administrativa',
+    id: 'facturacion',
+    icon: '📑',
+    title: 'Facturación',
+    subtitle: 'Facturas electrónicas DIAN',
+    module: 'gestion',
+  },
+  {
+    category: 'Gestión Administrativa',
+    id: 'contabilidad',
+    icon: '🏛️',
+    title: 'Contabilidad',
+    subtitle: 'Módulo DIAN F-350',
+    badge: 'Demo',
+    module: 'gestion',
+  },
+  {
+    category: 'Operación y Salón',
+    id: 'inventario',
+    icon: '📦',
+    title: 'Inventario',
+    subtitle: 'Existencias y kardex',
+    badge: 'WIP',
+    module: 'gestion',
+  },
+  {
+    category: 'Gestión Administrativa',
+    id: 'clientes',
+    icon: '👥',
+    title: 'Clientes CRM',
+    subtitle: 'Directorio de terceros',
+    badge: 'WIP',
+    module: 'gestion',
+  },
+  {
+    category: 'Gestión Administrativa',
+    id: 'reportes',
+    icon: '📈',
+    title: 'Reportes',
+    subtitle: 'Inteligencia de negocio',
+    badge: 'WIP',
+    module: 'gestion',
+  },
+  {
+    category: 'Seguridad y Control',
+    id: 'rbac',
+    icon: '🛡️',
+    title: 'Roles & Permisos',
+    subtitle: 'Matriz RBAC y usuarios',
+    module: 'gestion',
+  },
+  {
+    category: 'Preferencias',
+    id: 'ajustes',
+    icon: '⚙️',
+    title: 'Ajustes & Tema',
+    subtitle: 'Personalizar apariencia',
+    module: 'gestion',
+  },
+];
 
 class App {
   static init() {
@@ -58,6 +141,8 @@ class App {
     const tenant = state.currentTenant;
     const view = state.currentView;
     const isPosModule = state.currentModule === 'pos';
+    const roleDef = state.getRoleDefinition() || ROLE_DEFINITIONS.mesero;
+    const canSwitchModule = state.canSwitchModule();
 
     const userInitials = user.nombre
       ? user.nombre.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
@@ -76,6 +161,39 @@ class App {
       themeLabel = effectiveTheme === 'dark' ? 'Auto (Oscuro)' : 'Auto (Claro)';
     }
 
+    // Filtrar elementos de navegación permitidos exclusivamente para este rol (RBAC Filtering)
+    const allowedNavItems = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id));
+
+    // Agrupar por categoría
+    const categoriesMap = new Map();
+    allowedNavItems.forEach((item) => {
+      if (!categoriesMap.has(item.category)) {
+        categoriesMap.set(item.category, []);
+      }
+      categoriesMap.get(item.category).push(item);
+    });
+
+    let navHtml = '';
+    for (const [catName, items] of categoriesMap.entries()) {
+      navHtml += `<div class="nav-section-title">${catName}</div>`;
+      for (const item of items) {
+        const isActive = view === item.id;
+        navHtml += `
+          <div class="nav-item ${isActive ? 'active' : ''}" data-nav="${item.id}" data-mod="${item.module}">
+            <span class="nav-item-icon">${item.icon}</span>
+            <div>
+              <span>${item.title}</span>
+              <span class="nav-item-sub">${item.subtitle}</span>
+            </div>
+            ${item.badge ? `<span class="nav-badge-wip">${item.badge}</span>` : ''}
+          </div>
+        `;
+      }
+    }
+
+    // Badge visual de Rol
+    const roleBadgeColor = roleDef.color || '#2563eb';
+
     this.root.innerHTML = `
       <!-- Banner de Entorno de Desarrollo -->
       <div class="dev-env-banner">
@@ -84,7 +202,7 @@ class App {
           <span><b>Aislamiento Activo:</b> Schema PostgreSQL <code>"${tenant.slug}"</code></span>
         </div>
         <div class="tenant-indicator">
-          <span>Conectado como: <b>${user.nombre}</b> (<span style="color: var(--primary-600); font-weight: 700;">${user.rol.nombre}</span>)</span>
+          <span>Conectado como: <b>${user.nombre}</b> (<span style="color: ${roleBadgeColor}; font-weight: 700;">${user.rol.nombre}</span>)</span>
           <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant">
             🔄 Cambiar Empresa
           </button>
@@ -92,7 +210,7 @@ class App {
       </div>
 
       <div class="app-container">
-        <!-- Sidebar Izquierda -->
+        <!-- Sidebar Izquierda con Navegación Dinámica según Rol -->
         <aside class="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-brand">
@@ -113,96 +231,18 @@ class App {
             </div>
           </div>
 
-          <!-- Navegación -->
+          <!-- Navegación Filtrada por RBAC -->
           <nav class="sidebar-nav">
-            <div class="nav-section-title">Gestión Administrativa</div>
-
-            <div class="nav-item ${view === 'dashboard' ? 'active' : ''}" data-nav="dashboard">
-              <span class="nav-item-icon">📊</span>
-              <div>
-                <span>Dashboard</span>
-                <span class="nav-item-sub">Resumen ejecutivo</span>
-              </div>
-            </div>
-
-            <div class="nav-item ${view === 'facturacion' ? 'active' : ''}" data-nav="facturacion">
-              <span class="nav-item-icon">📑</span>
-              <div>
-                <span>Facturación</span>
-                <span class="nav-item-sub">Facturas electrónicas DIAN</span>
-              </div>
-            </div>
-
-            <div class="nav-item ${view === 'pos' ? 'active' : ''}" data-nav="pos">
-              <span class="nav-item-icon">☕</span>
-              <div>
-                <span>Punto de Venta</span>
-                <span class="nav-item-sub">POS, Mesas & Comandas</span>
-              </div>
-            </div>
-
-            <div class="nav-item ${view === 'contabilidad' ? 'active' : ''}" data-nav="contabilidad">
-              <span class="nav-item-icon">🏛️</span>
-              <div>
-                <span>Contabilidad</span>
-                <span class="nav-item-sub">Módulo DIAN F-350</span>
-              </div>
-              <span class="nav-badge-wip">Demo</span>
-            </div>
-
-            <div class="nav-item ${view === 'clientes' ? 'active' : ''}" data-nav="clientes">
-              <span class="nav-item-icon">👥</span>
-              <div>
-                <span>Clientes CRM</span>
-                <span class="nav-item-sub">Directorio de terceros</span>
-              </div>
-              <span class="nav-badge-wip">WIP</span>
-            </div>
-
-            <div class="nav-item ${view === 'inventario' ? 'active' : ''}" data-nav="inventario">
-              <span class="nav-item-icon">📦</span>
-              <div>
-                <span>Inventario</span>
-                <span class="nav-item-sub">Existencias y kardex</span>
-              </div>
-              <span class="nav-badge-wip">WIP</span>
-            </div>
-
-            <div class="nav-item ${view === 'reportes' ? 'active' : ''}" data-nav="reportes">
-              <span class="nav-item-icon">📈</span>
-              <div>
-                <span>Reportes</span>
-                <span class="nav-item-sub">Inteligencia de negocio</span>
-              </div>
-              <span class="nav-badge-wip">WIP</span>
-            </div>
-
-            <div class="nav-section-title">Seguridad y Preferencias</div>
-
-            <div class="nav-item ${view === 'rbac' ? 'active' : ''}" data-nav="rbac">
-              <span class="nav-item-icon">🛡️</span>
-              <div>
-                <span>Roles & Permisos</span>
-                <span class="nav-item-sub">Matriz RBAC y usuarios</span>
-              </div>
-            </div>
-
-            <div class="nav-item ${view === 'ajustes' ? 'active' : ''}" data-nav="ajustes">
-              <span class="nav-item-icon">⚙️</span>
-              <div>
-                <span>Ajustes & Tema</span>
-                <span class="nav-item-sub">Personalizar apariencia</span>
-              </div>
-            </div>
+            ${navHtml}
           </nav>
 
-          <!-- Pie del Sidebar con el Usuario en Sesión -->
+          <!-- Pie del Sidebar con el Usuario en Sesión y su Rol -->
           <div class="sidebar-footer">
-            <div class="user-profile-widget" id="user-profile-trigger" title="Ver perfil y permisos">
-              <div class="user-avatar-circle">${userInitials}</div>
+            <div class="user-profile-widget" id="user-profile-trigger" title="Ver información de perfil">
+              <div class="user-avatar-circle" style="background: linear-gradient(135deg, ${roleBadgeColor} 0%, #1e3a8a 100%);">${userInitials}</div>
               <div class="user-info-text">
                 <span class="user-name">${user.nombre}</span>
-                <span class="user-role-badge">${user.rol.nombre}</span>
+                <span class="user-role-badge" style="font-weight: 700; color: ${roleBadgeColor};">${user.rol.nombre}</span>
               </div>
             </div>
           </div>
@@ -218,11 +258,21 @@ class App {
                 <div class="topbar-view-subtitle">${tenant.name} · ${tenant.nit}</div>
               </div>
 
-              <!-- Píldora Selectora de Módulo (Núcleo Gestión vs Núcleo POS) -->
-              <button type="button" class="module-switcher-pill ${isPosModule ? 'pos-mode' : ''}" id="topbar-module-pill">
-                <span>${isPosModule ? '☕ Núcleo Punto de Venta' : '🌐 Núcleo Gestión'}</span>
-                <span style="font-size: 10px;">▼</span>
-              </button>
+              <!-- Píldora Selectora de Módulo o Indicador de Área -->
+              ${
+                canSwitchModule
+                  ? `
+                <button type="button" class="module-switcher-pill ${isPosModule ? 'pos-mode' : ''}" id="topbar-module-pill" title="Alternar entre Gestión y Punto de Venta">
+                  <span>${isPosModule ? '☕ Núcleo Punto de Venta' : '🌐 Núcleo Gestión'}</span>
+                  <span style="font-size: 10px;">▼</span>
+                </button>
+              `
+                  : `
+                <div class="module-switcher-pill ${isPosModule ? 'pos-mode' : ''}" style="cursor: default;" title="Módulo operativo asignado a tu perfil">
+                  <span>${isPosModule ? '☕ Punto de Venta Operativo' : '🌐 Gestión Administrativa'}</span>
+                </div>
+              `
+              }
             </div>
 
             <div class="topbar-right">
@@ -296,6 +346,8 @@ class App {
         return 'NÚCLEO Control de Inventario y Kardex';
       case 'reportes':
         return 'NÚCLEO Inteligencia de Negocio y Reportes';
+      case 'acceso_denegado':
+        return 'NÚCLEO Control de Acceso RBAC';
       default:
         return 'NÚCLEO Financiero';
     }
@@ -304,6 +356,12 @@ class App {
   static mountActiveView(view) {
     const mountPoint = document.getElementById('active-view-mount');
     if (!mountPoint) return;
+
+    // Route Guard en tiempo de montaje
+    if (view !== 'login' && view !== 'acceso_denegado' && !state.canAccessView(view)) {
+      RestrictedView.mount(mountPoint, view);
+      return;
+    }
 
     switch (view) {
       case 'dashboard':
@@ -329,28 +387,34 @@ class App {
       case 'reportes':
         PlaceholderView.mount(mountPoint, view);
         break;
+      case 'acceso_denegado':
+        RestrictedView.mount(mountPoint, state.attemptedView || 'este módulo');
+        break;
       default:
         DashboardView.mount(mountPoint);
     }
   }
 
   static bindShellEvents() {
-    // Navegación Sidebar
+    // Navegación Sidebar (solo los elementos permitidos)
     document.querySelectorAll('.nav-item').forEach((item) => {
       item.addEventListener('click', () => {
         const targetView = item.getAttribute('data-nav');
-        if (targetView === 'pos') {
+        const targetMod = item.getAttribute('data-mod');
+
+        if (targetMod === 'pos' || targetView === 'pos') {
           state.setModule('pos');
         } else {
           state.setModule('gestion');
         }
+
         state.setView(targetView);
       });
     });
 
-    // Píldora de Módulo en Topbar (alterna entre Gestión y POS)
+    // Píldora de Módulo en Topbar (solo activa si el perfil tiene permisos para alternar)
     const modulePill = document.getElementById('topbar-module-pill');
-    if (modulePill) {
+    if (modulePill && state.canSwitchModule()) {
       modulePill.addEventListener('click', () => {
         if (state.currentModule === 'gestion') {
           state.setModule('pos');
@@ -399,11 +463,15 @@ class App {
       });
     }
 
-    // Perfil en Sidebar abre la vista RBAC
+    // Perfil en Sidebar abre la vista RBAC si tiene permiso, sino abre Ajustes
     const profileTrigger = document.getElementById('user-profile-trigger');
     if (profileTrigger) {
       profileTrigger.addEventListener('click', () => {
-        state.setView('rbac');
+        if (state.canAccessView('rbac')) {
+          state.setView('rbac');
+        } else {
+          state.setView('ajustes');
+        }
       });
     }
 

@@ -1,16 +1,17 @@
 /**
  * GESTOR DE ESTADO REACTIVO (STORE) — NÚCLEO FINANCIERO
- * Maneja el estado global, autenticación, tenants, módulo activo, carrito POS y motor de temas (Claro / Oscuro / Sistema).
+ * Maneja el estado global, autenticación, control de acceso por roles (RBAC),
+ * navegación protegida por perfiles, carrito POS y motor de temas.
  */
 
-import { DEMO_TENANTS } from './demo-fixtures.js';
+import { DEMO_TENANTS, ROLE_DEFINITIONS } from './demo-fixtures.js';
 
 class AppState {
   constructor() {
     // Cargar estado inicial desde sessionStorage y localStorage
     const savedTenantSlug = sessionStorage.getItem('nf_tenant_slug') || 'restaurante_origen';
     const savedUserJson = sessionStorage.getItem('nf_user');
-    const savedModule = sessionStorage.getItem('nf_module') || 'gestion'; // 'gestion' | 'pos'
+    const savedModule = sessionStorage.getItem('nf_module') || 'gestion';
     const savedView = sessionStorage.getItem('nf_view') || 'login';
     
     // Tema: 'light' (predeterminado "deja todo claro") | 'dark' | 'system'
@@ -19,7 +20,12 @@ class AppState {
     this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
     this.currentUser = savedUserJson ? JSON.parse(savedUserJson) : null;
     this.currentModule = savedModule;
-    this.currentView = this.currentUser ? (savedView === 'login' ? 'dashboard' : savedView) : 'login';
+    this.currentView = this.currentUser ? (savedView === 'login' ? this.getDefaultViewForUser() : savedView) : 'login';
+
+    // Verificar si la vista guardada está permitida para el usuario cargado
+    if (this.currentUser && !this.canAccessView(this.currentView)) {
+      this.currentView = this.getDefaultViewForUser();
+    }
 
     // Carrito de ventas POS
     this.cartItems = [];
@@ -87,6 +93,60 @@ class AppState {
     return this.themeSetting;
   }
 
+  // =========================================================================
+  // CONTROL DE ACCESO POR ROLES (RBAC ROUTE GUARDS)
+  // =========================================================================
+  getRoleSlug() {
+    if (!this.currentUser) return null;
+    return this.currentUser.rol?.slug || this.currentUser.rolSlug || 'mesero';
+  }
+
+  getRoleDefinition() {
+    const slug = this.getRoleSlug();
+    if (!slug) return null;
+    return ROLE_DEFINITIONS[slug] || ROLE_DEFINITIONS.mesero;
+  }
+
+  canAccessView(viewName) {
+    if (!this.currentUser) return viewName === 'login';
+    if (viewName === 'login') return true;
+
+    const slug = this.getRoleSlug();
+    if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
+      return true; // Bypass total para Super Administrador
+    }
+
+    const roleDef = this.getRoleDefinition();
+    if (!roleDef || !roleDef.allowedViews) {
+      return false;
+    }
+
+    return roleDef.allowedViews.includes(viewName);
+  }
+
+  getAllowedViews() {
+    if (!this.currentUser) return ['login'];
+    const slug = this.getRoleSlug();
+    if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
+      return ['dashboard', 'facturacion', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
+    }
+    const roleDef = this.getRoleDefinition();
+    return roleDef?.allowedViews || ['pos', 'ajustes'];
+  }
+
+  getDefaultViewForUser() {
+    const roleDef = this.getRoleDefinition();
+    return roleDef?.defaultView || 'pos';
+  }
+
+  canSwitchModule() {
+    if (!this.currentUser) return false;
+    const slug = this.getRoleSlug();
+    if (this.currentUser.esSuperAdmin || slug === 'super_admin') return true;
+    const roleDef = this.getRoleDefinition();
+    return Boolean(roleDef?.canSwitchModule);
+  }
+
   subscribe(listener) {
     this.listeners.push(listener);
     return () => {
@@ -108,25 +168,69 @@ class AppState {
   }
 
   setUser(userData) {
-    this.currentUser = userData;
     if (userData) {
-      sessionStorage.setItem('nf_user', JSON.stringify(userData));
+      // Normalizar estructura del rol
+      const roleSlug = userData.rol?.slug || userData.rolSlug || (typeof userData.rol === 'string' ? userData.rol.toLowerCase().replace(/[^a-z0-9_]/g, '_') : 'mesero');
+      const roleDef = ROLE_DEFINITIONS[roleSlug] || ROLE_DEFINITIONS.mesero;
+
+      const normalizedUser = {
+        ...userData,
+        rolSlug: roleSlug,
+        rol: {
+          id: userData.rol?.id || `rol_${roleSlug}`,
+          nombre: userData.rol?.nombre || roleDef.nombre,
+          slug: roleSlug,
+        },
+        permisos: Array.isArray(userData.permisos) && userData.permisos.length > 0 ? userData.permisos : roleDef.permisos,
+        esSuperAdmin: roleSlug === 'super_admin' || Boolean(userData.esSuperAdmin),
+      };
+
+      this.currentUser = normalizedUser;
+      sessionStorage.setItem('nf_user', JSON.stringify(normalizedUser));
+
+      // Asignar módulo y vista inicial según la política RBAC del perfil
+      this.currentModule = roleDef.defaultModule || 'gestion';
+      this.currentView = roleDef.defaultView || 'dashboard';
+      sessionStorage.setItem('nf_module', this.currentModule);
+      sessionStorage.setItem('nf_view', this.currentView);
     } else {
+      this.currentUser = null;
       sessionStorage.removeItem('nf_user');
+      sessionStorage.removeItem('nf_view');
+      this.currentView = 'login';
     }
-    this.notify('user_changed', userData);
+
+    this.notify('user_changed', this.currentUser);
   }
 
   setView(viewName) {
+    if (viewName !== 'login') {
+      if (!this.canAccessView(viewName)) {
+        console.warn(`[RBAC] Acceso denegado a la vista "${viewName}" para el rol "${this.getRoleSlug()}".`);
+        // Redirigir a la vista de acceso restringido o a su vista por defecto
+        this.currentView = 'acceso_denegado';
+        this.attemptedView = viewName;
+        sessionStorage.setItem('nf_view', 'acceso_denegado');
+        this.notify('view_changed', 'acceso_denegado');
+        return;
+      }
+    }
+
     this.currentView = viewName;
     sessionStorage.setItem('nf_view', viewName);
     this.notify('view_changed', viewName);
   }
 
   setModule(moduleName) {
-    this.currentModule = moduleName;
-    sessionStorage.setItem('nf_module', moduleName);
-    this.notify('module_changed', moduleName);
+    // Si el perfil no tiene permiso para cambiar de módulo, forzar su módulo permitido
+    if (!this.canSwitchModule()) {
+      const roleDef = this.getRoleDefinition();
+      this.currentModule = roleDef?.defaultModule || 'pos';
+    } else {
+      this.currentModule = moduleName;
+    }
+    sessionStorage.setItem('nf_module', this.currentModule);
+    this.notify('module_changed', this.currentModule);
   }
 
   addToCart(product) {
@@ -164,6 +268,7 @@ class AppState {
   logout() {
     this.currentUser = null;
     sessionStorage.removeItem('nf_user');
+    sessionStorage.removeItem('nf_view');
     this.clearCart();
     this.setView('login');
   }

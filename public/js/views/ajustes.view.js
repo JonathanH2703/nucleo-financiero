@@ -248,6 +248,38 @@ export class AjustesView {
           </div>
         </div>
 
+        <!-- SECCIÓN 4: TU PERFIL Y ALCANCE DE PERMISOS ASIGNADOS -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px 28px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 20px;">👤</span>
+              <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Tu Perfil y Permisos Activos</h3>
+            </div>
+            <span class="badge" style="background: var(--primary-50); color: var(--primary-600); border: 1px solid var(--primary-100); font-weight: 700;">
+              ${user.rol?.nombre || 'Colaborador'}
+            </span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Módulos autorizados para <b>${user.nombre}</b> bajo las directrices de seguridad RBAC de ${tenant.name}:
+          </p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+            ${(state.getAllowedViews() || [])
+              .map(
+                (v) => `
+              <span style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; color: var(--text-main); display: inline-flex; align-items: center; gap: 6px;">
+                <span style="color: #22c55e;">✓</span> ${v.toUpperCase()}
+              </span>
+            `
+              )
+              .join('')}
+          </div>
+
+          <div style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+            💡 <b>Control de Acceso:</b> Los módulos no incluidos en esta lista (como finanzas, contabilidad o inventario general) están restringidos para este perfil operativo.
+          </div>
+        </div>
+
       </div>
     `;
 

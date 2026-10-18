@@ -338,6 +338,36 @@ export class TenantSchemaManager {
 
     // C. Mapeo de Permisos a Roles
     await client.query(`
+      -- Administrador de Negocio (Acceso completo operativo, facturación e inventario)
+      INSERT INTO "${schemaName}".rol_permisos (rol_id, permiso_id) VALUES
+      ('rol_admin_negocio', 'perm_pos_comanda_crear'),
+      ('rol_admin_negocio', 'perm_pos_comanda_cobrar'),
+      ('rol_admin_negocio', 'perm_pos_comanda_anular'),
+      ('rol_admin_negocio', 'perm_pos_descuento_aplicar'),
+      ('rol_admin_negocio', 'perm_pos_mesas_gestionar'),
+      ('rol_admin_negocio', 'perm_catalogo_ver'),
+      ('rol_admin_negocio', 'perm_catalogo_editar'),
+      ('rol_admin_negocio', 'perm_inventario_ajustar'),
+      ('rol_admin_negocio', 'perm_fact_emitir_dian'),
+      ('rol_admin_negocio', 'perm_fact_reportes_ver'),
+      ('rol_admin_negocio', 'perm_usuarios_gestionar')
+      ON CONFLICT DO NOTHING;
+
+      -- Gerente Operativo
+      INSERT INTO "${schemaName}".rol_permisos (rol_id, permiso_id) VALUES
+      ('rol_gerente_operativo', 'perm_pos_comanda_crear'),
+      ('rol_gerente_operativo', 'perm_pos_comanda_cobrar'),
+      ('rol_gerente_operativo', 'perm_pos_comanda_anular'),
+      ('rol_gerente_operativo', 'perm_pos_descuento_aplicar'),
+      ('rol_gerente_operativo', 'perm_pos_mesas_gestionar'),
+      ('rol_gerente_operativo', 'perm_kds_monitor_ver'),
+      ('rol_gerente_operativo', 'perm_kds_estado_actualizar'),
+      ('rol_gerente_operativo', 'perm_catalogo_ver'),
+      ('rol_gerente_operativo', 'perm_catalogo_editar'),
+      ('rol_gerente_operativo', 'perm_inventario_ajustar'),
+      ('rol_gerente_operativo', 'perm_fact_reportes_ver')
+      ON CONFLICT DO NOTHING;
+
       -- Cajero
       INSERT INTO "${schemaName}".rol_permisos (rol_id, permiso_id) VALUES
       ('rol_cajero', 'perm_pos_comanda_crear'),
@@ -356,7 +386,8 @@ export class TenantSchemaManager {
       -- Cocinero
       INSERT INTO "${schemaName}".rol_permisos (rol_id, permiso_id) VALUES
       ('rol_cocinero', 'perm_kds_monitor_ver'),
-      ('rol_cocinero', 'perm_kds_estado_actualizar')
+      ('rol_cocinero', 'perm_kds_estado_actualizar'),
+      ('rol_cocinero', 'perm_catalogo_ver')
       ON CONFLICT DO NOTHING;
 
       -- Contador
