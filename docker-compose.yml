@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nucleo_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-nucleo_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nucleo_secure_pass_2026}
+      POSTGRES_DB: ${DB_NAME:-nucleo_financiero_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-nucleo_admin} -d ${DB_NAME:-nucleo_financiero_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nucleo_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: nucleo_minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_ACCESS_KEY:-minioadmin123}
+    ports:
+      - "9000:9000" # API S3
+      - "9001:9001" # Consola Web MinIO
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - nucleo_network
+
+  createbuckets:
+    image: minio/mc:latest
+    container_name: nucleo_minio_init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 ${STORAGE_ACCESS_KEY_ID:-minioadmin} ${STORAGE_SECRET_ACCESS_KEY:-minioadmin123};
+      /usr/bin/mc mb --ignore-existing myminio/${STORAGE_BUCKET_NAME:-nucleo-financiero-dev};
+      /usr/bin/mc version enable myminio/${STORAGE_BUCKET_NAME:-nucleo-financiero-dev};
+      echo 'Bucket ${STORAGE_BUCKET_NAME:-nucleo-financiero-dev} configurado exitosamente.';
+      exit 0;
+      "
+    networks:
+      - nucleo_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nucleo_api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      API_PREFIX: /api/v1
+      CORS_ORIGIN: "*"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-nucleo_admin}
+      DB_PASSWORD: ${DB_PASSWORD:-nucleo_secure_pass_2026}
+      DB_NAME: ${DB_NAME:-nucleo_financiero_db}
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_BUCKET_NAME: ${STORAGE_BUCKET_NAME:-nucleo-financiero-dev}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID:-minioadmin}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY:-minioadmin123}
+      STORAGE_FORCE_PATH_STYLE: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - nucleo_network
+
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  nucleo_network:
+    driver: bridge
+
