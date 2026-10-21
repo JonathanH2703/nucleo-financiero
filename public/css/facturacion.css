@@ -1,5 +1,7 @@
 /* ==========================================================================
    FACTURACIÓN ELECTRÓNICA DIAN — NÚCLEO FINANCIERO (FIGMA DESIGN)
+   Optimizada para PyMEs: Dashboards de cartera, paginación, modales de abono,
+   notas de crédito, UBL 2.1 y soporte multidispositivo (móvil, tablet, desktop).
    ========================================================================== */
 
 .facturacion-container {
@@ -28,11 +30,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 0 0 4px 0;
 }
 
 .facturacion-title-group p {
   font-size: 12px;
   color: var(--text-muted);
+  margin: 0;
 }
 
 .facturacion-actions {
@@ -41,7 +45,99 @@
   gap: 12px;
 }
 
-/* Barra de Filtros y Búsqueda */
+/* ==========================================================================
+   TARJETAS DE RESUMEN FINANCIERO (KPIS CONSOLIDADOS)
+   ========================================================================== */
+.financial-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kpi-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.kpi-icon-box.blue {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+.kpi-icon-box.green {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.kpi-icon-box.amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.kpi-icon-box.purple {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpi-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.kpi-value.highlight-green {
+  color: #059669;
+}
+
+.kpi-value.highlight-amber {
+  color: #d97706;
+}
+
+/* ==========================================================================
+   BARRA DE FILTROS Y BÚSQUEDA
+   ========================================================================== */
 .table-filter-bar {
   display: flex;
   align-items: center;
@@ -56,6 +152,7 @@
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+  max-width: 100%;
 }
 
 .filter-pill {
@@ -113,7 +210,9 @@
   font-size: 14px;
 }
 
-/* Tabla de Facturas Fiscales */
+/* ==========================================================================
+   TABLA DE FACTURAS FISCALES
+   ========================================================================== */
 .invoices-table-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -135,7 +234,7 @@
 }
 
 .invoices-table th {
-  padding: 12px 18px;
+  padding: 12px 16px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -152,8 +251,16 @@
   background-color: var(--table-row-hover);
 }
 
+.invoices-table tbody tr.tr-nota-credito {
+  background-color: rgba(239, 68, 68, 0.02);
+}
+
+.invoices-table tbody tr.tr-nota-credito:hover {
+  background-color: rgba(239, 68, 68, 0.06);
+}
+
 .invoices-table td {
-  padding: 14px 18px;
+  padding: 13px 16px;
   color: var(--text-main);
   vertical-align: middle;
 }
@@ -198,8 +305,74 @@
   color: var(--text-main);
 }
 
+.amount-negative {
+  color: #dc2626 !important;
+}
+
+.badge-fe {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.badge-nc {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Badges de Métodos de Pago */
+.badge-metodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.metodo-efectivo {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.metodo-tarjeta {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.metodo-transferencia {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.metodo-nequi {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.metodo-daviplata {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
 .btn-table-action {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   padding: 4px 10px;
   border-radius: var(--radius-sm);
@@ -213,14 +386,79 @@
 .btn-table-action:hover {
   border-color: var(--primary-500);
   color: var(--primary-600);
-  background-color: #eff6ff;
+  background-color: rgba(59, 130, 246, 0.05);
 }
 
-/* Modal de Detalle de Factura DIAN */
+/* ==========================================================================
+   BARRA DE PAGINACIÓN SERVIDOR
+   ========================================================================== */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-info {
+  color: var(--text-muted);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-pagination {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-pagination:hover:not(:disabled) {
+  border-color: var(--primary-500);
+  color: var(--primary-600);
+}
+
+.btn-pagination:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-current {
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 0 4px;
+}
+
+.pagination-size-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   MODALES Y FORMULARIOS FINANCIEROS
+   ========================================================================== */
 .invoice-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -229,6 +467,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-fast);
+  padding: 16px;
 }
 
 .invoice-modal-backdrop.open {
@@ -239,24 +478,104 @@
 .invoice-modal-card {
   background: #ffffff;
   border-radius: var(--radius-xl);
-  width: 90%;
-  max-width: 640px;
+  width: 100%;
+  max-width: 680px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
-  padding: 32px;
+  padding: 28px;
   position: relative;
+  border: 1px solid var(--border-subtle);
 }
 
 .modal-close-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 18px;
+  right: 18px;
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
   color: var(--text-muted);
+  line-height: 1;
+  padding: 4px;
+}
+
+.modal-close-btn:hover {
+  color: var(--text-main);
+}
+
+.form-group-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group-modal label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.input-modal {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  background: #ffffff;
+  color: #0f172a;
+  transition: all var(--transition-fast);
+}
+
+.input-modal:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Subtabla de Historial de Pagos */
+.payments-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.payments-subtable thead {
+  background-color: #f8fafc;
+}
+
+.payments-subtable th {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.payments-subtable td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: #0f172a;
+}
+
+.payments-subtable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badge-mini {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 /* ==========================================================================
@@ -274,7 +593,7 @@
   }
 
   .invoices-table {
-    min-width: 700px;
+    min-width: 820px;
   }
 }
 
@@ -295,9 +614,19 @@
     flex-wrap: wrap;
   }
 
+  .financial-kpis-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
   .table-filter-bar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .search-box-wrapper {
+    width: 100%;
+    min-width: 0;
   }
 
   .filter-pills-row {
@@ -305,7 +634,7 @@
   }
 
   .invoices-table {
-    min-width: 600px;
+    min-width: 780px;
     font-size: 12px;
   }
 
@@ -314,11 +643,21 @@
     padding: 10px 12px;
   }
 
+  .pagination-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .invoice-modal-card {
-    width: 95%;
-    max-height: 85vh;
-    padding: 20px;
+    width: 100%;
+    max-height: 90vh;
+    padding: 18px;
     border-radius: var(--radius-lg);
   }
 }
-

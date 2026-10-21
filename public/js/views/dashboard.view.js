@@ -3,11 +3,37 @@
  */
 
 import { state } from '../state.js';
+import { ApiClient } from '../api.js';
 
 export class DashboardView {
-  static mount(container) {
+  static async mount(container) {
     this.container = container;
     this.render();
+    await this.loadFinancialSummary();
+  }
+
+  static async loadFinancialSummary() {
+    try {
+      const res = await ApiClient.getResumenFinanciero();
+      if (res.success && res.data) {
+        const d = res.data;
+        const elEmitidas = document.getElementById('dash-stat-emitidas');
+        const elCobradas = document.getElementById('dash-stat-cobradas');
+        const elPendientes = document.getElementById('dash-stat-pendientes');
+
+        if (elEmitidas) elEmitidas.textContent = d.facturasEsteMes || '0';
+        if (elCobradas) {
+          const cobradoM = (Number(d.totalCobrado || 0) / 1000000).toFixed(1);
+          elCobradas.textContent = `$ ${cobradoM}M`;
+        }
+        if (elPendientes) {
+          const pendienteM = (Number(d.cuentasPorCobrar || 0) / 1000000).toFixed(1);
+          elPendientes.textContent = `$ ${pendienteM}M`;
+        }
+      }
+    } catch (err) {
+      console.warn('Dashboard: no se pudo cargar el resumen financiero:', err);
+    }
   }
 
   static render() {
@@ -130,15 +156,15 @@ export class DashboardView {
               <div class="today-header">Hoy — 09/10/2026</div>
               <div class="today-stats-grid">
                 <div class="stat-box">
-                  <span class="stat-value">11</span>
+                  <span class="stat-value" id="dash-stat-emitidas">11</span>
                   <span class="stat-label">Facturas emitidas</span>
                 </div>
                 <div class="stat-box">
-                  <span class="stat-value highlight">$ 24.5M</span>
+                  <span class="stat-value highlight" id="dash-stat-cobradas">$ 24.5M</span>
                   <span class="stat-label">Cobradas</span>
                 </div>
                 <div class="stat-box">
-                  <span class="stat-value" style="color: #f59e0b;">3</span>
+                  <span class="stat-value" id="dash-stat-pendientes" style="color: #f59e0b;">$ 4.2M</span>
                   <span class="stat-label">Pendientes</span>
                 </div>
                 <div class="stat-box">

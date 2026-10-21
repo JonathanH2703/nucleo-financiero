@@ -1,5 +1,6 @@
-export type TipoDocumentoFiscal = 'FACTURA_ELECTRONICA_DIAN' | 'DOCUMENTO_EQUIVALENTE_POS';
-export type EstadoDian = 'ACEPTADA' | 'PENDIENTE' | 'RECHAZADA_DIAN' | 'PAGO_PARCIAL' | 'VENCIDA' | 'ANULADA';
+export type TipoDocumentoFiscal = 'FACTURA_ELECTRONICA_DIAN' | 'DOCUMENTO_EQUIVALENTE_POS' | 'NOTA_CREDITO_DIAN';
+export type EstadoDian = 'ACEPTADA' | 'PAGADA' | 'PENDIENTE' | 'RECHAZADA_DIAN' | 'PAGO_PARCIAL' | 'VENCIDA' | 'ANULADA';
+export type MetodoPago = 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA' | 'MIXTO' | 'NEQUI' | 'DAVIPLATA';
 
 export interface FacturaFiscalProps {
   id: string;
@@ -21,6 +22,9 @@ export interface FacturaFiscalProps {
   qrCode?: string;
   archivoXmlKey?: string;
   archivoPdfKey?: string;
+  metodoPago?: MetodoPago | string;
+  notas?: string;
+  facturaReferenciaId?: string; // Para notas crédito: referencia a la factura original
 }
 
 export class FacturaFiscal {
@@ -43,6 +47,9 @@ export class FacturaFiscal {
   public qrCode?: string;
   public archivoXmlKey?: string;
   public archivoPdfKey?: string;
+  public readonly metodoPago: string;
+  public readonly notas?: string;
+  public readonly facturaReferenciaId?: string;
 
   constructor(props: FacturaFiscalProps) {
     this.id = props.id;
@@ -64,9 +71,16 @@ export class FacturaFiscal {
     this.qrCode = props.qrCode;
     this.archivoXmlKey = props.archivoXmlKey;
     this.archivoPdfKey = props.archivoPdfKey;
+    this.metodoPago = props.metodoPago ?? 'EFECTIVO';
+    this.notas = props.notas;
+    this.facturaReferenciaId = props.facturaReferenciaId;
   }
 
   public get numeroCompleto(): string {
     return `${this.prefijo}-${String(this.consecutivo).padStart(6, '0')}`;
+  }
+
+  public get esNotaCredito(): boolean {
+    return this.tipoDocumento === 'NOTA_CREDITO_DIAN';
   }
 }

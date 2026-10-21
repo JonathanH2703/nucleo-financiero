@@ -1,11 +1,14 @@
 /**
  * CLIENTE API UNIFICADO — NÚCLEO FINANCIERO
  * Inyecta automáticamente los encabezados multi-tenant y procesa respuestas JSON.
+ * Optimizado para conexiones inestables con retry automático y timeouts.
  */
 
 import { state } from './state.js';
 
 const API_BASE = '/api/v1';
+const DEFAULT_TIMEOUT = 15000; // 15s timeout para conexiones lentas
+const MAX_RETRIES = 2;
 
 export class ApiClient {
   static getHeaders() {
@@ -21,10 +24,14 @@ export class ApiClient {
     return headers;
   }
 
-  static async request(endpoint, options = {}) {
+  static async request(endpoint, options = {}, retries = MAX_RETRIES) {
     const url = `${API_BASE}${endpoint}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
+
     const config = {
       ...options,
+      signal: controller.signal,
       headers: {
         ...this.getHeaders(),
         ...(options.headers || {}),
@@ -33,6 +40,7 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeout);
       const data = await response.json();
 
       if (!response.ok) {
@@ -41,12 +49,21 @@ export class ApiClient {
 
       return data;
     } catch (err) {
+      clearTimeout(timeout);
+
+      // Retry on network errors (not on HTTP 4xx/5xx business errors)
+      if (retries > 0 && (err.name === 'AbortError' || err.name === 'TypeError')) {
+        console.warn(`[API Retry] ${endpoint} — intento ${MAX_RETRIES - retries + 1}`);
+        await new Promise(r => setTimeout(r, 1000));
+        return this.request(endpoint, options, retries - 1);
+      }
+
       console.error(`[API Error] ${endpoint}:`, err);
       throw err;
     }
   }
 
-  // Métodos de Autenticación
+  // ─── Autenticación ───────────────────────────────────────
   static async loginPin(pin) {
     return this.request('/auth/login-pin', {
       method: 'POST',
@@ -61,7 +78,7 @@ export class ApiClient {
     });
   }
 
-  // Métodos de Empresas y Roles
+  // ─── Empresas y Roles ────────────────────────────────────
   static async listTenants() {
     return this.request('/tenants');
   }
@@ -78,13 +95,42 @@ export class ApiClient {
     return this.request('/auth/usuarios');
   }
 
-  // Módulo de Facturación Electrónica DIAN
+  // ─── Facturación Electrónica DIAN ────────────────────────
   static async listFacturas(params = {}) {
     const query = new URLSearchParams(params).toString();
     return this.request(`/facturacion/documentos${query ? `?${query}` : ''}`);
   }
 
-  // Módulo de Punto de Venta (POS)
+  static async getFacturaById(id) {
+    return this.request(`/facturacion/documentos/${id}`);
+  }
+
+  static async emitirFacturaDirecta(facturaData) {
+    return this.request('/facturacion/documentos', {
+      method: 'POST',
+      body: JSON.stringify(facturaData),
+    });
+  }
+
+  static async anularFactura(id, motivo = '') {
+    return this.request(`/facturacion/documentos/${id}/anular`, {
+      method: 'POST',
+      body: JSON.stringify({ motivo }),
+    });
+  }
+
+  static async registrarPago(facturaId, pagoData) {
+    return this.request(`/facturacion/documentos/${facturaId}/pago`, {
+      method: 'POST',
+      body: JSON.stringify(pagoData),
+    });
+  }
+
+  static async getResumenFinanciero() {
+    return this.request('/facturacion/resumen');
+  }
+
+  // ─── Punto de Venta (POS) ────────────────────────────────
   static async getCatalogoPos(params = {}) {
     const query = new URLSearchParams(params).toString();
     return this.request(`/pos/catalogo${query ? `?${query}` : ''}`);

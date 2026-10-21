@@ -285,18 +285,37 @@ export class PostgresPosRepository
 
   public async listComandasActivas(schemaName: string): Promise<Comanda[]> {
     const s = sanitizeSchema(schemaName);
+
+    // Single query with JOIN to avoid N+1 — loads comandas + items in one round trip
     const res = await dbPool.query(
-      `SELECT c.*, p.nombre as punto_nombre 
-       FROM "${s}".ventas_comandas c 
-       LEFT JOIN "${s}".puntos_atencion p ON c.punto_atencion_id = p.id 
-       WHERE c.estado NOT IN ('COBRADO', 'CANCELADO') 
+      `SELECT 
+         c.id, c.numero_comanda, c.modo_atencion, c.punto_atencion_id, c.estado,
+         c.cliente_nombre, c.cliente_nit, c.subtotal, c.descuento, c.propina_sugerida,
+         c.impuesto_consumo, c.iva, c.total, c.notas, c.created_at, c.updated_at,
+         p.nombre as punto_nombre,
+         COALESCE(json_agg(
+           json_build_object(
+             'id', i.id, 'comanda_id', i.comanda_id, 'producto_id', i.producto_id,
+             'nombre_producto', i.nombre_producto, 'cantidad', i.cantidad,
+             'precio_unitario', i.precio_unitario, 'tipo_impuesto', i.tipo_impuesto,
+             'notas_cocina', i.notas_cocina, 'requiere_kds', i.requiere_kds,
+             'estado_preparacion', i.estado_preparacion
+           ) ORDER BY i.id
+         ) FILTER (WHERE i.id IS NOT NULL), '[]') AS items_json
+       FROM "${s}".ventas_comandas c
+       LEFT JOIN "${s}".puntos_atencion p ON c.punto_atencion_id = p.id
+       LEFT JOIN "${s}".items_comanda i ON i.comanda_id = c.id
+       WHERE c.estado NOT IN ('COBRADO', 'CANCELADO')
+       GROUP BY c.id, c.numero_comanda, c.modo_atencion, c.punto_atencion_id, c.estado,
+                c.cliente_nombre, c.cliente_nit, c.subtotal, c.descuento, c.propina_sugerida,
+                c.impuesto_consumo, c.iva, c.total, c.notas, c.created_at, c.updated_at,
+                p.nombre
        ORDER BY c.created_at DESC`
     );
 
-    const comandas: Comanda[] = [];
-    for (const r of res.rows) {
-      const itemsRes = await dbPool.query(`SELECT * FROM "${s}".items_comanda WHERE comanda_id = $1`, [r.id]);
-      const items = itemsRes.rows.map((ir) => new ItemComanda({
+    return res.rows.map((r) => {
+      const itemsRaw = typeof r.items_json === 'string' ? JSON.parse(r.items_json) : r.items_json;
+      const items = (itemsRaw as any[]).map((ir: any) => new ItemComanda({
         id: ir.id,
         comandaId: ir.comanda_id,
         productoId: ir.producto_id,
@@ -309,7 +328,7 @@ export class PostgresPosRepository
         estadoPreparacion: ir.estado_preparacion as EstadoPreparacionItem,
       }));
 
-      comandas.push(new Comanda({
+      return new Comanda({
         id: r.id,
         numeroComanda: r.numero_comanda,
         modoAtencion: r.modo_atencion as ModoAtencion,
@@ -324,9 +343,8 @@ export class PostgresPosRepository
         items,
         createdAt: new Date(r.created_at),
         updatedAt: new Date(r.updated_at),
-      }));
-    }
-    return comandas;
+      });
+    });
   }
 
   public async listKdsItems(schemaName: string): Promise<{ item: ItemComanda; comandaNumero: string; puntoAtencion?: string }[]> {
@@ -385,13 +403,15 @@ export class PostgresPosRepository
         id, comanda_id, prefijo, consecutivo, numero_completo, tipo_documento,
         fecha_emision, fecha_vencimiento, cliente_nombre, cliente_nit,
         base_gravable, total_iva, total_impoconsumo, propina, total_pagar,
-        estado_dian, cufe, qr_code, archivo_xml_key, archivo_pdf_key
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+        estado_dian, cufe, qr_code, archivo_xml_key, archivo_pdf_key,
+        metodo_pago, notas, factura_referencia_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
       [
         f.id, f.comandaId || null, f.prefijo, f.consecutivo, f.numeroCompleto, f.tipoDocumento,
         f.fechaEmision, f.fechaVencimiento, f.clienteNombre, f.clienteNit,
         f.baseGravable, f.totalIva, f.totalImpoconsumo, f.propina, f.totalPagar,
-        f.estadoDian, f.cufe || null, f.qrCode || null, f.archivoXmlKey || null, f.archivoPdfKey || null
+        f.estadoDian, f.cufe || null, f.qrCode || null, f.archivoXmlKey || null, f.archivoPdfKey || null,
+        f.metodoPago || 'EFECTIVO', f.notas || null, f.facturaReferenciaId || null
       ]
     );
     return f;
@@ -403,34 +423,176 @@ export class PostgresPosRepository
       `SELECT * FROM "${s}".facturas_fiscales ORDER BY fecha_emision DESC LIMIT $1`,
       [limit]
     );
-    return res.rows.map((r) => new FacturaFiscal({
-      id: r.id,
-      comandaId: r.comanda_id,
-      prefijo: r.prefijo,
-      consecutivo: r.consecutivo,
-      tipoDocumento: r.tipo_documento as TipoDocumentoFiscal,
-      fechaEmision: new Date(r.fecha_emision),
-      fechaVencimiento: new Date(r.fecha_vencimiento),
-      clienteNombre: r.cliente_nombre,
-      clienteNit: r.cliente_nit,
-      baseGravable: Number(r.base_gravable),
-      totalIva: Number(r.total_iva),
-      totalImpoconsumo: Number(r.total_impoconsumo),
-      propina: Number(r.propina),
-      totalPagar: Number(r.total_pagar),
-      estadoDian: r.estado_dian as EstadoDian,
-      cufe: r.cufe,
-      qrCode: r.qr_code,
-      archivoXmlKey: r.archivo_xml_key,
-      archivoPdfKey: r.archivo_pdf_key,
-    }));
+    return res.rows.map((r) => this.mapRowToFactura(r));
+  }
+
+  /**
+   * Optimized listing with server-side filtering, search, and cursor-based pagination.
+   * Single query — no N+1. Designed for poor-connection environments with minimal payload.
+   */
+  public async listFacturasWithFilters(
+    schemaName: string,
+    filters: {
+      estado?: string;
+      search?: string;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      tipoDocumento?: string;
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<{ facturas: FacturaFiscal[]; total: number; page: number; totalPages: number }> {
+    const s = sanitizeSchema(schemaName);
+    const page = Math.max(1, filters.page || 1);
+    const limit = Math.min(100, Math.max(1, filters.limit || 25));
+    const offset = (page - 1) * limit;
+
+    let whereClause = 'WHERE 1=1';
+    const params: any[] = [];
+
+    if (filters.estado && filters.estado !== 'TODAS') {
+      params.push(filters.estado);
+      whereClause += ` AND f.estado_dian = $${params.length}`;
+    }
+
+    if (filters.tipoDocumento) {
+      params.push(filters.tipoDocumento);
+      whereClause += ` AND f.tipo_documento = $${params.length}`;
+    }
+
+    if (filters.fechaDesde) {
+      params.push(filters.fechaDesde);
+      whereClause += ` AND f.fecha_emision >= $${params.length}::timestamptz`;
+    }
+
+    if (filters.fechaHasta) {
+      params.push(filters.fechaHasta);
+      whereClause += ` AND f.fecha_emision <= $${params.length}::timestamptz`;
+    }
+
+    if (filters.search && filters.search.trim()) {
+      params.push(`%${filters.search.trim()}%`);
+      whereClause += ` AND (f.numero_completo ILIKE $${params.length} OR f.cliente_nombre ILIKE $${params.length} OR f.cliente_nit ILIKE $${params.length})`;
+    }
+
+    // Count + data in a single round trip using CTE
+    const countParam = params.length + 1;
+    const limitParam = params.length + 2;
+    params.push(offset, limit);
+
+    const query = `
+      WITH filtered AS (
+        SELECT f.* FROM "${s}".facturas_fiscales f ${whereClause}
+      )
+      SELECT 
+        (SELECT COUNT(*) FROM filtered) AS total_count,
+        f.*
+      FROM filtered f
+      ORDER BY f.fecha_emision DESC
+      OFFSET $${countParam} LIMIT $${limitParam}
+    `;
+
+    const res = await dbPool.query(query, params);
+
+    const total = res.rows.length > 0 ? Number(res.rows[0].total_count) : 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      facturas: res.rows.map((r) => this.mapRowToFactura(r)),
+      total,
+      page,
+      totalPages,
+    };
   }
 
   public async getFacturaById(schemaName: string, id: string): Promise<FacturaFiscal | null> {
     const s = sanitizeSchema(schemaName);
     const res = await dbPool.query(`SELECT * FROM "${s}".facturas_fiscales WHERE id = $1`, [id]);
     if (res.rows.length === 0) return null;
-    const r = res.rows[0];
+    return this.mapRowToFactura(res.rows[0]);
+  }
+
+  public async updateFacturaEstado(schemaName: string, id: string, estado: EstadoDian): Promise<void> {
+    const s = sanitizeSchema(schemaName);
+    await dbPool.query(
+      `UPDATE "${s}".facturas_fiscales SET estado_dian = $1 WHERE id = $2`,
+      [estado, id]
+    );
+  }
+
+  /**
+   * Registra un pago parcial o total contra una factura existente.
+   */
+  public async createPagoFactura(
+    schemaName: string,
+    pago: { id: string; facturaId: string; monto: number; metodoPago: string; referencia?: string; notas?: string }
+  ): Promise<void> {
+    const s = sanitizeSchema(schemaName);
+    await dbPool.query(
+      `INSERT INTO "${s}".pagos_factura (id, factura_id, monto, metodo_pago, referencia, notas)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [pago.id, pago.facturaId, pago.monto, pago.metodoPago, pago.referencia || null, pago.notas || null]
+    );
+  }
+
+  /**
+   * Obtiene todos los pagos asociados a una factura (sin N+1).
+   */
+  public async listPagosFactura(schemaName: string, facturaId: string): Promise<any[]> {
+    const s = sanitizeSchema(schemaName);
+    const res = await dbPool.query(
+      `SELECT * FROM "${s}".pagos_factura WHERE factura_id = $1 ORDER BY created_at ASC`,
+      [facturaId]
+    );
+    return res.rows;
+  }
+
+  /**
+   * Resumen financiero: totales por estado, ingreso del mes, cuentas por cobrar.
+   * Single aggregated query — no N+1. Optimized for dashboard widgets.
+   */
+  public async getResumenFinanciero(schemaName: string): Promise<{
+    totalFacturado: number;
+    totalCobrado: number;
+    totalPendiente: number;
+    totalVencido: number;
+    totalAnulado: number;
+    facturasEsteMes: number;
+    ingresoEsteMes: number;
+    cuentasPorCobrar: number;
+  }> {
+    const s = sanitizeSchema(schemaName);
+    const res = await dbPool.query(`
+      SELECT
+        COALESCE(SUM(total_pagar), 0) AS total_facturado,
+        COALESCE(SUM(CASE WHEN estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS total_cobrado,
+        COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL') THEN total_pagar ELSE 0 END), 0) AS total_pendiente,
+        COALESCE(SUM(CASE WHEN estado_dian = 'VENCIDA' THEN total_pagar ELSE 0 END), 0) AS total_vencido,
+        COALESCE(SUM(CASE WHEN estado_dian = 'ANULADA' THEN total_pagar ELSE 0 END), 0) AS total_anulado,
+        COUNT(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) THEN 1 END) AS facturas_este_mes,
+        COALESCE(SUM(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) AND estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS ingreso_este_mes,
+        COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL', 'VENCIDA') THEN total_pagar ELSE 0 END), 0) AS cuentas_por_cobrar
+      FROM "${s}".facturas_fiscales
+      WHERE tipo_documento != 'NOTA_CREDITO_DIAN'
+    `);
+
+    const row = res.rows[0];
+    return {
+      totalFacturado: Number(row.total_facturado),
+      totalCobrado: Number(row.total_cobrado),
+      totalPendiente: Number(row.total_pendiente),
+      totalVencido: Number(row.total_vencido),
+      totalAnulado: Number(row.total_anulado),
+      facturasEsteMes: Number(row.facturas_este_mes),
+      ingresoEsteMes: Number(row.ingreso_este_mes),
+      cuentasPorCobrar: Number(row.cuentas_por_cobrar),
+    };
+  }
+
+  /**
+   * Helper: maps a raw DB row to a FacturaFiscal entity (DRY, no duplication).
+   */
+  private mapRowToFactura(r: any): FacturaFiscal {
     return new FacturaFiscal({
       id: r.id,
       comandaId: r.comanda_id,
@@ -451,6 +613,9 @@ export class PostgresPosRepository
       qrCode: r.qr_code,
       archivoXmlKey: r.archivo_xml_key,
       archivoPdfKey: r.archivo_pdf_key,
+      metodoPago: r.metodo_pago,
+      notas: r.notas,
+      facturaReferenciaId: r.factura_referencia_id,
     });
   }
 }

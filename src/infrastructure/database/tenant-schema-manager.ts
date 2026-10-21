@@ -256,11 +256,32 @@ export class TenantSchemaManager {
           qr_code TEXT,
           archivo_xml_key VARCHAR(500),
           archivo_pdf_key VARCHAR(500),
+          metodo_pago VARCHAR(40) NOT NULL DEFAULT 'EFECTIVO',
+          notas TEXT,
+          factura_referencia_id VARCHAR(64) REFERENCES "${schemaName}".facturas_fiscales(id) ON DELETE SET NULL,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         CREATE INDEX IF NOT EXISTS idx_facturas_estado_dian ON "${schemaName}".facturas_fiscales(estado_dian);
         CREATE INDEX IF NOT EXISTS idx_facturas_consecutivo ON "${schemaName}".facturas_fiscales(consecutivo);
+        CREATE INDEX IF NOT EXISTS idx_facturas_fecha_emision ON "${schemaName}".facturas_fiscales(fecha_emision DESC);
+        CREATE INDEX IF NOT EXISTS idx_facturas_cliente_nit ON "${schemaName}".facturas_fiscales(cliente_nit);
+        CREATE INDEX IF NOT EXISTS idx_facturas_tipo_doc ON "${schemaName}".facturas_fiscales(tipo_documento);
+      `);
+
+      // 9b. Pagos parciales y totales contra facturas
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".pagos_factura (
+          id VARCHAR(64) PRIMARY KEY,
+          factura_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".facturas_fiscales(id) ON DELETE CASCADE,
+          monto NUMERIC(14, 2) NOT NULL,
+          metodo_pago VARCHAR(40) NOT NULL DEFAULT 'EFECTIVO',
+          referencia VARCHAR(100),
+          notas TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_pagos_factura ON "${schemaName}".pagos_factura(factura_id);
       `);
 
       // 10. Documentos contables generales (compatibilidad)

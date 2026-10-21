@@ -1,7 +1,7 @@
 import { Categoria, Producto } from '../entities/catalogo.entity.js';
 import { AreaOperativa, PuntoAtencion, EstadoPuntoAtencion } from '../entities/operacion.entity.js';
 import { Comanda, ItemComanda, EstadoComanda, EstadoPreparacionItem } from '../entities/pos.entity.js';
-import { FacturaFiscal } from '../entities/facturacion.entity.js';
+import { FacturaFiscal, EstadoDian } from '../entities/facturacion.entity.js';
 
 export interface ICatalogoRepository {
   listCategorias(schemaName: string): Promise<Categoria[]>;
@@ -30,6 +30,35 @@ export interface IPosRepository {
 export interface IFacturacionRepository {
   createFactura(schemaName: string, factura: FacturaFiscal): Promise<FacturaFiscal>;
   listFacturas(schemaName: string, limit?: number): Promise<FacturaFiscal[]>;
+  listFacturasWithFilters(
+    schemaName: string,
+    filters: {
+      estado?: string;
+      search?: string;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      tipoDocumento?: string;
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<{ facturas: FacturaFiscal[]; total: number; page: number; totalPages: number }>;
   getFacturaById(schemaName: string, id: string): Promise<FacturaFiscal | null>;
   getNextConsecutivo(schemaName: string, prefijo: string): Promise<number>;
+  updateFacturaEstado(schemaName: string, id: string, estado: EstadoDian): Promise<void>;
+  createPagoFactura(
+    schemaName: string,
+    pago: { id: string; facturaId: string; monto: number; metodoPago: string; referencia?: string; notas?: string }
+  ): Promise<void>;
+  listPagosFactura(schemaName: string, facturaId: string): Promise<any[]>;
+  getResumenFinanciero(schemaName: string): Promise<{
+    totalFacturado: number;
+    totalCobrado: number;
+    totalPendiente: number;
+    totalVencido: number;
+    totalAnulado: number;
+    facturasEsteMes: number;
+    ingresoEsteMes: number;
+    cuentasPorCobrar: number;
+  }>;
 }
+
