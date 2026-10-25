@@ -8,6 +8,9 @@ import { testDbConnection } from '../../../infrastructure/database/connection.js
 import { S3StorageService } from '../../../infrastructure/storage/s3-storage.service.js';
 import { env } from '../../../config/env.js';
 
+import { tercerosRouter } from './terceros.routes.js';
+import { contabilidadRouter } from './contabilidad.routes.js';
+
 export const apiRouter = Router();
 
 // Healthcheck completo del sistema (DB y Bucket)
@@ -53,5 +56,7 @@ apiRouter.use('/tenants', tenantRouter);
 apiRouter.use('/storage', storageRouter);
 apiRouter.use('/pos', posRouter);
 apiRouter.use('/facturacion', facturacionRouter);
+apiRouter.use('/terceros', tercerosRouter);
+apiRouter.use('/contabilidad', contabilidadRouter);
 
 

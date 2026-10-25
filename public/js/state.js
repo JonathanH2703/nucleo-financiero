@@ -128,10 +128,20 @@ class AppState {
     if (!this.currentUser) return ['login'];
     const slug = this.getRoleSlug();
     if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
-      return ['dashboard', 'facturacion', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
+      return ['dashboard', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
     }
     const roleDef = this.getRoleDefinition();
     return roleDef?.allowedViews || ['pos', 'ajustes'];
+  }
+
+  setClienteSeleccionadoPreviamente(cliente) {
+    this.clienteSeleccionadoPreviamente = cliente;
+  }
+
+  getClienteSeleccionadoPreviamente() {
+    const c = this.clienteSeleccionadoPreviamente;
+    this.clienteSeleccionadoPreviamente = null; // consumo único
+    return c;
   }
 
   getDefaultViewForUser() {

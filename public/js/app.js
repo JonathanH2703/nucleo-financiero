@@ -10,88 +10,109 @@ import { DashboardView } from './views/dashboard.view.js';
 import { FacturacionView } from './views/facturacion.view.js';
 import { PosView } from './views/pos.view.js';
 import { RbacView } from './views/rbac.view.js';
-import { ContabilidadView } from './views/contabilidad.view.js';
+import { ContabilidadView } from './views/contabilidad.view.js?v=3.8';
 import { PlaceholderView } from './views/placeholder.view.js';
 import { AjustesView } from './views/ajustes.view.js';
 import { RestrictedView } from './views/restricted.view.js';
+import { EmpresasView } from './views/empresas.view.js?v=3.5';
 import { ROLE_DEFINITIONS } from './demo-fixtures.js';
 
 // Catálogo maestro de navegación del sistema
+// Catálogo maestro de navegación del sistema
 const MASTER_NAV_ITEMS = [
+  // ─── FINANCIERO ────────────────────────
   {
-    category: 'Operación y Salón',
-    id: 'pos',
-    icon: '☕',
-    title: 'Punto de Venta',
-    subtitle: 'POS, Mesas & Comandas',
-    module: 'pos',
-  },
-  {
-    category: 'Gestión Administrativa',
-    id: 'dashboard',
-    icon: '📊',
-    title: 'Dashboard',
-    subtitle: 'Resumen ejecutivo',
-    module: 'gestion',
-  },
-  {
-    category: 'Gestión Administrativa',
+    category: 'Financiero',
     id: 'facturacion',
     icon: '📑',
-    title: 'Facturación',
-    subtitle: 'Facturas electrónicas DIAN',
+    title: 'Facturación DIAN',
     module: 'gestion',
+    isCoreFinance: true,
+    badge: 'Activo',
   },
   {
-    category: 'Gestión Administrativa',
+    category: 'Financiero',
+    id: 'empresas',
+    icon: '🏢',
+    title: 'Empresas / Terceros',
+    module: 'gestion',
+    isCoreFinance: true,
+    badge: 'Activo',
+  },
+  {
+    category: 'Financiero',
     id: 'contabilidad',
     icon: '🏛️',
     title: 'Contabilidad',
-    subtitle: 'Módulo DIAN F-350',
-    badge: 'Demo',
     module: 'gestion',
+    isCoreFinance: true,
+    badge: 'Activo',
   },
   {
-    category: 'Operación y Salón',
+    category: 'Financiero',
+    id: 'dashboard',
+    icon: '📊',
+    title: 'Dashboard',
+    module: 'gestion',
+    isCoreFinance: true,
+    badge: 'Activo',
+  },
+
+  // ─── OPERACIÓN ────────────────────────
+  {
+    category: 'Operación',
+    id: 'pos',
+    icon: '☕',
+    title: 'Punto de Venta',
+    module: 'pos',
+    isCoreFinance: false,
+    badge: 'Demo',
+  },
+  {
+    category: 'Operación',
     id: 'inventario',
     icon: '📦',
     title: 'Inventario',
-    subtitle: 'Existencias y kardex',
-    badge: 'WIP',
+    badge: 'Próximamente',
+    isCoreFinance: false,
     module: 'gestion',
   },
   {
-    category: 'Gestión Administrativa',
+    category: 'Operación',
     id: 'clientes',
     icon: '👥',
-    title: 'Clientes CRM',
-    subtitle: 'Directorio de terceros',
-    badge: 'WIP',
+    title: 'CRM Clientes',
+    badge: 'Próximamente',
+    isCoreFinance: false,
     module: 'gestion',
   },
   {
-    category: 'Gestión Administrativa',
+    category: 'Operación',
     id: 'reportes',
     icon: '📈',
-    title: 'Reportes',
-    subtitle: 'Inteligencia de negocio',
-    badge: 'WIP',
+    title: 'Reportes BI',
+    badge: 'Próximamente',
+    isCoreFinance: false,
     module: 'gestion',
   },
+
+  // ─── CONFIGURACIÓN ─────────────────────
   {
-    category: 'Seguridad y Control',
+    category: 'Sistema',
     id: 'rbac',
     icon: '🛡️',
-    title: 'Roles & Permisos',
-    subtitle: 'Matriz RBAC y usuarios',
+    title: 'Roles y Permisos',
+    badge: 'Config',
+    isCoreFinance: false,
     module: 'gestion',
   },
   {
-    category: 'Preferencias',
+    category: 'Sistema',
     id: 'ajustes',
     icon: '⚙️',
-    title: 'Ajustes & Tema',
-    subtitle: 'Personalizar apariencia',
+    title: 'Ajustes',
+    badge: 'Config',
+    isCoreFinance: false,
     module: 'gestion',
   },
 ];
@@ -178,14 +199,14 @@ class App {
       navHtml += `<div class="nav-section-title">${catName}</div>`;
       for (const item of items) {
         const isActive = view === item.id;
+        const isCore = !!item.isCoreFinance;
+        const coreClass = isCore ? 'nav-core-finance' : 'nav-item-pale';
+        const badgeClass = isCore ? 'nav-badge-core' : 'nav-badge-pale';
         navHtml += `
-          <div class="nav-item ${isActive ? 'active' : ''}" data-nav="${item.id}" data-mod="${item.module}">
+          <div class="nav-item ${coreClass} ${isActive ? 'active' : ''}" data-nav="${item.id}" data-mod="${item.module}" title="${item.title}">
             <span class="nav-item-icon">${item.icon}</span>
-            <div>
-              <span>${item.title}</span>
-              <span class="nav-item-sub">${item.subtitle}</span>
-            </div>
-            ${item.badge ? `<span class="nav-badge-wip">${item.badge}</span>` : ''}
+            <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: ${isCore ? '600' : '500'};">${item.title}</span>
+            ${item.badge ? `<span class="${badgeClass}">${item.badge}</span>` : ''}
           </div>
         `;
       }
@@ -195,17 +216,15 @@ class App {
     const roleBadgeColor = roleDef.color || '#2563eb';
 
     this.root.innerHTML = `
-      <!-- Banner de Entorno de Desarrollo -->
+      <!-- Banner de Entorno Dev -->
       <div class="dev-env-banner">
         <div class="dev-banner-left">
-          <span class="badge-pill">Demo</span>
-          <span class="dev-banner-schema">Schema: <code>${tenant.slug}</code></span>
+          <span class="badge-pill">Dev</span>
+          <span>Schema: <code>${tenant.slug}</code></span>
         </div>
         <div class="tenant-indicator">
-          <span class="dev-banner-user"><b>${user.nombre}</b> (<span style="color: ${roleBadgeColor}; font-weight: 700;">${user.rol.nombre}</span>)</span>
-          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant" title="Cambiar Empresa">
-            🔄 <span class="desktop-only">Cambiar</span> Empresa
-          </button>
+          <span class="dev-banner-user">${user.nombre} · <span style="color: ${roleBadgeColor};">${user.rol.nombre}</span></span>
+          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant" title="Cambiar Empresa">↻ Empresa</button>
         </div>
       </div>
 
@@ -343,16 +362,18 @@ class App {
         return 'Dashboard';
       case 'facturacion':
         return 'Facturación DIAN';
+      case 'empresas':
+        return 'Empresas / Terceros';
       case 'pos':
-        return 'Punto de Venta POS';
+        return 'Punto de Venta';
       case 'rbac':
-        return 'Roles & Permisos';
+        return 'Roles y Permisos';
       case 'ajustes':
         return 'Ajustes';
       case 'contabilidad':
         return 'Contabilidad';
       case 'clientes':
-        return 'Clientes CRM';
+        return 'CRM Clientes';
       case 'inventario':
         return 'Inventario';
       case 'reportes':
@@ -360,7 +381,7 @@ class App {
       case 'acceso_denegado':
         return 'Control de Acceso';
       default:
-        return 'NÚCLEO Financiero';
+        return 'Núcleo Financiero';
     }
   }
 
@@ -380,6 +401,9 @@ class App {
         break;
       case 'facturacion':
         FacturacionView.mount(mountPoint);
+        break;
+      case 'empresas':
+        EmpresasView.mount(mountPoint);
         break;
       case 'pos':
         PosView.mount(mountPoint);
@@ -411,7 +435,8 @@ class App {
       case 'pos': return 'POS';
       case 'dashboard': return 'Dashboard';
       case 'facturacion': return 'Facturas';
-      case 'contabilidad': return 'Contabilidad';
+      case 'empresas': return 'Empresas';
+      case 'contabilidad': return 'Contable';
       case 'rbac': return 'Roles';
       case 'ajustes': return 'Ajustes';
       case 'inventario': return 'Inventario';
@@ -422,14 +447,19 @@ class App {
   }
 
   static buildMobileBottomNav(currentView) {
-    // Tomar los primeros 4 módulos permitidos para la barra inferior
-    const mobileItems = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id)).slice(0, 4);
-    return mobileItems.map((item) => `
-      <button class="mobile-nav-btn ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
-        <span class="icon">${item.icon}</span>
-        <span>${this.getShortNavTitle(item.id, item.title)}</span>
-      </button>
-    `).join('');
+    // Tomar los primeros módulos permitidos para la barra inferior, priorizando facturación y contabilidad
+    const allowed = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id));
+    const sorted = [...allowed].sort((a, b) => (b.isCoreFinance ? 1 : 0) - (a.isCoreFinance ? 1 : 0));
+    const mobileItems = sorted.slice(0, 4);
+    return mobileItems.map((item) => {
+      const isCore = !!item.isCoreFinance;
+      return `
+        <button class="mobile-nav-btn ${isCore ? 'nav-core' : 'nav-pale'} ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
+          <span class="icon">${item.icon}</span>
+          <span>${this.getShortNavTitle(item.id, item.title)}</span>
+        </button>
+      `;
+    }).join('');
   }
 
   static toggleSidebar(open) {

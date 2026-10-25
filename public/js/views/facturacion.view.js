@@ -23,6 +23,12 @@ export class FacturacionView {
 
     this.renderSkeleton();
     await Promise.all([this.loadResumenFinanciero(), this.loadFacturas()]);
+
+    // Si el usuario seleccionó "Facturar →" desde la vista de Empresas / Terceros
+    const preCliente = state.getClienteSeleccionadoPreviamente();
+    if (preCliente) {
+      this.openEmitirFacturaModal(preCliente);
+    }
   }
 
   static renderSkeleton() {
@@ -875,10 +881,21 @@ export class FacturacionView {
   /**
    * Abre modal para emitir una nueva factura electrónica directamente (sin flujo de mesas POS).
    */
-  static openEmitirFacturaModal() {
+  static async openEmitirFacturaModal(preCliente = null) {
     const backdrop = document.getElementById('emitir-modal-backdrop');
     const content = document.getElementById('emitir-modal-content');
     if (!backdrop || !content) return;
+
+    // Cargar empresas/clientes precargados para sugerencias
+    let tercerosDisponibles = [];
+    try {
+      const resTerceros = await ApiClient.listTerceros({ tipo: 'cliente' });
+      if (resTerceros.success && Array.isArray(resTerceros.data)) {
+        tercerosDisponibles = resTerceros.data;
+      }
+    } catch (e) {
+      console.warn('No se pudieron precargar terceros para sugerencias:', e);
+    }
 
     content.innerHTML = `
       <button class="modal-close-btn" id="emitir-modal-close-btn">✕</button>
@@ -908,9 +925,13 @@ export class FacturacionView {
         </div>
 
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
-          <div class="form-group-modal">
-            <label>Cliente / Razón Social *</label>
-            <input type="text" id="emitir-cliente-nombre" class="input-modal" placeholder="Ej: Inversiones Andina S.A.S." required>
+          <div class="form-group-modal" style="position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label style="margin: 0;">Cliente / Empresa *</label>
+              <span style="font-size: 10px; color: var(--accent-primary); font-weight: 600;">Sugerencias automáticas</span>
+            </div>
+            <input type="text" id="emitir-cliente-nombre" class="input-modal" placeholder="Ej: Inversiones Andina (libre o selecciona sugerencia)" autocomplete="off" required>
+            <div id="terceros-autocomplete-list" class="terceros-autocomplete-dropdown" style="display: none;"></div>
           </div>
           <div class="form-group-modal">
             <label>NIT / Cédula *</label>
@@ -981,6 +1002,78 @@ export class FacturacionView {
     `;
 
     backdrop.classList.add('open');
+
+    const inputNombre = document.getElementById('emitir-cliente-nombre');
+    const inputNit = document.getElementById('emitir-cliente-nit');
+    const dropdownTerceros = document.getElementById('terceros-autocomplete-list');
+
+    // Si viene preCliente desde la vista de Empresas
+    if (preCliente) {
+      if (inputNombre && preCliente.nombre) inputNombre.value = preCliente.nombre;
+      if (inputNit && preCliente.doc) inputNit.value = preCliente.doc;
+    }
+
+    // Funciones de sugerencias y autocompletado
+    const renderSugerencias = (matches) => {
+      if (!dropdownTerceros) return;
+      if (matches.length === 0) {
+        dropdownTerceros.style.display = 'none';
+        return;
+      }
+
+      dropdownTerceros.innerHTML = matches.map(t => `
+        <div class="tercero-autocomplete-item" data-nombre="${t.razonSocial}" data-nit="${t.numeroDocumento}">
+          <div>
+            <div class="tercero-item-name">${t.razonSocial}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${t.ciudad ? `📍 ${t.ciudad}` : ''} ${t.esCliente && t.esProveedor ? '· Cliente/Proveedor' : ''}</div>
+          </div>
+          <div class="tercero-item-doc">${t.tipoDocumento || 'NIT'} ${t.numeroDocumento}</div>
+        </div>
+      `).join('');
+
+      dropdownTerceros.style.display = 'block';
+
+      dropdownTerceros.querySelectorAll('.tercero-autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+          inputNombre.value = item.getAttribute('data-nombre');
+          inputNit.value = item.getAttribute('data-nit');
+          dropdownTerceros.style.display = 'none';
+        });
+      });
+    };
+
+    if (inputNombre) {
+      inputNombre.addEventListener('focus', () => {
+        const val = inputNombre.value.trim().toLowerCase();
+        const matches = val === ''
+          ? tercerosDisponibles.slice(0, 6)
+          : tercerosDisponibles.filter(t =>
+              t.razonSocial.toLowerCase().includes(val) ||
+              t.numeroDocumento.toLowerCase().includes(val)
+            ).slice(0, 6);
+        renderSugerencias(matches);
+      });
+
+      inputNombre.addEventListener('input', (e) => {
+        const val = e.target.value.trim().toLowerCase();
+        if (val === '') {
+          renderSugerencias(tercerosDisponibles.slice(0, 6));
+          return;
+        }
+        const matches = tercerosDisponibles.filter(t =>
+          t.razonSocial.toLowerCase().includes(val) ||
+          t.numeroDocumento.toLowerCase().includes(val)
+        ).slice(0, 8);
+        renderSugerencias(matches);
+      });
+    }
+
+    // Cerrar sugerencias si hace clic fuera
+    document.addEventListener('click', (e) => {
+      if (dropdownTerceros && !dropdownTerceros.contains(e.target) && e.target !== inputNombre) {
+        dropdownTerceros.style.display = 'none';
+      }
+    });
 
     document.getElementById('emitir-modal-close-btn').addEventListener('click', () => backdrop.classList.remove('open'));
     document.getElementById('btn-cancel-emitir').addEventListener('click', () => backdrop.classList.remove('open'));

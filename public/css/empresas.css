@@ -1,0 +1,485 @@
+/* ==========================================================================
+   GESTIÓN DE EMPRESAS Y TERCEROS — NÚCLEO FINANCIERO
+   Diseño de Alta Fidelidad para Directorio y Modal de Registro Comercial
+   ========================================================================== */
+
+.empresas-view-container {
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header de la vista */
+.empresas-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.empresas-header-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.empresas-header-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+  max-width: 700px;
+  line-height: 1.5;
+}
+
+.empresas-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Botones principales de la vista */
+.btn-nueva-empresa {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 9px 18px !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-nueva-empresa:hover {
+  background: #1d4ed8 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.btn-nueva-empresa:active {
+  transform: translateY(0) !important;
+}
+
+.btn-refresh-empresas {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  color: var(--text-main, #0f172a);
+  padding: 9px 15px;
+  border-radius: var(--radius-md, 10px);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh-empresas:hover {
+  background: var(--bg-card-hover, #f8fafc);
+  border-color: var(--border-strong, #cbd5e1);
+}
+
+/* Barra de herramientas / Filtros */
+.empresas-toolbar {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg, 14px);
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.empresa-filter-pill {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill, 9999px);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.empresa-filter-pill:hover {
+  border-color: var(--primary-500, #3b82f6);
+  color: var(--primary-600, #2563eb);
+}
+
+.empresa-filter-pill.active {
+  border-color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+  font-weight: 700;
+}
+
+.empresas-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: var(--radius-md, 10px);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-main, #0f172a);
+  transition: all 0.2s ease;
+}
+
+.empresas-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Tabla de empresas */
+.empresas-table-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg, 14px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.empresas-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.empresas-data-table th {
+  padding: 12px 18px;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.empresas-data-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  color: var(--text-main, #0f172a);
+}
+
+.empresas-data-table tbody tr:hover {
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.btn-usar-en-factura {
+  background: transparent;
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  color: var(--primary-600, #2563eb);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-usar-en-factura:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   MODAL DE REGISTRO DE EMPRESA / TERCERO (DISEÑO PREMIUM)
+   ========================================================================== */
+.modal-empresa-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  padding: 20px;
+  animation: fadeInModal 0.2s ease;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-empresa-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-xl, 20px);
+  width: 100%;
+  max-width: 580px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  padding: 28px 32px;
+  position: relative;
+  animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleInModal {
+  from { transform: scale(0.96) translateY(8px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-empresa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-empresa-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-empresa-subtitle {
+  font-size: 12px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.modal-empresa-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.modal-empresa-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Caja de Selección de Clasificación Comercial */
+.clasificacion-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md, 10px);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.clasificacion-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.clasificacion-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.clasificacion-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: var(--radius-md, 10px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.clasificacion-card:hover {
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.clasificacion-card.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.clasificacion-card input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.clasificacion-card-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.clasificacion-card-label strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.clasificacion-card-label span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Campos de Formulario */
+.form-field-group {
+  margin-bottom: 14px;
+}
+
+.form-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 5px;
+}
+
+.form-field-label .required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.form-field-input,
+.form-field-select {
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md, 10px);
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #0f172a;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.form-field-input:focus,
+.form-field-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-field-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Grid de Formulario */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid-doc {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+}
+
+.form-grid-dir {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+/* Footer de Acciones del Modal */
+.modal-empresa-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 18px;
+  margin-top: 20px;
+}
+
+.btn-modal-cancelar {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 9px 18px;
+  border-radius: var(--radius-md, 10px);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-modal-cancelar:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-modal-guardar {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 9px 22px !important;
+  border-radius: var(--radius-md, 10px) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-modal-guardar:hover {
+  background: #1d4ed8 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.btn-modal-guardar:active {
+  transform: translateY(0) !important;
+}
+
+.btn-modal-guardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}

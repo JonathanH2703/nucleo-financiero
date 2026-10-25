@@ -7,7 +7,7 @@ export const ROLE_DEFINITIONS = {
   super_admin: {
     nombre: 'Super Administrador',
     slug: 'super_admin',
-    allowedViews: ['dashboard', 'facturacion', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
+    allowedViews: ['dashboard', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
     defaultView: 'dashboard',
     defaultModule: 'gestion',
     canSwitchModule: true,
@@ -26,7 +26,7 @@ export const ROLE_DEFINITIONS = {
   admin_negocio: {
     nombre: 'Administrador de Sede / Negocio',
     slug: 'admin_negocio',
-    allowedViews: ['dashboard', 'facturacion', 'pos', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
+    allowedViews: ['dashboard', 'facturacion', 'empresas', 'pos', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
     defaultView: 'dashboard',
     defaultModule: 'gestion',
     canSwitchModule: true,
@@ -43,7 +43,7 @@ export const ROLE_DEFINITIONS = {
   gerente_operativo: {
     nombre: 'Gerente Operativo',
     slug: 'gerente_operativo',
-    allowedViews: ['dashboard', 'facturacion', 'pos', 'inventario', 'reportes', 'ajustes'],
+    allowedViews: ['dashboard', 'facturacion', 'empresas', 'pos', 'inventario', 'reportes', 'ajustes'],
     defaultView: 'dashboard',
     defaultModule: 'gestion',
     canSwitchModule: true,
@@ -60,7 +60,7 @@ export const ROLE_DEFINITIONS = {
   cajero: {
     nombre: 'Cajero / Punto de Venta',
     slug: 'cajero',
-    allowedViews: ['pos', 'facturacion', 'clientes', 'ajustes'],
+    allowedViews: ['pos', 'facturacion', 'empresas', 'clientes', 'ajustes'],
     defaultView: 'pos',
     defaultModule: 'pos',
     canSwitchModule: false,

@@ -424,24 +424,49 @@ export class PosView {
       });
     }
 
-    // Cobro y Facturación
+    // Cobro y Facturación conectada a PostgreSQL Cloud
     const btnPay = document.getElementById('btn-pos-pay');
     if (btnPay) {
-      btnPay.addEventListener('click', () => {
+      btnPay.addEventListener('click', async () => {
         if (state.cartItems.length === 0) {
           alert('No hay productos en la orden para liquidar.');
           return;
         }
 
         const totalText = document.getElementById('summary-total').textContent;
+        const subtotal = state.cartItems.reduce((acc, it) => acc + (it.price * it.quantity), 0);
         const confirmMsg = `¿Proceder con el cobro por ${totalText} y emisión de Factura Fiscal DIAN?`;
-        if (confirm(confirmMsg)) {
-          alert(`✅ ¡Pago registrado con éxito!\nComprobante fiscal FE-2026 emitido a Consumidor Final.`);
+        if (!confirm(confirmMsg)) return;
+
+        btnPay.disabled = true;
+        btnPay.textContent = '⏳ Guardando en base de datos...';
+
+        try {
+          const res = await ApiClient.emitirFacturaDirecta({
+            clienteNombre: 'Consumidor Final',
+            clienteNit: '222222222222',
+            tipoDocumento: 'DOCUMENTO_EQUIVALENTE_POS',
+            baseGravable: subtotal,
+            porcentajeIva: 8,
+            metodoPago: 'EFECTIVO',
+            estadoDian: 'ACEPTADA',
+            diasVencimiento: 1,
+            notas: `Venta POS en ${state.selectedTable || 'Mesa 02'}`
+          });
+
+          if (!res.success) throw new Error(res.message || 'Error al procesar cobro');
+
+          alert(`✅ ¡Pago y venta guardados con éxito en la base de datos!\nComprobante: ${res.data.numeroCompleto}\nCUFE: ${res.data.cufe || 'Generado DIAN'}\nEstado: Aceptada y Liquidada`);
           state.clearCart();
           this.renderCart();
           if (orderColumn) {
             orderColumn.classList.remove('mobile-open');
           }
+        } catch (err) {
+          alert(`❌ Error al guardar en base de datos: ${err.message}`);
+        } finally {
+          btnPay.disabled = false;
+          btnPay.textContent = 'Cobrar e Imprimir';
         }
       });
     }

@@ -48,6 +48,8 @@
   --primary-600: #2563eb;
   --primary-700: #1d4ed8;
   --primary-shadow: rgba(37, 99, 235, 0.2);
+  --accent-primary: #2563eb;
+  --border-color: #e2e8f0;
 
   /* Acentos de Operación */
   --accent-pos: #f59e0b;

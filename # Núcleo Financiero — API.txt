@@ -1,0 +1,9 @@
+# Núcleo Financiero — API
+
+
+# Núcleo Financiero
+API Multi-Tenant · ERP · POS · Facturación DIAN
+Endpoints principales
+[/api/v1/health](https://nucleo-financiero.onrender.com/api/v1/health)
+Header requerido para peticiones
+v1.0.0 · Node.js + Express + PostgreSQL Multi-Tenant · [Healthcheck →](https://nucleo-financiero.onrender.com/api/v1/health)

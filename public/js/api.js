@@ -130,6 +130,43 @@ export class ApiClient {
     return this.request('/facturacion/resumen');
   }
 
+  // ─── Terceros (Clientes y Proveedores) ─────────────────
+  static async listTerceros(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/terceros${query ? `?${query}` : ''}`);
+  }
+
+  static async createTercero(terceroData) {
+    return this.request('/terceros', {
+      method: 'POST',
+      body: JSON.stringify(terceroData),
+    });
+  }
+
+  // ─── Contabilidad y Asientos Contables ─────────────────
+  static async getLibroDiario() {
+    return this.request('/contabilidad/libro-diario');
+  }
+
+  static async createAsiento(asientoData) {
+    return this.request('/contabilidad/asientos', {
+      method: 'POST',
+      body: JSON.stringify(asientoData),
+    });
+  }
+
+  static async getPuc() {
+    return this.request('/contabilidad/puc');
+  }
+
+  static async getBalancePrueba() {
+    return this.request('/contabilidad/balance-prueba');
+  }
+
+  static async getLiquidacionImpuestos() {
+    return this.request('/contabilidad/liquidacion-impuestos');
+  }
+
   // ─── Punto de Venta (POS) ────────────────────────────────
   static async getCatalogoPos(params = {}) {
     const query = new URLSearchParams(params).toString();
