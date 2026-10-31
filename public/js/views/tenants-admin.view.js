@@ -35,9 +35,9 @@ export class TenantsAdminView {
               </h1>
             </div>
             <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
-              ${isSuperAdmin 
-                ? 'Administración multi-tenant global. Cada empresa opera en su propio esquema de base de datos con aislamiento estricto.' 
-                : 'Configura las sucursales físicas de tu negocio. Cada sucursal accede con su propio PIN independiente para operar el POS.'}
+              ${isSuperAdmin
+        ? 'Administración multi-tenant global. Cada empresa opera en su propio esquema de base de datos con aislamiento estricto.'
+        : 'Configura las sucursales físicas de tu negocio. Cada sucursal accede con su propio PIN independiente para operar el POS.'}
             </p>
           </div>
 
@@ -291,8 +291,8 @@ export class TenantsAdminView {
       this.isLoading = false;
       const content = document.getElementById('admin-content-area');
       if (content) {
-        content.innerHTML = (this.activeTab === 'empresas' && isSuperAdmin) 
-          ? this.renderEmpresasTab() 
+        content.innerHTML = (this.activeTab === 'empresas' && isSuperAdmin)
+          ? this.renderEmpresasTab()
           : this.renderSucursalesTab();
         this.bindDynamicEvents();
       }
@@ -459,3 +459,4 @@ export class TenantsAdminView {
     });
   }
 }
+
