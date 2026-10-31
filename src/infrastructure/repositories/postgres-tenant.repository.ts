@@ -11,6 +11,7 @@ export class PostgresTenantRepository implements ITenantRepository {
       taxId: row.tax_id,
       schemaName: row.schema_name,
       status: row.status as TenantStatus,
+      adminPin: row.admin_pin || '123456',
       storageQuotaBytes: Number(row.storage_quota_bytes),
       storageUsedBytes: Number(row.storage_used_bytes),
       createdAt: new Date(row.created_at),
@@ -31,7 +32,13 @@ export class PostgresTenantRepository implements ITenantRepository {
   }
 
   public async findByTaxId(taxId: string): Promise<Tenant | null> {
-    const res = await dbPool.query('SELECT * FROM public.tenants WHERE tax_id = $1', [taxId]);
+    const clean = taxId.replace(/[^0-9a-zA-Z]/g, '');
+    const res = await dbPool.query(
+      `SELECT * FROM public.tenants 
+       WHERE tax_id = $1 
+          OR regexp_replace(tax_id, '[^0-9a-zA-Z]', '', 'g') = $2`,
+      [taxId.trim(), clean]
+    );
     if (res.rows.length === 0) return null;
     return this.mapRowToTenant(res.rows[0]);
   }
@@ -39,9 +46,9 @@ export class PostgresTenantRepository implements ITenantRepository {
   public async create(tenant: Tenant): Promise<Tenant> {
     const query = `
       INSERT INTO public.tenants (
-        id, name, slug, tax_id, schema_name, status,
+        id, name, slug, tax_id, schema_name, status, admin_pin,
         storage_quota_bytes, storage_used_bytes, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *;
     `;
     const values = [
@@ -51,6 +58,7 @@ export class PostgresTenantRepository implements ITenantRepository {
       tenant.taxId,
       tenant.schemaName,
       tenant.status,
+      tenant.adminPin || '123456',
       tenant.storageQuotaBytes,
       tenant.storageUsedBytes,
       tenant.createdAt,
@@ -68,10 +76,11 @@ export class PostgresTenantRepository implements ITenantRepository {
         slug = $2,
         tax_id = $3,
         status = $4,
-        storage_quota_bytes = $5,
-        storage_used_bytes = $6,
-        updated_at = $7
-      WHERE id = $8
+        admin_pin = $5,
+        storage_quota_bytes = $6,
+        storage_used_bytes = $7,
+        updated_at = $8
+      WHERE id = $9
       RETURNING *;
     `;
     const values = [
@@ -79,6 +88,7 @@ export class PostgresTenantRepository implements ITenantRepository {
       tenant.slug,
       tenant.taxId,
       tenant.status,
+      tenant.adminPin || '123456',
       tenant.storageQuotaBytes,
       tenant.storageUsedBytes,
       new Date(),

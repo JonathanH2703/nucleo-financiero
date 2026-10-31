@@ -15,6 +15,7 @@ import { PlaceholderView } from './views/placeholder.view.js';
 import { AjustesView } from './views/ajustes.view.js';
 import { RestrictedView } from './views/restricted.view.js';
 import { EmpresasView } from './views/empresas.view.js?v=3.5';
+import { TenantsAdminView } from './views/tenants-admin.view.js';
 import { ROLE_DEFINITIONS } from './demo-fixtures.js';
 
 // Catálogo maestro de navegación del sistema
@@ -96,12 +97,21 @@ const MASTER_NAV_ITEMS = [
     module: 'gestion',
   },
 
-  // ─── CONFIGURACIÓN ─────────────────────
+  // ─── CONFIGURACIÓN & ADMINISTRACIÓN ────
+  {
+    category: 'Sistema',
+    id: 'tenants',
+    icon: '🏢',
+    title: 'Sedes y Empresas',
+    badge: 'Multi-Sede',
+    isCoreFinance: false,
+    module: 'gestion',
+  },
   {
     category: 'Sistema',
     id: 'rbac',
     icon: '🛡️',
-    title: 'Roles y Permisos',
+    title: 'Roles y Usuarios',
     badge: 'Config',
     isCoreFinance: false,
     module: 'gestion',
@@ -138,20 +148,10 @@ class App {
   }
 
   static render() {
-    // Si no hay usuario autenticado o la vista es login, mostrar Login View
+    // Si no hay usuario autenticado o la vista es login, mostrar Login View Limpio
     if (!state.currentUser || state.currentView === 'login') {
       this.root.innerHTML = `
-        <div class="dev-env-banner">
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="badge-pill">Entorno Dev</span>
-            <span>Schema: <code>${state.currentTenant.slug}</code></span>
-          </div>
-          <div class="tenant-indicator">
-            <span>Empresa:</span>
-            <span class="tenant-name-highlight">${state.currentTenant.name}</span>
-          </div>
-        </div>
-        <div id="login-view-mount" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;"></div>
+        <div id="login-view-mount" style="width: 100%; min-height: 100vh; overflow-y: auto; -webkit-overflow-scrolling: touch;"></div>
       `;
       LoginView.mount(document.getElementById('login-view-mount'));
       return;
@@ -408,6 +408,9 @@ class App {
       case 'pos':
         PosView.mount(mountPoint);
         break;
+      case 'tenants':
+        TenantsAdminView.mount(mountPoint);
+        break;
       case 'rbac':
         RbacView.mount(mountPoint);
         break;
@@ -436,6 +439,7 @@ class App {
       case 'dashboard': return 'Dashboard';
       case 'facturacion': return 'Facturas';
       case 'empresas': return 'Empresas';
+      case 'tenants': return 'Sedes';
       case 'contabilidad': return 'Contable';
       case 'rbac': return 'Roles';
       case 'ajustes': return 'Ajustes';

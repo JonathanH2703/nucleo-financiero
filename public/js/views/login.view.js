@@ -1,24 +1,25 @@
 /**
- * VISTA DE INICIO DE SESIÓN — NÚCLEO FINANCIERO (FIGMA REPLICA)
+ * VISTA DE INICIO DE SESIÓN UNIFICADA (NIT + PIN) — NÚCLEO FINANCIERO
+ * Acceso corporativo limpio por NIT de empresa y PIN (admin de empresa o sucursal),
+ * más acceso maestro de Administrador del Sistema y carrusel informativo/publicitario lateral.
  */
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
-import { DEMO_TENANTS } from '../demo-fixtures.js';
 
 export class LoginView {
   static mount(container) {
     this.container = container;
-    this.currentTab = 'email'; // 'email' | 'pin'
+    this.currentSlide = 0;
+    this.carouselTimer = null;
+    this.showNumpad = false;
     this.render();
   }
 
   static render() {
-    const selectedTenant = state.currentTenant;
-
     this.container.innerHTML = `
       <div class="login-page-container">
-        <!-- COLUMNA IZQUIERDA: Propuesta de Valor y Certificaciones (Tema Figma Dark Navy) -->
+        <!-- COLUMNA IZQUIERDA: Branding y Carrusel (Sistema + Publicidad Hipotética) -->
         <div class="login-hero-side">
           <div class="login-brand-header">
             <div class="login-brand-logo-card">
@@ -31,24 +32,69 @@ export class LoginView {
 
             <h1 class="login-hero-headline">Tu negocio, claro.<br>Tu operación, conectada.</h1>
             <p class="login-hero-description">
-              Gestión contable, facturación electrónica DIAN, inventarios y punto de venta unificados con aislamiento estricto de datos en la nube.
+              Gestión contable, facturación electrónica DIAN, inventarios y terminales de venta con aislamiento estricto de datos en la nube.
             </p>
 
-            <div class="login-module-cards">
-              <div class="login-module-card">
-                <div class="module-card-icon gestion">🌐</div>
-                <div class="module-card-info">
-                  <h4>Núcleo Gestión</h4>
-                  <p>Contabilidad · Facturación DIAN · Clientes CRM · Reportes</p>
+            <!-- CARRUSEL LATERAL INTERACTIVO -->
+            <div class="login-carousel-wrapper" id="login-carousel">
+              <!-- Slide 1: Sistema - Core ERP -->
+              <div class="login-carousel-slide active" data-slide="0">
+                <div class="carousel-tag sistema">🏛️ SISTEMA · CORE FINANCIERO</div>
+                <h3 class="carousel-title">Aislamiento Multi-Tenant & Contabilidad NIIF</h3>
+                <p class="carousel-desc">
+                  Tus datos financieros y contables aislados por esquema PostgreSQL, libro diario automático, balance de comprobación y PUC colombiano oficial.
+                </p>
+                <div class="carousel-highlight">
+                  ✓ PUC oficial · Conciliación bancaria · Reportes fiscales en tiempo real
                 </div>
               </div>
 
-              <div class="login-module-card">
-                <div class="module-card-icon pos">☕</div>
-                <div class="module-card-info">
-                  <h4>Núcleo Punto de Venta</h4>
-                  <p>Ventas táctiles · Comandas KDS · Mesas y Mostrador · Inventario</p>
+              <!-- Slide 2: Publicidad - Pasarelas y Datáfonos -->
+              <div class="login-carousel-slide" data-slide="1">
+                <div class="carousel-tag publicidad">📢 PUBLICIDAD · PASARELAS & DATÁFONOS</div>
+                <h3 class="carousel-title">Alianza FinTech: Datáfonos Móviles con 0% de Comisión</h3>
+                <p class="carousel-desc">
+                  Recibe pagos con tarjetas débito/crédito y transferencias QR en tu punto de venta con liquidación inmediata de fondos en tu cuenta bancaria.
+                </p>
+                <div class="carousel-highlight ad">
+                  🎁 \$150.000 COP de bienvenida en comisiones de adquirencia para comercios
                 </div>
+              </div>
+
+              <!-- Slide 3: Sistema - Multi-Sucursal y Kardex -->
+              <div class="login-carousel-slide" data-slide="2">
+                <div class="carousel-tag sistema">📦 SISTEMA · MULTI-SUCURSAL & KARDEX</div>
+                <h3 class="carousel-title">Control Multi-Sucursal y Bodegas Independientes</h3>
+                <p class="carousel-desc">
+                  Cada sede ingresa con su propio PIN exclusivo para operar la caja. Kardex permanente, alertas de stock mínimo y trazabilidad de lotes con vencimiento.
+                </p>
+                <div class="carousel-highlight">
+                  ✓ PIN por sucursal · Existencias por bodega · Mermas y traslados
+                </div>
+              </div>
+
+              <!-- Slide 4: Publicidad - Firma Digital y DIAN -->
+              <div class="login-carousel-slide" data-slide="3">
+                <div class="carousel-tag publicidad">⚡ PUBLICIDAD · SERVICIOS ALIADOS</div>
+                <h3 class="carousel-title">Firma Digital y Certificado DIAN Incluidos</h3>
+                <p class="carousel-desc">
+                  Emite facturas electrónicas y notas crédito validadas ante la DIAN sin comprar certificados digitales externos ni pagar por paquetes de folios adicionales.
+                </p>
+                <div class="carousel-highlight ad">
+                  📑 Emisión y validación previa automática ante la DIAN en 2 segundos
+                </div>
+              </div>
+
+              <!-- Controles del Carrusel -->
+              <div class="carousel-controls">
+                <button type="button" class="carousel-nav-btn" id="btn-carousel-prev" title="Anterior">‹</button>
+                <div class="carousel-dots" id="carousel-dots">
+                  <span class="carousel-dot active" data-index="0"></span>
+                  <span class="carousel-dot" data-index="1"></span>
+                  <span class="carousel-dot" data-index="2"></span>
+                  <span class="carousel-dot" data-index="3"></span>
+                </div>
+                <button type="button" class="carousel-nav-btn" id="btn-carousel-next" title="Siguiente">›</button>
               </div>
             </div>
           </div>
@@ -57,15 +103,14 @@ export class LoginView {
             <span class="cert-badge"><span class="check">✓</span> ISO 27001</span>
             <span class="cert-badge"><span class="check">✓</span> DIAN Habilitado</span>
             <span class="cert-badge"><span class="check">✓</span> Encriptación AES-256</span>
-            <span class="cert-badge"><span class="check">✓</span> MFA Listo</span>
             <span class="cert-badge"><span class="check">✓</span> Multi-Tenant Schema</span>
           </div>
         </div>
 
-        <!-- COLUMNA DERECHA: Formulario de Acceso y Modo Demostración -->
+        <!-- COLUMNA DERECHA: Formulario Ultra-Limpio (NIT + PIN) -->
         <div class="login-form-side">
           <div class="login-form-card">
-            <!-- Branding visible únicamente en móvil/tablet -->
+            <!-- Branding visible en móvil/tablet -->
             <div class="login-mobile-brand">
               <div class="login-brand-logo-icon">🏛️</div>
               <div class="login-brand-logo-text">
@@ -75,194 +120,224 @@ export class LoginView {
             </div>
 
             <div class="login-form-header">
-              <h2 class="login-form-title">Iniciar sesión</h2>
-              <p class="login-form-subtitle">Accede con tus credenciales corporativas o usa el modo de prueba</p>
+              <h2 class="login-form-title">Iniciar Sesión</h2>
+              <p class="login-form-subtitle">Ingresa el NIT de tu empresa y tu PIN de acceso corporativo</p>
             </div>
 
             <!-- Alerta de Error / Éxito -->
-            <div id="login-alert" class="login-alert"></div>
-
-            <!-- Selector de Método: Correo vs PIN -->
-            <div class="auth-tabs-container">
-              <button type="button" id="tab-btn-email" class="auth-tab-btn ${this.currentTab === 'email' ? 'active' : ''}">
-                ✉ Correo y contraseña
-              </button>
-              <button type="button" id="tab-btn-pin" class="auth-tab-btn ${this.currentTab === 'pin' ? 'active' : ''}">
-                🔑 PIN rápido
-              </button>
-            </div>
+            <div id="login-alert" class="login-alert" style="display: none;"></div>
 
             <!-- Formulario Principal -->
             <form id="login-form">
-              <!-- Selector de Empresa (Tenant) -->
+              <!-- NIT de la Empresa -->
               <div class="form-group">
-                <label class="form-label" for="tenant-select">
-                  <span>🏢 Empresa (Aislamiento de Negocio)</span>
-                  <span style="font-size: 11px; color: #2563eb; font-weight: 600;">Multi-Tenant Activo</span>
+                <label class="form-label" for="nit-input">
+                  <span>🏢 NIT de la Empresa</span>
+                  <span style="font-size: 11px; color: #2563eb; font-weight: 600;">Colombia</span>
                 </label>
-                <select id="tenant-select" class="form-select">
-                  ${DEMO_TENANTS.map(
-                    (t) => `
-                    <option value="${t.slug}" ${t.slug === selectedTenant.slug ? 'selected' : ''}>
-                      ${t.name} (${t.category})
-                    </option>
-                  `
-                  ).join('')}
-                </select>
+                <input 
+                  type="text" 
+                  id="nit-input" 
+                  class="form-input" 
+                  placeholder="Ej: 901.445.772-0" 
+                  value="901.445.772-0" 
+                  required 
+                  autofocus
+                  autocomplete="organization"
+                >
               </div>
 
-              <!-- Selector de Sucursal -->
+              <!-- PIN de Acceso -->
               <div class="form-group">
-                <label class="form-label" for="sucursal-select">
-                  <span>📍 Sucursal / Sede</span>
-                </label>
-                <select id="sucursal-select" class="form-select">
-                  ${selectedTenant.sucursales
-                    .map(
-                      (s) => `
-                    <option value="${s}">${s}</option>
-                  `
-                    )
-                    .join('')}
-                </select>
-              </div>
-
-              <!-- Campos para Tab Email -->
-              <div id="email-fields-group" style="display: ${this.currentTab === 'email' ? 'block' : 'none'};">
-                <div class="form-group">
-                  <label class="form-label" for="email-input">
-                    <span>✉ Correo corporativo</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label class="form-label" for="pin-input" style="margin-bottom: 0;">
+                    <span>🔑 PIN de Acceso</span>
                   </label>
-                  <input type="email" id="email-input" class="form-input" placeholder="usuario@empresa.co" value="carlos.mendoza@nucleo.co" required>
+                  <button type="button" id="btn-toggle-numpad" style="background: none; border: none; font-size: 12px; color: #2563eb; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    🔢 Teclado táctil
+                  </button>
                 </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="password-input">
-                    <span>🔒 Contraseña</span>
-                    <a href="#" class="forgot-password-link" onclick="alert('En entorno de desarrollo use los botones de autocompletado demo inferiores.'); return false;">¿Olvidaste tu contraseña?</a>
-                  </label>
-                  <div class="password-input-wrapper">
-                    <input type="password" id="password-input" class="form-input" placeholder="••••••••" value="demo123456" required>
-                    <button type="button" id="toggle-password-btn" class="password-toggle-btn">👁️</button>
-                  </div>
+                <div class="password-input-wrapper">
+                  <input 
+                    type="password" 
+                    id="pin-input" 
+                    class="form-input" 
+                    placeholder="••••" 
+                    maxlength="6" 
+                    value="123456" 
+                    style="font-size: 22px; letter-spacing: 8px; text-align: center; font-weight: 800;" 
+                    required
+                    autocomplete="current-password"
+                  >
+                  <button type="button" id="toggle-password-btn" class="password-toggle-btn">👁️</button>
+                </div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
+                  💡 Accede con el <b>PIN de administración</b> o con el <b>PIN de tu sucursal</b>.
                 </div>
               </div>
 
-              <!-- Campos para Tab PIN Rápido -->
-              <div id="pin-fields-group" style="display: ${this.currentTab === 'pin' ? 'block' : 'none'};">
-                <div class="form-group">
-                  <label class="form-label" for="pin-input">
-                    <span>🔑 PIN de Seguridad Personal (6 dígitos)</span>
-                  </label>
-                  <input type="password" id="pin-input" class="form-input" style="font-size: 20px; letter-spacing: 8px; text-align: center;" placeholder="••••••" maxlength="6" value="123456">
-                </div>
-
-                <!-- Teclado Numérico Táctil -->
-                <div class="pin-numpad">
-                  <button type="button" class="numpad-btn" data-val="1">1</button>
-                  <button type="button" class="numpad-btn" data-val="2">2</button>
-                  <button type="button" class="numpad-btn" data-val="3">3</button>
-                  <button type="button" class="numpad-btn" data-val="4">4</button>
-                  <button type="button" class="numpad-btn" data-val="5">5</button>
-                  <button type="button" class="numpad-btn" data-val="6">6</button>
-                  <button type="button" class="numpad-btn" data-val="7">7</button>
-                  <button type="button" class="numpad-btn" data-val="8">8</button>
-                  <button type="button" class="numpad-btn" data-val="9">9</button>
-                  <button type="button" class="numpad-btn" data-val="clear">C</button>
-                  <button type="button" class="numpad-btn" data-val="0">0</button>
-                  <button type="button" class="numpad-btn" data-val="back">⌫</button>
-                </div>
-              </div>
-
-              <div class="form-checkbox-wrapper">
-                <input type="checkbox" id="remember-session" class="form-checkbox" checked>
-                <label for="remember-session" class="form-checkbox-label">Mantener sesión iniciada (8 horas)</label>
+              <!-- Teclado Numérico Táctil Opcional -->
+              <div id="pin-numpad-container" class="pin-numpad" style="display: ${this.showNumpad ? 'grid' : 'none'}; margin: 14px 0 18px 0;">
+                <button type="button" class="numpad-btn" data-val="1">1</button>
+                <button type="button" class="numpad-btn" data-val="2">2</button>
+                <button type="button" class="numpad-btn" data-val="3">3</button>
+                <button type="button" class="numpad-btn" data-val="4">4</button>
+                <button type="button" class="numpad-btn" data-val="5">5</button>
+                <button type="button" class="numpad-btn" data-val="6">6</button>
+                <button type="button" class="numpad-btn" data-val="7">7</button>
+                <button type="button" class="numpad-btn" data-val="8">8</button>
+                <button type="button" class="numpad-btn" data-val="9">9</button>
+                <button type="button" class="numpad-btn" data-val="clear">C</button>
+                <button type="button" class="numpad-btn" data-val="0">0</button>
+                <button type="button" class="numpad-btn" data-val="back">⌫</button>
               </div>
 
               <button type="submit" id="btn-submit" class="btn-submit-login">
-                🔒 Ingresar al sistema
+                🔒 Ingresar al Sistema ➔
               </button>
             </form>
 
-            <!-- CAJA DE MODO DEMOSTRACIÓN (AUTOCOMPLETADO RÁPIDO) -->
-            <div class="demo-mode-card">
-              <div class="demo-mode-header">
-                <div class="demo-mode-title">
-                  <span>⚡ Modo Demostración</span>
-                  <span class="demo-mode-badge">Autocompletar en 1-clic</span>
-                </div>
-                <span style="font-size: 11px; color: #64748b;">Prueba usuarios de <b>${selectedTenant.name.split(' ')[0]}</b></span>
-              </div>
-
-              <div class="demo-users-grid">
-                ${selectedTenant.users
-                  .map(
-                    (u) => `
-                  <button type="button" class="demo-user-btn" data-email="${u.email}" data-pin="${u.pin}" data-name="${u.nombre}">
-                    <div class="demo-user-left">
-                      <div class="demo-avatar">${u.avatar}</div>
-                      <div>
-                        <span class="demo-user-name">${u.nombre}</span>
-                        <span class="demo-user-role">${u.rol}</span>
-                      </div>
-                    </div>
-                    <span class="demo-pin-badge">PIN: ${u.pin}</span>
-                  </button>
-                `
-                  )
-                  .join('')}
-              </div>
+            <!-- Acceso Administrador del Sistema -->
+            <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border-subtle); text-align: center;">
+              <button type="button" id="btn-open-master-admin" style="background: none; border: none; font-size: 13px; color: #64748b; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease;">
+                <span>🛡️</span> Acceso Administrador del Sistema (Plataforma)
+              </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- MODAL ACCESO ADMINISTRADOR DEL SISTEMA -->
+      <div id="modal-master-admin-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; z-index: 2200; padding: 20px;">
+        <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); padding: 28px; border: 1px solid var(--border-subtle); position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px;">🛡️</div>
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Administrador del Sistema</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Panel Maestro Multi-Tenant</p>
+              </div>
+            </div>
+            <button type="button" id="btn-close-master-modal" style="background: var(--bg-subtle); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; color: var(--text-muted); cursor: pointer;">✕</button>
+          </div>
+
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
+            Este acceso está reservado exclusivamente para la administración global de la plataforma, creación de empresas y aprovisionamiento de esquemas.
+          </p>
+
+          <form id="form-master-admin">
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">PIN Maestro de Plataforma *</label>
+              <input 
+                type="password" 
+                id="master-pin-input" 
+                placeholder="••••••" 
+                maxlength="6" 
+                value="999999"
+                required 
+                style="width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 22px; letter-spacing: 8px; text-align: center; font-weight: 800;"
+              >
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" id="btn-cancel-master" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
+              <button type="submit" id="btn-submit-master" style="padding: 10px 20px; border-radius: 10px; border: none; background: #b45309; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);">
+                🛡️ Ingresar al Panel Maestro
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     `;
 
     this.bindEvents();
+    this.startCarousel();
+  }
+
+  static startCarousel() {
+    if (this.carouselTimer) clearInterval(this.carouselTimer);
+    this.carouselTimer = setInterval(() => {
+      this.nextSlide();
+    }, 5000);
+  }
+
+  static stopCarousel() {
+    if (this.carouselTimer) {
+      clearInterval(this.carouselTimer);
+      this.carouselTimer = null;
+    }
+  }
+
+  static goToSlide(index) {
+    const slides = document.querySelectorAll('.login-carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    if (slides.length === 0) return;
+
+    this.currentSlide = (index + slides.length) % slides.length;
+
+    slides.forEach((s, i) => {
+      if (i === this.currentSlide) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+
+    dots.forEach((d, i) => {
+      if (i === this.currentSlide) {
+        d.classList.add('active');
+      } else {
+        d.classList.remove('active');
+      }
+    });
+  }
+
+  static nextSlide() {
+    this.goToSlide(this.currentSlide + 1);
+  }
+
+  static prevSlide() {
+    this.goToSlide(this.currentSlide - 1);
   }
 
   static bindEvents() {
-    const tabEmail = document.getElementById('tab-btn-email');
-    const tabPin = document.getElementById('tab-btn-pin');
-    const emailGroup = document.getElementById('email-fields-group');
-    const pinGroup = document.getElementById('pin-fields-group');
-    const tenantSelect = document.getElementById('tenant-select');
     const loginForm = document.getElementById('login-form');
-    const togglePassBtn = document.getElementById('toggle-password-btn');
-    const passInput = document.getElementById('password-input');
     const pinInput = document.getElementById('pin-input');
+    const nitInput = document.getElementById('nit-input');
+    const togglePassBtn = document.getElementById('toggle-password-btn');
+    const btnToggleNumpad = document.getElementById('btn-toggle-numpad');
+    const numpadContainer = document.getElementById('pin-numpad-container');
 
-    // Cambio de Pestañas
-    tabEmail.addEventListener('click', () => {
-      this.currentTab = 'email';
-      tabEmail.classList.add('active');
-      tabPin.classList.remove('active');
-      emailGroup.style.display = 'block';
-      pinGroup.style.display = 'none';
+    // Carrusel eventos
+    const btnNext = document.getElementById('btn-carousel-next');
+    const btnPrev = document.getElementById('btn-carousel-prev');
+    const carouselWrapper = document.getElementById('login-carousel');
+
+    if (btnNext) btnNext.addEventListener('click', () => { this.nextSlide(); this.startCarousel(); });
+    if (btnPrev) btnPrev.addEventListener('click', () => { this.prevSlide(); this.startCarousel(); });
+
+    document.querySelectorAll('.carousel-dot').forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.getAttribute('data-index'), 10);
+        this.goToSlide(idx);
+        this.startCarousel();
+      });
     });
 
-    tabPin.addEventListener('click', () => {
-      this.currentTab = 'pin';
-      tabPin.classList.add('active');
-      tabEmail.classList.remove('active');
-      emailGroup.style.display = 'none';
-      pinGroup.style.display = 'block';
-    });
+    if (carouselWrapper) {
+      carouselWrapper.addEventListener('mouseenter', () => this.stopCarousel());
+      carouselWrapper.addEventListener('mouseleave', () => this.startCarousel());
+    }
 
-    // Revelar / Ocultar Contraseña
-    if (togglePassBtn) {
-      togglePassBtn.addEventListener('click', () => {
-        if (passInput.type === 'password') {
-          passInput.type = 'text';
-          togglePassBtn.textContent = '🔒';
-        } else {
-          passInput.type = 'password';
-          togglePassBtn.textContent = '👁️';
-        }
+    // Toggle teclado numérico táctil
+    if (btnToggleNumpad && numpadContainer) {
+      btnToggleNumpad.addEventListener('click', () => {
+        this.showNumpad = !this.showNumpad;
+        numpadContainer.style.display = this.showNumpad ? 'grid' : 'none';
       });
     }
 
-    // Teclado Numérico Virtual para PIN
+    // Teclado virtual numérico táctil
     document.querySelectorAll('.numpad-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const val = btn.getAttribute('data-val');
@@ -278,104 +353,133 @@ export class LoginView {
       });
     });
 
-    // Cambio de Empresa (Tenant)
-    tenantSelect.addEventListener('change', (e) => {
-      const slug = e.target.value;
-      state.setTenant(slug);
-      this.render(); // Redibuja el formulario y actualiza la lista de usuarios demo
-    });
-
-    // Botones de Autocompletado Demo
-    document.querySelectorAll('.demo-user-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const email = btn.getAttribute('data-email');
-        const pin = btn.getAttribute('data-pin');
-
-        if (this.currentTab === 'email') {
-          document.getElementById('email-input').value = email;
-          document.getElementById('password-input').value = 'demo123456';
+    // Revelar / Ocultar PIN
+    if (togglePassBtn) {
+      togglePassBtn.addEventListener('click', () => {
+        if (pinInput.type === 'password') {
+          pinInput.type = 'text';
+          togglePassBtn.textContent = '🔒';
         } else {
-          document.getElementById('pin-input').value = pin;
+          pinInput.type = 'password';
+          togglePassBtn.textContent = '👁️';
         }
+      });
+    }
 
-        // Enviar automáticamente para mayor comodidad del usuario
+    // Envío del Formulario Principal NIT + PIN
+    if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
         this.submitLogin();
       });
-    });
+    }
 
-    // Envío del Formulario
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.submitLogin();
-    });
+    // Modal Super Admin
+    const btnOpenMaster = document.getElementById('btn-open-master-admin');
+    const modalMaster = document.getElementById('modal-master-admin-backdrop');
+    const btnCloseMaster = document.getElementById('btn-close-master-modal');
+    const btnCancelMaster = document.getElementById('btn-cancel-master');
+    const formMaster = document.getElementById('form-master-admin');
+
+    if (btnOpenMaster && modalMaster) {
+      btnOpenMaster.addEventListener('click', () => {
+        modalMaster.style.display = 'flex';
+      });
+    }
+
+    const closeMasterModal = () => {
+      if (modalMaster) modalMaster.style.display = 'none';
+    };
+
+    if (btnCloseMaster) btnCloseMaster.addEventListener('click', closeMasterModal);
+    if (btnCancelMaster) btnCancelMaster.addEventListener('click', closeMasterModal);
+
+    if (formMaster) {
+      formMaster.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pin = document.getElementById('master-pin-input').value.trim();
+        const submitBtn = document.getElementById('btn-submit-master');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Verificando...';
+
+        try {
+          const res = await ApiClient.loginAdminSistema(pin);
+          if (res.success && res.usuario) {
+            closeMasterModal();
+            this.handleSuccessfulAuth(res);
+          }
+        } catch (err) {
+          alert(`❌ Error: ${err.message || 'PIN maestro inválido'}`);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🛡️ Ingresar al Panel Maestro';
+        }
+      });
+    }
   }
 
   static async submitLogin() {
     const alertBox = document.getElementById('login-alert');
     const submitBtn = document.getElementById('btn-submit');
-    const originalBtnText = submitBtn.innerHTML;
+    const nit = document.getElementById('nit-input').value.trim();
+    const pin = document.getElementById('pin-input').value.trim();
 
     alertBox.className = 'login-alert';
     alertBox.style.display = 'none';
 
+    if (!nit || !pin) {
+      alertBox.className = 'login-alert error';
+      alertBox.textContent = '❌ Por favor ingresa el NIT de la empresa y el PIN de acceso.';
+      alertBox.style.display = 'flex';
+      return;
+    }
+
     try {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '⏳ Conectando...';
+      submitBtn.innerHTML = '⏳ Verificando credenciales...';
 
-      let result;
-      if (this.currentTab === 'email') {
-        const email = document.getElementById('email-input').value.trim();
-        const password = document.getElementById('password-input').value;
-        result = await ApiClient.loginEmail(email, password);
-      } else {
-        const pin = document.getElementById('pin-input').value.trim();
-        result = await ApiClient.loginPin(pin);
-      }
+      const res = await ApiClient.loginNitPin(nit, pin);
 
-      if (result && result.success && result.usuario) {
+      if (res && res.success && res.usuario) {
         alertBox.className = 'login-alert success';
-        alertBox.textContent = `✅ ${result.message}`;
+        alertBox.textContent = `✅ ${res.message}`;
         alertBox.style.display = 'flex';
 
-        // Guardar usuario en el estado (normaliza rol y permisos)
-        state.setUser(result.usuario);
-
-        // Enrutamiento inteligente según política RBAC del perfil
-        setTimeout(() => {
-          const defaultView = state.getDefaultViewForUser();
-          const defaultModule = state.getRoleDefinition()?.defaultModule || 'gestion';
-          state.setModule(defaultModule);
-          state.setView(defaultView);
-        }, 350);
+        this.handleSuccessfulAuth(res);
       }
     } catch (err) {
-      // Fallback a fixtures si la base de datos o el endpoint no responden
-      const email = document.getElementById('email-input')?.value.trim();
-      const pin = document.getElementById('pin-input')?.value.trim();
-      const currentTenantUsers = state.currentTenant.users || [];
-      const match = currentTenantUsers.find((u) => (this.currentTab === 'email' ? u.email === email : u.pin === pin));
-
-      if (match) {
-        alertBox.className = 'login-alert success';
-        alertBox.textContent = `✅ Sesión iniciada correctamente como ${match.nombre}`;
-        alertBox.style.display = 'flex';
-
-        state.setUser(match);
-
-        setTimeout(() => {
-          const defaultView = state.getDefaultViewForUser();
-          const defaultModule = state.getRoleDefinition()?.defaultModule || 'gestion';
-          state.setModule(defaultModule);
-          state.setView(defaultView);
-        }, 350);
-      } else {
-        alertBox.className = 'login-alert error';
-        alertBox.textContent = `❌ ${err.message || 'Error al iniciar sesión'}`;
-        alertBox.style.display = 'flex';
-      }
+      alertBox.className = 'login-alert error';
+      alertBox.textContent = `❌ ${err.message || 'Error al iniciar sesión'}`;
+      alertBox.style.display = 'flex';
     } finally {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnText;
+      submitBtn.innerHTML = '🔒 Ingresar al Sistema ➔';
     }
+  }
+
+  static handleSuccessfulAuth(res) {
+    this.stopCarousel();
+
+    // Guardar tenant en estado
+    if (res.tenant) {
+      state.setTenant(res.tenant);
+    }
+
+    // Configurar información de sucursal si vino en el login
+    if (res.sucursal) {
+      res.usuario.sucursal = res.sucursal;
+      res.usuario.esSucursal = true;
+    }
+
+    // Guardar usuario en el estado
+    state.setUser(res.usuario);
+
+    // Redirección inteligente
+    setTimeout(() => {
+      const defaultView = state.getDefaultViewForUser();
+      const defaultModule = state.getRoleDefinition()?.defaultModule || (res.usuario.esSucursal ? 'pos' : 'gestion');
+      state.setModule(defaultModule);
+      state.setView(defaultView);
+    }, 350);
   }
 }

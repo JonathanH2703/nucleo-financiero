@@ -9,6 +9,7 @@ export interface CreateTenantDTO {
   name: string;
   slug: string;
   taxId: string;
+  adminPin?: string;
   storageQuotaBytes?: number;
 }
 
@@ -41,6 +42,7 @@ export class CreateTenantUseCase {
       taxId: dto.taxId.trim(),
       schemaName,
       status: 'ACTIVE',
+      adminPin: dto.adminPin || '123456',
       storageQuotaBytes: dto.storageQuotaBytes || 5368709120, // 5 GB por defecto
       storageUsedBytes: 0,
       createdAt: new Date(),

@@ -6,3 +6,4 @@ export const tenantRouter = Router();
 // Endpoints de administración global de inquilinos
 tenantRouter.post('/', TenantController.create);
 tenantRouter.get('/', TenantController.list);
+tenantRouter.put('/:id', TenantController.update);

@@ -84,6 +84,8 @@ export interface UsuarioProps {
   rolSlug?: string;
   permisos?: string[]; // Lista de códigos de permiso directos
   areaAsignadaId?: string;
+  sucursalId?: string;
+  sucursalNombre?: string;
   activo?: boolean;
   createdAt?: Date;
 }
@@ -98,6 +100,8 @@ export class Usuario {
   public rolSlug?: string;
   public permisos: string[];
   public areaAsignadaId?: string;
+  public sucursalId?: string;
+  public sucursalNombre?: string;
   public activo: boolean;
   public readonly createdAt: Date;
 
@@ -111,6 +115,8 @@ export class Usuario {
     this.rolSlug = props.rolSlug;
     this.permisos = props.permisos ?? [];
     this.areaAsignadaId = props.areaAsignadaId;
+    this.sucursalId = props.sucursalId;
+    this.sucursalNombre = props.sucursalNombre;
     this.activo = props.activo ?? true;
     this.createdAt = props.createdAt ?? new Date();
   }

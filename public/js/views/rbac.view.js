@@ -109,11 +109,63 @@ export class RbacView {
               </h3>
               <p style="font-size: 12px; color: var(--text-muted);">Usuarios con acceso autorizado a este establecimiento</p>
             </div>
-            <span style="font-size: 12px; color: var(--text-muted);" id="users-count-badge">Consultando colaboradores...</span>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 12px; color: var(--text-muted);" id="users-count-badge">Consultando colaboradores...</span>
+              <button type="button" id="btn-abrir-crear-usuario" style="background: #2563eb; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                + Registrar Usuario
+              </button>
+            </div>
           </div>
 
           <div id="users-directory-table" style="overflow-x: auto;">
             <p style="padding: 20px; text-align: center; color: var(--text-muted);">Cargando usuarios del schema aislado...</p>
+          </div>
+        </div>
+
+        <!-- Modal Crear Usuario -->
+        <div id="modal-usuario-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2100; padding: 20px;">
+          <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3); padding: 26px 30px; border: 1px solid var(--border-subtle); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 20px;">
+              <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">👤 Registrar Nuevo Colaborador</h3>
+              <button type="button" id="btn-cerrar-modal-usuario" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--text-muted); cursor: pointer;">✕</button>
+            </div>
+
+            <form id="form-crear-usuario">
+              <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Nombre Completo *</label>
+                <input type="text" id="usr-nombre" required placeholder="Ej: Camilo Torres" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
+              </div>
+
+              <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Correo Corporativo *</label>
+                <input type="email" id="usr-email" required placeholder="camilo@empresa.co" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Rol Asignado *</label>
+                  <select id="usr-rol" required style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
+                    <option value="rol_cajero">Cajero / Punto de Venta</option>
+                    <option value="rol_mesero">Mesero / Salón</option>
+                    <option value="rol_cocinero">Jefe de Cocina / KDS</option>
+                    <option value="rol_gerente_operativo">Gerente Operativo</option>
+                    <option value="rol_contador">Contador / Revisor</option>
+                    <option value="rol_admin_negocio">Administrador</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">PIN Táctil (4-6 dígitos)</label>
+                  <input type="password" id="usr-pin" maxlength="6" placeholder="Ej: 5566" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); letter-spacing: 2px;">
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" id="btn-cancelar-crear-usuario" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
+                <button type="submit" id="btn-submit-usuario" style="padding: 10px 22px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                  ✓ Guardar Usuario
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -151,6 +203,7 @@ export class RbacView {
 
       this.renderUsersDirectory();
       this.renderModulesGrid(permisosRes.modulos || {});
+      this.bindModalEvents();
     } catch (err) {
       console.warn('Cargando usuarios desde fixtures locales:', err);
       // Fallback a usuarios del tenant activo en fixtures
@@ -163,6 +216,63 @@ export class RbacView {
       }));
       this.renderUsersDirectory();
       this.renderModulesGridFromStatic();
+      this.bindModalEvents();
+    }
+  }
+
+  static bindModalEvents() {
+    const btnAbrir = document.getElementById('btn-abrir-crear-usuario');
+    const modal = document.getElementById('modal-usuario-backdrop');
+    const btnCerrar = document.getElementById('btn-cerrar-modal-usuario');
+    const btnCancelar = document.getElementById('btn-cancelar-crear-usuario');
+    const form = document.getElementById('form-crear-usuario');
+
+    if (btnAbrir && modal) {
+      btnAbrir.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+    }
+
+    const cerrarModal = () => {
+      if (modal) modal.style.display = 'none';
+    };
+
+    if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal);
+    if (btnCancelar) btnCancelar.addEventListener('click', cerrarModal);
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('btn-submit-usuario');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Guardando...';
+
+        try {
+          const nombre = document.getElementById('usr-nombre').value.trim();
+          const email = document.getElementById('usr-email').value.trim();
+          const rolId = document.getElementById('usr-rol').value;
+          const pinSeguridad = document.getElementById('usr-pin').value.trim();
+
+          const res = await ApiClient.createUsuario({
+            nombre,
+            email,
+            rolId,
+            pinSeguridad: pinSeguridad || undefined,
+          });
+
+          if (res.success) {
+            alert(`✅ Usuario "${nombre}" registrado exitosamente.`);
+            cerrarModal();
+            form.reset();
+            await this.loadData();
+          }
+        } catch (err) {
+          alert(`❌ Error al crear usuario: ${err.message}`);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✓ Guardar Usuario';
+        }
+      });
     }
   }
 

@@ -7,6 +7,7 @@ export interface SucursalProps {
   departamento?: string;
   telefono?: string;
   responsableId?: string;
+  pinAcceso?: string;
   activa?: boolean;
   createdAt?: Date;
 }
@@ -20,6 +21,7 @@ export class Sucursal {
   public readonly departamento?: string;
   public readonly telefono?: string;
   public readonly responsableId?: string;
+  public readonly pinAcceso?: string;
   public readonly activa: boolean;
   public readonly createdAt: Date;
 
@@ -32,6 +34,7 @@ export class Sucursal {
     this.departamento = props.departamento;
     this.telefono = props.telefono;
     this.responsableId = props.responsableId;
+    this.pinAcceso = props.pinAcceso;
     this.activa = props.activa ?? true;
     this.createdAt = props.createdAt ?? new Date();
   }

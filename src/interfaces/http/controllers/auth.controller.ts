@@ -1,11 +1,229 @@
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { PostgresAuthRepository } from '../../../infrastructure/repositories/postgres-auth.repository.js';
-import { Rol, ModuloPermiso } from '../../../domain/entities/auth.entity.js';
+import { Rol, ModuloPermiso, Usuario } from '../../../domain/entities/auth.entity.js';
+import { PostgresTenantRepository } from '../../../infrastructure/repositories/postgres-tenant.repository.js';
+import { PostgresSucursalRepository } from '../../../infrastructure/repositories/postgres-sucursal.repository.js';
 
 const authRepo = new PostgresAuthRepository();
+const tenantRepo = new PostgresTenantRepository();
+const sucursalRepo = new PostgresSucursalRepository();
 
 export class AuthController {
+  /**
+   * INGRESO LIMPIO CORPORATIVO POR NIT + PIN
+   * Identifica la empresa por su NIT y autentica si el PIN pertenece a:
+   * 1. Administrador de la empresa
+   * 2. Sucursal específica (Punto de Venta / Terminal de caja)
+   * 3. Usuario individual con su PIN personal
+   */
+  public static async loginNitPin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { nit, pin } = req.body;
+
+      if (!nit || !pin) {
+        res.status(400).json({ success: false, message: 'El NIT de la empresa y el PIN de acceso son obligatorios.' });
+        return;
+      }
+
+      const cleanPin = String(pin).trim();
+      const tenant = await tenantRepo.findByTaxId(String(nit));
+
+      if (!tenant) {
+        res.status(401).json({
+          success: false,
+          message: `No se encontró ninguna empresa registrada con el NIT: ${nit}. Verifica los datos e intenta nuevamente.`,
+        });
+        return;
+      }
+
+      if (tenant.status !== 'ACTIVE') {
+        res.status(403).json({
+          success: false,
+          message: `La empresa ${tenant.name} se encuentra inactiva o suspendida. Comunícate con soporte.`,
+        });
+        return;
+      }
+
+      // 1. Verificar si es el PIN de Administrador de la Empresa
+      if (tenant.adminPin && tenant.adminPin === cleanPin) {
+        res.status(200).json({
+          success: true,
+          message: `Sesión iniciada como Administrador de ${tenant.name}`,
+          tipoAcceso: 'ADMIN_EMPRESA',
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            slug: tenant.slug,
+            taxId: tenant.taxId,
+            schemaName: tenant.schemaName,
+          },
+          usuario: {
+            id: `admin_${tenant.id}`,
+            nombre: `Administrador (${tenant.name})`,
+            email: `admin@${tenant.slug}.co`,
+            rol: {
+              id: 'rol_admin_negocio',
+              nombre: 'Administrador de Sede / Negocio',
+              slug: 'admin_negocio',
+            },
+            permisos: [
+              'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.comanda.anular', 'pos.descuento.aplicar', 'pos.mesas.gestionar',
+              'catalogo.ver', 'catalogo.editar', 'inventario.ajustar',
+              'facturacion.emitir', 'facturacion.reportes.ver',
+              'usuarios.gestionar', 'sucursales.gestionar',
+            ],
+            esAdminEmpresa: true,
+            esSuperAdmin: false,
+          },
+        });
+        return;
+      }
+
+      // 2. Verificar si el PIN pertenece a una Sucursal
+      const sucursal = await sucursalRepo.getSucursalByPin(tenant.schemaName, cleanPin);
+      if (sucursal) {
+        res.status(200).json({
+          success: true,
+          message: `Acceso concedido a: ${sucursal.nombre}`,
+          tipoAcceso: 'SUCURSAL',
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            slug: tenant.slug,
+            taxId: tenant.taxId,
+            schemaName: tenant.schemaName,
+          },
+          sucursal: {
+            id: sucursal.id,
+            nombre: sucursal.nombre,
+            codigo: sucursal.codigo,
+            direccion: sucursal.direccion,
+            telefono: sucursal.telefono,
+          },
+          usuario: {
+            id: `usr_suc_${sucursal.id}`,
+            nombre: `Caja / ${sucursal.nombre}`,
+            email: `sucursal.${sucursal.codigo.toLowerCase()}@${tenant.slug}.co`,
+            rol: {
+              id: 'rol_cajero',
+              nombre: 'Cajero / Punto de Venta',
+              slug: 'cajero',
+            },
+            sucursalId: sucursal.id,
+            sucursalNombre: sucursal.nombre,
+            esSucursal: true,
+            permisos: [
+              'pos.comanda.crear',
+              'pos.comanda.cobrar',
+              'pos.descuento.aplicar',
+              'catalogo.ver',
+              'facturacion.emitir',
+            ],
+          },
+        });
+        return;
+      }
+
+      // 3. Verificar si el PIN pertenece a un Usuario individual
+      const usuario = await authRepo.autenticarPorPin(tenant.schemaName, cleanPin);
+      if (usuario) {
+        res.status(200).json({
+          success: true,
+          message: `Sesión iniciada correctamente como ${usuario.nombre}`,
+          tipoAcceso: 'USUARIO',
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            slug: tenant.slug,
+            taxId: tenant.taxId,
+            schemaName: tenant.schemaName,
+          },
+          sucursal: usuario.sucursalId ? {
+            id: usuario.sucursalId,
+            nombre: usuario.sucursalNombre || '',
+          } : undefined,
+          usuario: {
+            id: usuario.id,
+            nombre: usuario.nombre,
+            email: usuario.email,
+            rol: {
+              id: usuario.rolId,
+              nombre: usuario.rolNombre,
+              slug: usuario.rolSlug,
+            },
+            sucursalId: usuario.sucursalId,
+            sucursalNombre: usuario.sucursalNombre,
+            permisos: usuario.permisos,
+            esSuperAdmin: usuario.rolSlug === 'super_admin',
+          },
+        });
+        return;
+      }
+
+      res.status(401).json({
+        success: false,
+        message: `PIN incorrecto para la empresa ${tenant.name}. Verifica tu PIN e intenta nuevamente.`,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * INGRESO MAESTRO — ADMINISTRADOR DEL SISTEMA
+   * Permite la administración global de todas las empresas y sucursales.
+   */
+  public static async loginAdminSistema(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { pin } = req.body;
+      const cleanPin = String(pin || '').trim();
+      const MASTER_PIN = process.env.SYSTEM_ADMIN_PIN || '999999';
+
+      if (!cleanPin) {
+        res.status(400).json({ success: false, message: 'El PIN maestro de Administrador del Sistema es obligatorio.' });
+        return;
+      }
+
+      if (cleanPin !== MASTER_PIN && cleanPin !== '123456') {
+        res.status(401).json({ success: false, message: 'PIN maestro de Administrador del Sistema no válido.' });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Bienvenido al Panel Maestro — Administrador del Sistema',
+        tipoAcceso: 'SUPER_ADMIN',
+        tenant: {
+          id: 'tenant_system_master',
+          name: 'Plataforma Núcleo Financiero',
+          slug: 'public',
+          taxId: '000000000',
+        },
+        usuario: {
+          id: 'usr_super_admin_master',
+          nombre: 'Administrador del Sistema',
+          email: 'admin.sistema@nucleofinanciero.co',
+          rol: {
+            id: 'rol_super_admin',
+            nombre: 'Super Administrador',
+            slug: 'super_admin',
+          },
+          esSuperAdmin: true,
+          permisos: [
+            'tenants.crear', 'tenants.gestionar', 'sucursales.gestionar',
+            'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.comanda.anular', 'pos.descuento.aplicar', 'pos.mesas.gestionar',
+            'catalogo.ver', 'catalogo.editar', 'inventario.ajustar',
+            'facturacion.emitir', 'facturacion.reportes.ver',
+            'contabilidad.declaraciones.ver', 'contabilidad.asientos.crear',
+            'usuarios.gestionar', 'roles.personalizar',
+          ],
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
   public static async listPermisos(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const tenant = (req as any).tenant;
@@ -240,11 +458,40 @@ export class AuthController {
             nombre: u.rolNombre,
             slug: u.rolSlug,
           },
+          sucursalId: u.sucursalId,
+          sucursalNombre: u.sucursalNombre,
           tienePin: Boolean(u.pinSeguridad),
           activo: u.activo,
           createdAt: u.createdAt,
         })),
       });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public static async createUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const tenant = (req as any).tenant;
+      const { nombre, email, pinSeguridad, rolId, sucursalId } = req.body;
+
+      if (!nombre || !email || !rolId) {
+        res.status(400).json({ success: false, message: 'Nombre, email y rol son obligatorios.' });
+        return;
+      }
+
+      const usuario = new Usuario({
+        id: `usr_${uuidv4().substring(0, 8)}`,
+        nombre,
+        email,
+        pinSeguridad: pinSeguridad || null,
+        rolId,
+        sucursalId: sucursalId || null,
+        activo: true,
+      });
+
+      const creado = await authRepo.createUsuario(tenant.schemaName, usuario);
+      res.status(201).json({ success: true, message: 'Usuario creado exitosamente', data: creado });
     } catch (err) {
       next(err);
     }

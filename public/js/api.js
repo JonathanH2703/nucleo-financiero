@@ -63,7 +63,21 @@ export class ApiClient {
     }
   }
 
-  // ─── Autenticación ───────────────────────────────────────
+  // ─── Autenticación Unificada (NIT + PIN) ────────────────
+  static async loginNitPin(nit, pin) {
+    return this.request('/auth/login-nit-pin', {
+      method: 'POST',
+      body: JSON.stringify({ nit, pin }),
+    });
+  }
+
+  static async loginAdminSistema(pin) {
+    return this.request('/auth/login-admin-sistema', {
+      method: 'POST',
+      body: JSON.stringify({ pin }),
+    });
+  }
+
   static async loginPin(pin) {
     return this.request('/auth/login-pin', {
       method: 'POST',
@@ -78,9 +92,54 @@ export class ApiClient {
     });
   }
 
-  // ─── Empresas y Roles ────────────────────────────────────
+  // ─── Gestión de Empresas y Sucursales ────────────────────
   static async listTenants() {
     return this.request('/tenants');
+  }
+
+  static async createTenant(tenantData) {
+    return this.request('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(tenantData),
+    });
+  }
+
+  static async updateTenant(id, tenantData) {
+    return this.request(`/tenants/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(tenantData),
+    });
+  }
+
+  static async listSucursales() {
+    return this.request('/sucursales');
+  }
+
+  static async createSucursal(sucursalData) {
+    return this.request('/sucursales', {
+      method: 'POST',
+      body: JSON.stringify(sucursalData),
+    });
+  }
+
+  static async updateSucursal(id, sucursalData) {
+    return this.request(`/sucursales/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(sucursalData),
+    });
+  }
+
+  static async deleteSucursal(id) {
+    return this.request(`/sucursales/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  static async createUsuario(usuarioData) {
+    return this.request('/auth/usuarios', {
+      method: 'POST',
+      body: JSON.stringify(usuarioData),
+    });
   }
 
   static async listRoles() {

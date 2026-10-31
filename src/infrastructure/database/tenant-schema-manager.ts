@@ -17,6 +17,7 @@ export class TenantSchemaManager {
           tax_id VARCHAR(50) NOT NULL UNIQUE,
           schema_name VARCHAR(100) NOT NULL UNIQUE,
           status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+          admin_pin VARCHAR(20) NOT NULL DEFAULT '123456',
           storage_quota_bytes BIGINT NOT NULL DEFAULT 5368709120, -- 5GB por defecto
           storage_used_bytes BIGINT NOT NULL DEFAULT 0,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -150,6 +151,7 @@ export class TenantSchemaManager {
           pin_seguridad VARCHAR(10),
           rol_id VARCHAR(64) REFERENCES "${schemaName}".roles(id) ON DELETE RESTRICT,
           area_asignada_id VARCHAR(64),
+          sucursal_id VARCHAR(64),
           activo BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
@@ -342,6 +344,7 @@ export class TenantSchemaManager {
           departamento VARCHAR(100) DEFAULT 'Cundinamarca',
           telefono VARCHAR(50),
           responsable_id VARCHAR(64),
+          pin_acceso VARCHAR(20),
           activa BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );

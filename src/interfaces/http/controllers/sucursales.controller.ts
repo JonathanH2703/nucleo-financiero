@@ -23,7 +23,7 @@ export class SucursalesController {
   public static async createSucursal(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const tenant = (req as any).tenant;
-      const { nombre, codigo, direccion, ciudad, departamento, telefono, responsableId } = req.body;
+      const { nombre, codigo, direccion, ciudad, departamento, telefono, responsableId, pinAcceso } = req.body;
 
       if (!nombre || !codigo) {
         res.status(400).json({ success: false, message: 'El nombre y código de sucursal son obligatorios.' });
@@ -39,6 +39,7 @@ export class SucursalesController {
         departamento,
         telefono,
         responsableId,
+        pinAcceso: pinAcceso || Math.floor(1000 + Math.random() * 9000).toString(),
       });
 
       const creada = await sucursalRepo.createSucursal(tenant.schemaName, sucursal);

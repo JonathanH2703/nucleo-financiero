@@ -7,6 +7,7 @@ export interface TenantProps {
   taxId: string; // NIT / RUC / RFC
   schemaName: string;
   status: TenantStatus;
+  adminPin?: string;
   storageQuotaBytes: number;
   storageUsedBytes: number;
   createdAt: Date;
@@ -15,11 +16,12 @@ export interface TenantProps {
 
 export class Tenant {
   public readonly id: string;
-  public readonly name: string;
+  public name: string;
   public readonly slug: string;
-  public readonly taxId: string;
+  public taxId: string;
   public readonly schemaName: string;
   public status: TenantStatus;
+  public adminPin: string;
   public storageQuotaBytes: number;
   public storageUsedBytes: number;
   public readonly createdAt: Date;
@@ -32,6 +34,7 @@ export class Tenant {
     this.taxId = props.taxId;
     this.schemaName = props.schemaName;
     this.status = props.status;
+    this.adminPin = props.adminPin || '123456';
     this.storageQuotaBytes = props.storageQuotaBytes;
     this.storageUsedBytes = props.storageUsedBytes;
     this.createdAt = props.createdAt;

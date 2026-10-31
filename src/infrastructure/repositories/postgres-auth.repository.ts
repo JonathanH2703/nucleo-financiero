@@ -183,9 +183,10 @@ export class PostgresAuthRepository implements IAuthRepository {
   public async listUsuarios(schemaName: string): Promise<Usuario[]> {
     const s = sanitizeSchema(schemaName);
     const res = await dbPool.query(
-      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug 
+      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug, s.nombre as sucursal_nombre
        FROM "${s}".usuarios u
        JOIN "${s}".roles r ON u.rol_id = r.id
+       LEFT JOIN "${s}".sucursales s ON u.sucursal_id = s.id
        WHERE u.activo = true
        ORDER BY u.nombre ASC`
     );
@@ -210,6 +211,8 @@ export class PostgresAuthRepository implements IAuthRepository {
         rolSlug: r.rol_slug,
         permisos,
         areaAsignadaId: r.area_asignada_id,
+        sucursalId: r.sucursal_id,
+        sucursalNombre: r.sucursal_nombre,
         activo: r.activo,
         createdAt: new Date(r.created_at),
       }));
@@ -220,9 +223,10 @@ export class PostgresAuthRepository implements IAuthRepository {
   public async getUsuarioById(schemaName: string, id: string): Promise<Usuario | null> {
     const s = sanitizeSchema(schemaName);
     const res = await dbPool.query(
-      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug 
+      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug, s.nombre as sucursal_nombre
        FROM "${s}".usuarios u
        JOIN "${s}".roles r ON u.rol_id = r.id
+       LEFT JOIN "${s}".sucursales s ON u.sucursal_id = s.id
        WHERE u.id = $1`,
       [id]
     );
@@ -247,6 +251,8 @@ export class PostgresAuthRepository implements IAuthRepository {
       rolSlug: r.rol_slug,
       permisos,
       areaAsignadaId: r.area_asignada_id,
+      sucursalId: r.sucursal_id,
+      sucursalNombre: r.sucursal_nombre,
       activo: r.activo,
       createdAt: new Date(r.created_at),
     });
@@ -255,9 +261,10 @@ export class PostgresAuthRepository implements IAuthRepository {
   public async autenticarPorPin(schemaName: string, pin: string): Promise<Usuario | null> {
     const s = sanitizeSchema(schemaName);
     const res = await dbPool.query(
-      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug 
+      `SELECT u.*, r.nombre as rol_nombre, r.slug as rol_slug, s.nombre as sucursal_nombre
        FROM "${s}".usuarios u
        JOIN "${s}".roles r ON u.rol_id = r.id
+       LEFT JOIN "${s}".sucursales s ON u.sucursal_id = s.id
        WHERE u.pin_seguridad = $1 AND u.activo = true`,
       [pin]
     );
@@ -282,6 +289,8 @@ export class PostgresAuthRepository implements IAuthRepository {
       rolSlug: r.rol_slug,
       permisos,
       areaAsignadaId: r.area_asignada_id,
+      sucursalId: r.sucursal_id,
+      sucursalNombre: r.sucursal_nombre,
       activo: r.activo,
       createdAt: new Date(r.created_at),
     });
@@ -325,9 +334,9 @@ export class PostgresAuthRepository implements IAuthRepository {
   public async createUsuario(schemaName: string, u: Usuario): Promise<Usuario> {
     const s = sanitizeSchema(schemaName);
     await dbPool.query(
-      `INSERT INTO "${s}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, activo, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [u.id, u.nombre, u.email, u.pinSeguridad || null, u.rolId, u.areaAsignadaId || null, u.activo, u.createdAt]
+      `INSERT INTO "${s}".usuarios (id, nombre, email, pin_seguridad, rol_id, area_asignada_id, sucursal_id, activo, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [u.id, u.nombre, u.email, u.pinSeguridad || null, u.rolId, u.areaAsignadaId || null, u.sucursalId || null, u.activo, u.createdAt]
     );
     return u;
   }

@@ -9,6 +9,7 @@ import { DEMO_TENANTS, ROLE_DEFINITIONS } from './demo-fixtures.js';
 class AppState {
   constructor() {
     // Cargar estado inicial desde sessionStorage y localStorage
+    const savedTenantJson = sessionStorage.getItem('nf_tenant_data');
     const savedTenantSlug = sessionStorage.getItem('nf_tenant_slug') || 'restaurante_origen';
     const savedUserJson = sessionStorage.getItem('nf_user');
     const savedModule = sessionStorage.getItem('nf_module') || 'gestion';
@@ -17,7 +18,15 @@ class AppState {
     // Tema: 'light' (predeterminado "deja todo claro") | 'dark' | 'system'
     this.themeSetting = localStorage.getItem('nf_theme') || 'light';
 
-    this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
+    if (savedTenantJson) {
+      try {
+        this.currentTenant = JSON.parse(savedTenantJson);
+      } catch {
+        this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
+      }
+    } else {
+      this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
+    }
     this.currentUser = savedUserJson ? JSON.parse(savedUserJson) : null;
     this.currentModule = savedModule;
     this.currentView = this.currentUser ? (savedView === 'login' ? this.getDefaultViewForUser() : savedView) : 'login';
@@ -128,7 +137,10 @@ class AppState {
     if (!this.currentUser) return ['login'];
     const slug = this.getRoleSlug();
     if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
-      return ['dashboard', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
+      return ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
+    }
+    if (slug === 'admin_negocio') {
+      return ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
     }
     const roleDef = this.getRoleDefinition();
     return roleDef?.allowedViews || ['pos', 'ajustes'];
@@ -145,6 +157,9 @@ class AppState {
   }
 
   getDefaultViewForUser() {
+    if (this.currentUser?.esSucursal) {
+      return 'pos';
+    }
     const roleDef = this.getRoleDefinition();
     return roleDef?.defaultView || 'pos';
   }
@@ -168,12 +183,27 @@ class AppState {
     this.listeners.forEach((l) => l(event, payload, this));
   }
 
-  setTenant(tenantSlug) {
-    const tenant = DEMO_TENANTS.find((t) => t.slug === tenantSlug);
+  setTenant(tenantOrSlug) {
+    if (typeof tenantOrSlug === 'object' && tenantOrSlug !== null) {
+      this.currentTenant = {
+        ...tenantOrSlug,
+        nit: tenantOrSlug.taxId || tenantOrSlug.nit || 'NIT',
+        category: tenantOrSlug.category || 'Comercio / Empresa',
+        sucursales: tenantOrSlug.sucursales || ['Sede Principal'],
+      };
+      sessionStorage.setItem('nf_tenant_slug', this.currentTenant.slug);
+      sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
+      this.notify('tenant_changed', this.currentTenant);
+      return;
+    }
+    const tenant = DEMO_TENANTS.find((t) => t.slug === tenantOrSlug);
     if (tenant) {
       this.currentTenant = tenant;
       sessionStorage.setItem('nf_tenant_slug', tenant.slug);
+      sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
       this.notify('tenant_changed', tenant);
+    }
+  }
     }
   }
 

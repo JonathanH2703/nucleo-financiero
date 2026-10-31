@@ -14,8 +14,8 @@ export class PostgresSucursalRepository implements ISucursalRepository {
     const s = sanitizeSchema(schemaName);
     await dbPool.query(
       `INSERT INTO "${s}".sucursales (
-        id, nombre, codigo, direccion, ciudad, departamento, telefono, responsable_id, activa, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        id, nombre, codigo, direccion, ciudad, departamento, telefono, responsable_id, pin_acceso, activa, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         suc.id,
         suc.nombre,
@@ -25,6 +25,7 @@ export class PostgresSucursalRepository implements ISucursalRepository {
         suc.departamento || 'Cundinamarca',
         suc.telefono || null,
         suc.responsableId || null,
+        suc.pinAcceso || null,
         suc.activa,
         suc.createdAt,
       ]
@@ -51,6 +52,7 @@ export class PostgresSucursalRepository implements ISucursalRepository {
       departamento: 'departamento',
       telefono: 'telefono',
       responsableId: 'responsable_id',
+      pinAcceso: 'pin_acceso',
       activa: 'activa',
     };
 
@@ -88,6 +90,13 @@ export class PostgresSucursalRepository implements ISucursalRepository {
     return this.mapRow(res.rows[0]);
   }
 
+  public async getSucursalByPin(schemaName: string, pin: string): Promise<Sucursal | null> {
+    const s = sanitizeSchema(schemaName);
+    const res = await dbPool.query(`SELECT * FROM "${s}".sucursales WHERE pin_acceso = $1 AND activa = true LIMIT 1`, [pin]);
+    if (res.rows.length === 0) return null;
+    return this.mapRow(res.rows[0]);
+  }
+
   public async listSucursales(schemaName: string): Promise<Sucursal[]> {
     const s = sanitizeSchema(schemaName);
     const res = await dbPool.query(`SELECT * FROM "${s}".sucursales WHERE activa = true ORDER BY nombre ASC`);
@@ -104,6 +113,7 @@ export class PostgresSucursalRepository implements ISucursalRepository {
       departamento: r.departamento,
       telefono: r.telefono,
       responsableId: r.responsable_id,
+      pinAcceso: r.pin_acceso,
       activa: Boolean(r.activa),
       createdAt: new Date(r.created_at),
     });

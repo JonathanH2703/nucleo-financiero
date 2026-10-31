@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Rol, Permiso, Usuario } from '../src/domain/entities/auth.entity.js';
+import { Sucursal } from '../src/domain/entities/sucursal.entity.js';
+import { Tenant } from '../src/domain/entities/tenant.entity.js';
 
 describe('Customizable RBAC Domain Tests (Roles, Permisos y Seguridad)', () => {
   const permCrearComanda = new Permiso({
@@ -93,6 +95,56 @@ describe('Customizable RBAC Domain Tests (Roles, Permisos y Seguridad)', () => {
       // La empresa decide otorgarle permiso de cobro adicional
       capitanRol.asignarPermisos([permCrearComanda, permCobrarComanda]);
       expect(capitanRol.tienePermiso('pos.comanda.cobrar')).toBe(true);
+    });
+  });
+
+  describe('Autenticación Limpia Multi-Sucursal (NIT + PIN)', () => {
+    it('debe permitir modelar sucursales con PINs independientes para acceso táctil al POS', () => {
+      const tenant = new Tenant({
+        id: 't-1',
+        name: 'Restaurante & Bar Origen S.A.S.',
+        slug: 'restaurante_origen',
+        taxId: '901.445.772-0',
+        schemaName: 'tenant_restaurante_origen',
+        status: 'ACTIVE',
+        adminPin: '123456',
+        storageQuotaBytes: 1000,
+        storageUsedBytes: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const sucursalPrincipal = new Sucursal({
+        id: 'suc-1',
+        nombre: 'Sede Principal Zona G',
+        codigo: 'SUC-01',
+        pinAcceso: '1001',
+      });
+
+      const sucursalNorte = new Sucursal({
+        id: 'suc-2',
+        nombre: 'Sede Parque 93',
+        codigo: 'SUC-02',
+        pinAcceso: '1002',
+      });
+
+      expect(tenant.adminPin).toBe('123456');
+      expect(sucursalPrincipal.pinAcceso).toBe('1001');
+      expect(sucursalNorte.pinAcceso).toBe('1002');
+      expect(sucursalPrincipal.pinAcceso).not.toBe(sucursalNorte.pinAcceso);
+
+      const usuarioSucursal = new Usuario({
+        id: 'u-suc-1',
+        nombre: 'Caja Zona G',
+        email: 'caja.zonag@origen.co',
+        rolId: 'r-cajero',
+        rolSlug: 'cajero',
+        sucursalId: sucursalPrincipal.id,
+        sucursalNombre: sucursalPrincipal.nombre,
+      });
+
+      expect(usuarioSucursal.sucursalId).toBe('suc-1');
+      expect(usuarioSucursal.sucursalNombre).toBe('Sede Principal Zona G');
     });
   });
 });

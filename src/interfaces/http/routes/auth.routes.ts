@@ -4,12 +4,19 @@ import { tenantResolverMiddleware } from '../middlewares/tenant-resolver.middlew
 
 export const authRouter = Router();
 
-// Todas las rutas de autenticación y gestión de roles se ejecutan en el contexto del tenant
-authRouter.use(tenantResolverMiddleware);
+// ─── Rutas Públicas (No requieren contexto de tenant previo) ──────────
+// Autenticación limpia unificada por NIT + PIN
+authRouter.post('/login-nit-pin', AuthController.loginNitPin);
 
-// Autenticación rápida táctil y por credenciales
+// Ingreso maestro exclusivo del Administrador del Sistema
+authRouter.post('/login-admin-sistema', AuthController.loginAdminSistema);
+
+// Compatibilidad
 authRouter.post('/login-pin', AuthController.loginPin);
 authRouter.post('/login-email', AuthController.loginEmail);
+
+// ─── Rutas Protegidas en Contexto de Tenant ───────────────────────────
+authRouter.use(tenantResolverMiddleware);
 
 // Catálogo de permisos del sistema (agrupados por módulos)
 authRouter.get('/permisos', AuthController.listPermisos);
@@ -20,5 +27,6 @@ authRouter.post('/roles', AuthController.createRol);
 authRouter.put('/roles/:rolId', AuthController.updateRol);
 authRouter.delete('/roles/:rolId', AuthController.deleteRol);
 
-// Directorio de usuarios y colaboradores
+// Directorio y creación de usuarios y colaboradores
 authRouter.get('/usuarios', AuthController.listUsuarios);
+authRouter.post('/usuarios', AuthController.createUsuario);
