@@ -204,8 +204,6 @@ class AppState {
       this.notify('tenant_changed', tenant);
     }
   }
-    }
-  }
 
   setUser(userData) {
     if (userData) {
