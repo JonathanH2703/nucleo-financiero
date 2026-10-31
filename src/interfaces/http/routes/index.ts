@@ -10,6 +10,10 @@ import { env } from '../../../config/env.js';
 
 import { tercerosRouter } from './terceros.routes.js';
 import { contabilidadRouter } from './contabilidad.routes.js';
+import { catalogoRouter } from './catalogo.routes.js';
+import { inventarioRouter } from './inventario.routes.js';
+import { comprasRouter } from './compras.routes.js';
+import { sucursalesRouter } from './sucursales.routes.js';
 
 export const apiRouter = Router();
 
@@ -58,5 +62,9 @@ apiRouter.use('/pos', posRouter);
 apiRouter.use('/facturacion', facturacionRouter);
 apiRouter.use('/terceros', tercerosRouter);
 apiRouter.use('/contabilidad', contabilidadRouter);
+apiRouter.use('/catalogo', catalogoRouter);
+apiRouter.use('/inventario', inventarioRouter);
+apiRouter.use('/compras', comprasRouter);
+apiRouter.use('/sucursales', sucursalesRouter);
 
 

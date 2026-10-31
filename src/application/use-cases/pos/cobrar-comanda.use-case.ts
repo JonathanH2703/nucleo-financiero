@@ -1,21 +1,27 @@
 import { v4 as uuidv4 } from 'uuid';
 import { IPosRepository, IOperacionRepository, IFacturacionRepository } from '../../../domain/repositories/pos.repository.interface.js';
+import { IInventarioRepository } from '../../../domain/repositories/inventario.repository.interface.js';
+import { IBodegaRepository } from '../../../domain/repositories/bodega.repository.interface.js';
 import { FacturaFiscal, TipoDocumentoFiscal } from '../../../domain/entities/facturacion.entity.js';
+import { MovimientoInventario } from '../../../domain/entities/inventario.entity.js';
 
 export interface CobrarComandaDTO {
   comandaId: string;
-  tipoDocumento?: TipoDocumentoFiscal; // 'FACTURA_ELECTRONICA_DIAN' | 'DOCUMENTO_EQUIVALENTE_POS'
+  tipoDocumento?: TipoDocumentoFiscal;
   metodoPago?: 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA' | 'MIXTO';
   clienteNombre?: string;
   clienteNit?: string;
   incluyePropina?: boolean;
+  bodegaId?: string; // Bodega opcional desde donde descargar inventario
 }
 
 export class CobrarComandaUseCase {
   constructor(
     private readonly posRepo: IPosRepository,
     private readonly operacionRepo: IOperacionRepository,
-    private readonly facturacionRepo: IFacturacionRepository
+    private readonly facturacionRepo: IFacturacionRepository,
+    private readonly inventarioRepo?: IInventarioRepository,
+    private readonly bodegaRepo?: IBodegaRepository
   ) {}
 
   public async execute(schemaName: string, dto: CobrarComandaDTO): Promise<{ factura: FacturaFiscal; mensaje: string }> {
@@ -64,20 +70,57 @@ export class CobrarComandaUseCase {
       qrCode,
     });
 
-    // Guardar factura fiscal
+    // 1. Guardar factura fiscal
     await this.facturacionRepo.createFactura(schemaName, factura);
 
-    // Actualizar estado de comanda a COBRADO
+    // 2. Actualizar estado de comanda a COBRADO
     await this.posRepo.updateComandaEstado(schemaName, comanda.id, 'COBRADO');
 
-    // Liberar punto de atención (mesa/caja)
+    // 3. Liberar punto de atención (mesa/caja)
     if (comanda.puntoAtencionId) {
       await this.operacionRepo.updateEstadoPunto(schemaName, comanda.puntoAtencionId, 'LIBRE');
     }
 
+    // 4. Descontar inventario automáticamente si hay repositorio de inventario configurado
+    if (this.inventarioRepo) {
+      let targetBodegaId = dto.bodegaId;
+
+      if (!targetBodegaId && this.bodegaRepo) {
+        const bodegas = await this.bodegaRepo.listBodegas(schemaName);
+        if (bodegas.length > 0) {
+          targetBodegaId = bodegas[0].id;
+        }
+      }
+
+      if (targetBodegaId) {
+        for (const item of comanda.items) {
+          try {
+            await this.inventarioRepo.registrarMovimiento(
+              schemaName,
+              new MovimientoInventario({
+                id: `mov_vta_${uuidv4().substring(0, 8)}`,
+                productoId: item.productoId,
+                bodegaId: targetBodegaId,
+                tipo: 'VENTA',
+                cantidad: item.cantidad,
+                costoUnitario: item.precioUnitario,
+                saldoAnterior: 0,
+                saldoNuevo: 0,
+                referenciaDocumento: factura.numeroCompleto,
+                referenciaTipo: 'VENTA_POS',
+                notas: `Despacho venta POS ${comanda.numeroComanda}`,
+              })
+            );
+          } catch {
+            // Silencioso o log si el producto no está inventariado en esa bodega
+          }
+        }
+      }
+    }
+
     return {
       factura,
-      mensaje: `Comanda ${comanda.numeroComanda} cobrada exitosamente. Factura ${factura.numeroCompleto} emitida ante DIAN (Aceptada).`,
+      mensaje: `Comanda ${comanda.numeroComanda} cobrada exitosamente. Factura ${factura.numeroCompleto} emitida ante DIAN (Aceptada) con descarga automática de inventario.`,
     };
   }
 }

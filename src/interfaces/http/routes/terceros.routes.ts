@@ -4,8 +4,10 @@ import { tenantResolverMiddleware } from '../middlewares/tenant-resolver.middlew
 
 export const tercerosRouter = Router();
 
-// Todas las rutas requieren tenant resolver
 tercerosRouter.use(tenantResolverMiddleware);
 
 tercerosRouter.get('/', TercerosController.listTerceros);
 tercerosRouter.post('/', TercerosController.createTercero);
+tercerosRouter.get('/:id', TercerosController.getTerceroById);
+tercerosRouter.put('/:id', TercerosController.updateTercero);
+tercerosRouter.delete('/:id', TercerosController.deleteTercero);

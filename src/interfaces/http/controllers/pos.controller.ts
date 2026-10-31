@@ -6,11 +6,16 @@ import { CreateComandaUseCase } from '../../../application/use-cases/pos/create-
 import { CobrarComandaUseCase } from '../../../application/use-cases/pos/cobrar-comanda.use-case.js';
 import { GetKdsUseCase } from '../../../application/use-cases/pos/get-kds.use-case.js';
 
+import { PostgresInventarioRepository } from '../../../infrastructure/repositories/postgres-inventario.repository.js';
+import { PostgresBodegaRepository } from '../../../infrastructure/repositories/postgres-bodega.repository.js';
+
 const posRepo = new PostgresPosRepository();
+const inventarioRepo = new PostgresInventarioRepository();
+const bodegaRepo = new PostgresBodegaRepository();
 const getCatalogoUseCase = new GetCatalogoUseCase(posRepo);
 const getOperacionUseCase = new GetOperacionUseCase(posRepo);
 const createComandaUseCase = new CreateComandaUseCase(posRepo, posRepo, posRepo);
-const cobrarComandaUseCase = new CobrarComandaUseCase(posRepo, posRepo, posRepo);
+const cobrarComandaUseCase = new CobrarComandaUseCase(posRepo, posRepo, posRepo, inventarioRepo, bodegaRepo);
 const getKdsUseCase = new GetKdsUseCase(posRepo);
 
 export class PosController {

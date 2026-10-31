@@ -82,16 +82,38 @@ export class TenantSchemaManager {
           tipo_documento VARCHAR(20) NOT NULL DEFAULT 'NIT',
           numero_documento VARCHAR(50) NOT NULL,
           razon_social VARCHAR(255) NOT NULL,
+          nombre_comercial VARCHAR(255),
           email VARCHAR(120),
           telefono VARCHAR(50),
           direccion VARCHAR(255),
           ciudad VARCHAR(100) DEFAULT 'Bogotá D.C.',
+          departamento VARCHAR(100) DEFAULT 'Cundinamarca',
+          tipo_contribuyente VARCHAR(40),
+          responsabilidades_rut TEXT,
+          aplica_retefuente BOOLEAN NOT NULL DEFAULT false,
+          tarifa_retefuente NUMERIC(5, 4) DEFAULT 0,
+          aplica_reteica BOOLEAN NOT NULL DEFAULT false,
+          tarifa_reteica NUMERIC(5, 4) DEFAULT 0,
+          aplica_reteiva BOOLEAN NOT NULL DEFAULT false,
+          banco VARCHAR(100),
+          tipo_cuenta VARCHAR(20),
+          numero_cuenta VARCHAR(50),
+          contacto_nombre VARCHAR(150),
+          contacto_cargo VARCHAR(100),
+          contacto_celular VARCHAR(50),
+          plazo_pago_dias INT DEFAULT 0,
+          descuento_pronto_pago NUMERIC(5, 2) DEFAULT 0,
+          cupo_credito NUMERIC(14, 2) DEFAULT 0,
           es_cliente BOOLEAN NOT NULL DEFAULT true,
           es_proveedor BOOLEAN NOT NULL DEFAULT false,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          activo BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         CREATE UNIQUE INDEX IF NOT EXISTS idx_terceros_doc ON "${schemaName}".terceros(numero_documento);
+        CREATE INDEX IF NOT EXISTS idx_terceros_es_prov ON "${schemaName}".terceros(es_proveedor);
+        CREATE INDEX IF NOT EXISTS idx_terceros_es_cli ON "${schemaName}".terceros(es_cliente);
       `);
 
       // 4. Módulo RBAC: Permisos granulares, Roles personalizables y Usuarios
@@ -144,7 +166,10 @@ export class TenantSchemaManager {
           icono VARCHAR(50) NOT NULL DEFAULT 'tag',
           color VARCHAR(20) NOT NULL DEFAULT '#2563eb',
           orden INT NOT NULL DEFAULT 0,
-          activo BOOLEAN NOT NULL DEFAULT true
+          activo BOOLEAN NOT NULL DEFAULT true,
+          categoria_padre_id VARCHAR(64) REFERENCES "${schemaName}".categorias(id) ON DELETE SET NULL,
+          slug VARCHAR(100),
+          descripcion TEXT
         );
       `);
 
@@ -165,6 +190,13 @@ export class TenantSchemaManager {
           stock_actual NUMERIC(12, 2) NOT NULL DEFAULT 0,
           stock_minimo NUMERIC(12, 2) NOT NULL DEFAULT 5,
           activo BOOLEAN NOT NULL DEFAULT true,
+          imagen_url VARCHAR(500),
+          imagen_key VARCHAR(500),
+          marca VARCHAR(150),
+          tiene_lotes BOOLEAN NOT NULL DEFAULT false,
+          tiene_vencimiento BOOLEAN NOT NULL DEFAULT false,
+          unidad_medida_compra VARCHAR(30) DEFAULT 'UNIDAD',
+          factor_conversion_compra NUMERIC(10, 4) DEFAULT 1,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
@@ -297,6 +329,292 @@ export class TenantSchemaManager {
           archivo_id UUID REFERENCES "${schemaName}".archivos(id) ON DELETE SET NULL,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+      `);
+
+      // 11. Sucursales y Bodegas (Multi-sucursal y multi-almacén configurable desde cero)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".sucursales (
+          id VARCHAR(64) PRIMARY KEY,
+          nombre VARCHAR(150) NOT NULL,
+          codigo VARCHAR(50) NOT NULL UNIQUE,
+          direccion VARCHAR(255),
+          ciudad VARCHAR(100) DEFAULT 'Bogotá D.C.',
+          departamento VARCHAR(100) DEFAULT 'Cundinamarca',
+          telefono VARCHAR(50),
+          responsable_id VARCHAR(64),
+          activa BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".bodegas (
+          id VARCHAR(64) PRIMARY KEY,
+          sucursal_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".sucursales(id) ON DELETE CASCADE,
+          nombre VARCHAR(150) NOT NULL,
+          codigo VARCHAR(50) NOT NULL UNIQUE,
+          tipo VARCHAR(30) NOT NULL DEFAULT 'PRINCIPAL',
+          activa BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_bodegas_sucursal ON "${schemaName}".bodegas(sucursal_id);
+      `);
+
+      // 12. Variantes de Producto (Presentaciones, tamaños, empaques con factor de conversión)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".producto_variantes (
+          id VARCHAR(64) PRIMARY KEY,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE CASCADE,
+          nombre VARCHAR(150) NOT NULL,
+          sku VARCHAR(100),
+          codigo_barras VARCHAR(100),
+          unidad_medida VARCHAR(30) NOT NULL DEFAULT 'UNIDAD',
+          factor_conversion NUMERIC(10, 4) NOT NULL DEFAULT 1,
+          precio_base NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          costo NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          activo BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_variantes_producto ON "${schemaName}".producto_variantes(producto_id);
+        CREATE INDEX IF NOT EXISTS idx_variantes_barcode ON "${schemaName}".producto_variantes(codigo_barras);
+      `);
+
+      // 13. Listas de Precios y Precios por Producto (Venta público, mayorista, etc.)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".listas_precios (
+          id VARCHAR(64) PRIMARY KEY,
+          nombre VARCHAR(100) NOT NULL,
+          descripcion TEXT,
+          moneda VARCHAR(10) DEFAULT 'COP',
+          activa BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".precios_producto (
+          id VARCHAR(64) PRIMARY KEY,
+          lista_precio_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".listas_precios(id) ON DELETE CASCADE,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE CASCADE,
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id) ON DELETE CASCADE,
+          precio NUMERIC(14, 2) NOT NULL,
+          descuento_maximo NUMERIC(5, 2) DEFAULT 0,
+          UNIQUE(lista_precio_id, producto_id, variante_id)
+        );
+      `);
+
+      // 14. Relación Proveedores y Productos (M:N — múltiples proveedores para un mismo producto)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".proveedor_producto (
+          id VARCHAR(64) PRIMARY KEY,
+          proveedor_id UUID NOT NULL REFERENCES "${schemaName}".terceros(id) ON DELETE CASCADE,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE CASCADE,
+          precio_compra NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          unidad_compra VARCHAR(30) NOT NULL DEFAULT 'UNIDAD',
+          tiempo_entrega_dias INT DEFAULT 0,
+          es_proveedor_principal BOOLEAN NOT NULL DEFAULT false,
+          notas TEXT,
+          activo BOOLEAN NOT NULL DEFAULT true,
+          updated_at TIMESTAMPTZ DEFAULT NOW(),
+          UNIQUE(proveedor_id, producto_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_prov_prod_proveedor ON "${schemaName}".proveedor_producto(proveedor_id);
+        CREATE INDEX IF NOT EXISTS idx_prov_prod_producto ON "${schemaName}".proveedor_producto(producto_id);
+      `);
+
+      // 15. Stock por Bodega y Lotes de Inventario (con fecha de vencimiento)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".stock_bodegas (
+          id VARCHAR(64) PRIMARY KEY,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE CASCADE,
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id) ON DELETE CASCADE,
+          bodega_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id) ON DELETE CASCADE,
+          cantidad NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          costo_promedio NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          UNIQUE(producto_id, variante_id, bodega_id)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_stock_producto ON "${schemaName}".stock_bodegas(producto_id);
+        CREATE INDEX IF NOT EXISTS idx_stock_bodega ON "${schemaName}".stock_bodegas(bodega_id);
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".lotes_inventario (
+          id VARCHAR(64) PRIMARY KEY,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE CASCADE,
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id),
+          bodega_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id) ON DELETE CASCADE,
+          numero_lote VARCHAR(100) NOT NULL,
+          fecha_vencimiento DATE,
+          fecha_ingreso TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          cantidad_inicial NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          cantidad_disponible NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          costo_unitario NUMERIC(14, 2) DEFAULT 0,
+          activo BOOLEAN NOT NULL DEFAULT true
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_lotes_producto ON "${schemaName}".lotes_inventario(producto_id);
+        CREATE INDEX IF NOT EXISTS idx_lotes_vencimiento ON "${schemaName}".lotes_inventario(fecha_vencimiento);
+      `);
+
+      // 16. Movimientos de Inventario (Kardex Permanente y Trazable)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".movimientos_inventario (
+          id VARCHAR(64) PRIMARY KEY,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id) ON DELETE RESTRICT,
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id),
+          bodega_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id) ON DELETE RESTRICT,
+          tipo VARCHAR(30) NOT NULL,
+          cantidad NUMERIC(12, 2) NOT NULL,
+          costo_unitario NUMERIC(14, 2) DEFAULT 0,
+          saldo_anterior NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          saldo_nuevo NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          lote_id VARCHAR(64),
+          referencia_documento VARCHAR(100),
+          referencia_tipo VARCHAR(40),
+          notas TEXT,
+          creado_por VARCHAR(64),
+          fecha TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_mov_inv_producto ON "${schemaName}".movimientos_inventario(producto_id);
+        CREATE INDEX IF NOT EXISTS idx_mov_inv_bodega ON "${schemaName}".movimientos_inventario(bodega_id);
+        CREATE INDEX IF NOT EXISTS idx_mov_inv_fecha ON "${schemaName}".movimientos_inventario(fecha DESC);
+        CREATE INDEX IF NOT EXISTS idx_mov_inv_tipo ON "${schemaName}".movimientos_inventario(tipo);
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".ajustes_inventario (
+          id VARCHAR(64) PRIMARY KEY,
+          bodega_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id) ON DELETE RESTRICT,
+          numero VARCHAR(50) NOT NULL UNIQUE,
+          tipo VARCHAR(30) NOT NULL DEFAULT 'CONTEO_FISICO',
+          observaciones TEXT,
+          estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+          creado_por VARCHAR(64),
+          aprobado_por VARCHAR(64),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".ajuste_items (
+          id VARCHAR(64) PRIMARY KEY,
+          ajuste_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".ajustes_inventario(id) ON DELETE CASCADE,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id),
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id),
+          cantidad_sistema NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          cantidad_fisica NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          diferencia NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          costo_unitario NUMERIC(14, 2) DEFAULT 0
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ajuste_items ON "${schemaName}".ajuste_items(ajuste_id);
+      `);
+
+      // 17. Órdenes de Compra, Recepciones y Cuentas por Pagar
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".ordenes_compra (
+          id VARCHAR(64) PRIMARY KEY,
+          proveedor_id UUID NOT NULL REFERENCES "${schemaName}".terceros(id),
+          proveedor_nombre VARCHAR(255),
+          bodega_destino_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id),
+          numero VARCHAR(50) NOT NULL UNIQUE,
+          estado VARCHAR(30) NOT NULL DEFAULT 'BORRADOR',
+          fecha_emision TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          fecha_entrega_estimada DATE,
+          subtotal NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          impuestos NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          total NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          notas TEXT,
+          creado_por VARCHAR(64),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_oc_proveedor ON "${schemaName}".ordenes_compra(proveedor_id);
+        CREATE INDEX IF NOT EXISTS idx_oc_estado ON "${schemaName}".ordenes_compra(estado);
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".orden_compra_items (
+          id VARCHAR(64) PRIMARY KEY,
+          orden_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".ordenes_compra(id) ON DELETE CASCADE,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id),
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id),
+          producto_nombre VARCHAR(255) NOT NULL,
+          cantidad_solicitada NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          cantidad_recibida NUMERIC(12, 2) NOT NULL DEFAULT 0,
+          precio_unitario NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          subtotal NUMERIC(14, 2) NOT NULL DEFAULT 0
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_oci_orden ON "${schemaName}".orden_compra_items(orden_id);
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".recepciones_compra (
+          id VARCHAR(64) PRIMARY KEY,
+          orden_compra_id VARCHAR(64) REFERENCES "${schemaName}".ordenes_compra(id) ON DELETE SET NULL,
+          proveedor_id UUID NOT NULL REFERENCES "${schemaName}".terceros(id),
+          bodega_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".bodegas(id),
+          numero VARCHAR(50) NOT NULL UNIQUE,
+          fecha TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          recibido_por VARCHAR(64),
+          notas TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".recepcion_items (
+          id VARCHAR(64) PRIMARY KEY,
+          recepcion_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".recepciones_compra(id) ON DELETE CASCADE,
+          producto_id VARCHAR(64) NOT NULL REFERENCES "${schemaName}".productos(id),
+          variante_id VARCHAR(64) REFERENCES "${schemaName}".producto_variantes(id),
+          cantidad_recibida NUMERIC(12, 2) NOT NULL,
+          costo_unitario NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          lote_numero VARCHAR(100),
+          fecha_vencimiento DATE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ri_recepcion ON "${schemaName}".recepcion_items(recepcion_id);
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".cuentas_por_pagar (
+          id VARCHAR(64) PRIMARY KEY,
+          proveedor_id UUID NOT NULL REFERENCES "${schemaName}".terceros(id),
+          proveedor_nombre VARCHAR(255),
+          factura_proveedor_numero VARCHAR(100),
+          orden_compra_id VARCHAR(64) REFERENCES "${schemaName}".ordenes_compra(id) ON DELETE SET NULL,
+          recepcion_id VARCHAR(64) REFERENCES "${schemaName}".recepciones_compra(id) ON DELETE SET NULL,
+          monto NUMERIC(14, 2) NOT NULL,
+          saldo NUMERIC(14, 2) NOT NULL,
+          fecha_emision TIMESTAMPTZ DEFAULT NOW(),
+          fecha_vencimiento DATE,
+          estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+          notas TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_cxp_proveedor ON "${schemaName}".cuentas_por_pagar(proveedor_id);
+        CREATE INDEX IF NOT EXISTS idx_cxp_estado ON "${schemaName}".cuentas_por_pagar(estado);
+        CREATE INDEX IF NOT EXISTS idx_cxp_vencimiento ON "${schemaName}".cuentas_por_pagar(fecha_vencimiento);
+      `);
+
+      // 18. Módulo Contable Formal (Asientos y Líneas creados desde provisión, eliminando ensureTables runtime)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "${schemaName}".asientos_contables (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          numero_comprobante VARCHAR(50) NOT NULL UNIQUE,
+          tipo VARCHAR(40) NOT NULL DEFAULT 'MANUAL',
+          fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+          concepto TEXT NOT NULL,
+          tercero_nit VARCHAR(50),
+          tercero_nombre VARCHAR(255),
+          total_debito NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          total_credito NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          cuadrado BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS "${schemaName}".asiento_lineas (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          asiento_id UUID REFERENCES "${schemaName}".asientos_contables(id) ON DELETE CASCADE,
+          cuenta_codigo VARCHAR(20) NOT NULL,
+          cuenta_nombre VARCHAR(150) NOT NULL,
+          descripcion TEXT,
+          debito NUMERIC(14, 2) NOT NULL DEFAULT 0,
+          credito NUMERIC(14, 2) NOT NULL DEFAULT 0
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_asiento_lineas_asiento ON "${schemaName}".asiento_lineas(asiento_id);
+        CREATE INDEX IF NOT EXISTS idx_asiento_lineas_cuenta ON "${schemaName}".asiento_lineas(cuenta_codigo);
       `);
 
       // 11. Datos Semilla Iniciales Universales y Realistas para Pruebas Completas

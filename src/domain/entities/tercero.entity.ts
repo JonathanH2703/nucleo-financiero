@@ -1,0 +1,103 @@
+import { TipoDocumentoIdentidad, TipoContribuyente, TipoCuenta } from './tipos-comunes.js';
+
+export interface TerceroProps {
+  id: string;
+  tipoDocumento: TipoDocumentoIdentidad | string;
+  numeroDocumento: string;
+  razonSocial: string;
+  nombreComercial?: string;
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  departamento?: string;
+  tipoContribuyente?: TipoContribuyente | string;
+  responsabilidadesRUT?: string[];
+  aplicaReteFuente?: boolean;
+  tarifaReteFuente?: number;
+  aplicaReteICA?: boolean;
+  tarifaReteICA?: number;
+  aplicaReteIVA?: boolean;
+  banco?: string;
+  tipoCuenta?: TipoCuenta | string;
+  numeroCuenta?: string;
+  contactoNombre?: string;
+  contactoCargo?: string;
+  contactoCelular?: string;
+  plazoPagoDias?: number;
+  descuentoProntoPago?: number;
+  cupoCredito?: number;
+  esCliente: boolean;
+  esProveedor: boolean;
+  activo?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export class Tercero {
+  public readonly id: string;
+  public readonly tipoDocumento: string;
+  public readonly numeroDocumento: string;
+  public readonly razonSocial: string;
+  public readonly nombreComercial?: string;
+  public readonly email?: string;
+  public readonly telefono?: string;
+  public readonly direccion?: string;
+  public readonly ciudad?: string;
+  public readonly departamento?: string;
+  public readonly tipoContribuyente?: string;
+  public readonly responsabilidadesRUT: string[];
+  public readonly aplicaReteFuente: boolean;
+  public readonly tarifaReteFuente: number;
+  public readonly aplicaReteICA: boolean;
+  public readonly tarifaReteICA: number;
+  public readonly aplicaReteIVA: boolean;
+  public readonly banco?: string;
+  public readonly tipoCuenta?: string;
+  public readonly numeroCuenta?: string;
+  public readonly contactoNombre?: string;
+  public readonly contactoCargo?: string;
+  public readonly contactoCelular?: string;
+  public readonly plazoPagoDias: number;
+  public readonly descuentoProntoPago: number;
+  public readonly cupoCredito: number;
+  public readonly esCliente: boolean;
+  public readonly esProveedor: boolean;
+  public readonly activo: boolean;
+  public readonly createdAt: Date;
+  public readonly updatedAt: Date;
+
+  constructor(props: TerceroProps) {
+    this.id = props.id;
+    this.tipoDocumento = props.tipoDocumento || 'NIT';
+    this.numeroDocumento = props.numeroDocumento;
+    this.razonSocial = props.razonSocial;
+    this.nombreComercial = props.nombreComercial;
+    this.email = props.email;
+    this.telefono = props.telefono;
+    this.direccion = props.direccion;
+    this.ciudad = props.ciudad || 'Bogotá D.C.';
+    this.departamento = props.departamento || 'Cundinamarca';
+    this.tipoContribuyente = props.tipoContribuyente;
+    this.responsabilidadesRUT = props.responsabilidadesRUT || [];
+    this.aplicaReteFuente = props.aplicaReteFuente ?? false;
+    this.tarifaReteFuente = props.tarifaReteFuente ?? 0;
+    this.aplicaReteICA = props.aplicaReteICA ?? false;
+    this.tarifaReteICA = props.tarifaReteICA ?? 0;
+    this.aplicaReteIVA = props.aplicaReteIVA ?? false;
+    this.banco = props.banco;
+    this.tipoCuenta = props.tipoCuenta;
+    this.numeroCuenta = props.numeroCuenta;
+    this.contactoNombre = props.contactoNombre;
+    this.contactoCargo = props.contactoCargo;
+    this.contactoCelular = props.contactoCelular;
+    this.plazoPagoDias = props.plazoPagoDias ?? 0;
+    this.descuentoProntoPago = props.descuentoProntoPago ?? 0;
+    this.cupoCredito = props.cupoCredito ?? 0;
+    this.esCliente = props.esCliente ?? true;
+    this.esProveedor = props.esProveedor ?? false;
+    this.activo = props.activo ?? true;
+    this.createdAt = props.createdAt ?? new Date();
+    this.updatedAt = props.updatedAt ?? new Date();
+  }
+}
