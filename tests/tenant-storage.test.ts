@@ -33,6 +33,33 @@ describe('Tenant Domain Entity', () => {
     tenant.reduceStorageUsage(500);
     expect(tenant.storageUsedBytes).toBe(450);
   });
+
+  it('debe asignar los módulos correctos por defecto según el plan del tenant', () => {
+    const tenantBasico = new Tenant({
+      id: 't-peq',
+      name: 'Tienda Esquina',
+      slug: 'tienda_esquina',
+      taxId: '900999888-1',
+      schemaName: 'tenant_tienda_esquina',
+      status: 'ACTIVE',
+      plan: 'basico',
+      storageQuotaBytes: 1000,
+      storageUsedBytes: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    expect(tenantBasico.plan).toBe('basico');
+    expect(tenantBasico.isModuleActive('pos')).toBe(true);
+    expect(tenantBasico.isModuleActive('inventario')).toBe(true);
+    expect(tenantBasico.isModuleActive('facturacion')).toBe(false);
+    expect(tenantBasico.isModuleActive('compras')).toBe(false);
+
+    tenantBasico.setPlan('intermedio');
+    expect(tenantBasico.plan).toBe('intermedio');
+    expect(tenantBasico.isModuleActive('facturacion')).toBe(true);
+    expect(tenantBasico.isModuleActive('compras')).toBe(true);
+  });
 });
 
 describe('S3 Storage Key Generation', () => {

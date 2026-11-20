@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ITenantRepository } from '../../../domain/repositories/tenant.repository.interface.js';
-import { Tenant } from '../../../domain/entities/tenant.entity.js';
+import { Tenant, TenantPlan } from '../../../domain/entities/tenant.entity.js';
 import { TenantSchemaManager } from '../../../infrastructure/database/tenant-schema-manager.js';
 import { AppError } from '../../../core/errors/app-error.js';
 import { logger } from '../../../core/logger/logger.js';
@@ -9,6 +9,8 @@ export interface CreateTenantDTO {
   name: string;
   slug: string;
   taxId: string;
+  plan?: TenantPlan;
+  modulosActivos?: string[];
   adminPin?: string;
   storageQuotaBytes?: number;
 }
@@ -42,6 +44,8 @@ export class CreateTenantUseCase {
       taxId: dto.taxId.trim(),
       schemaName,
       status: 'ACTIVE',
+      plan: dto.plan || 'basico',
+      modulosActivos: dto.modulosActivos,
       adminPin: dto.adminPin || '123456',
       storageQuotaBytes: dto.storageQuotaBytes || 5368709120, // 5 GB por defecto
       storageUsedBytes: 0,

@@ -1,9 +1,24 @@
 import { dbPool } from '../database/connection.js';
-import { ITenantRepository } from '../../domain/repositories/tenant.repository.interface.js';
-import { Tenant, TenantStatus } from '../../domain/entities/tenant.entity.js';
+import {
+  ITenantRepository,
+  TenantStatsDTO,
+  TenantDetalleDTO,
+} from '../../domain/repositories/tenant.repository.interface.js';
+import { Tenant, TenantPlan, TenantStatus } from '../../domain/entities/tenant.entity.js';
 
 export class PostgresTenantRepository implements ITenantRepository {
   private mapRowToTenant(row: any): Tenant {
+    let modulos: string[] = [];
+    if (Array.isArray(row.modulos_activos)) {
+      modulos = row.modulos_activos;
+    } else if (typeof row.modulos_activos === 'string') {
+      try {
+        modulos = JSON.parse(row.modulos_activos);
+      } catch {
+        modulos = [];
+      }
+    }
+
     return new Tenant({
       id: row.id,
       name: row.name,
@@ -11,9 +26,11 @@ export class PostgresTenantRepository implements ITenantRepository {
       taxId: row.tax_id,
       schemaName: row.schema_name,
       status: row.status as TenantStatus,
+      plan: (row.plan || 'basico') as TenantPlan,
+      modulosActivos: modulos,
       adminPin: row.admin_pin || '123456',
-      storageQuotaBytes: Number(row.storage_quota_bytes),
-      storageUsedBytes: Number(row.storage_used_bytes),
+      storageQuotaBytes: Number(row.storage_quota_bytes || 5368709120),
+      storageUsedBytes: Number(row.storage_used_bytes || 0),
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     });
@@ -46,9 +63,9 @@ export class PostgresTenantRepository implements ITenantRepository {
   public async create(tenant: Tenant): Promise<Tenant> {
     const query = `
       INSERT INTO public.tenants (
-        id, name, slug, tax_id, schema_name, status, admin_pin,
+        id, name, slug, tax_id, schema_name, status, plan, modulos_activos, admin_pin,
         storage_quota_bytes, storage_used_bytes, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
     `;
     const values = [
@@ -58,6 +75,8 @@ export class PostgresTenantRepository implements ITenantRepository {
       tenant.taxId,
       tenant.schemaName,
       tenant.status,
+      tenant.plan,
+      JSON.stringify(tenant.modulosActivos),
       tenant.adminPin || '123456',
       tenant.storageQuotaBytes,
       tenant.storageUsedBytes,
@@ -76,11 +95,13 @@ export class PostgresTenantRepository implements ITenantRepository {
         slug = $2,
         tax_id = $3,
         status = $4,
-        admin_pin = $5,
-        storage_quota_bytes = $6,
-        storage_used_bytes = $7,
-        updated_at = $8
-      WHERE id = $9
+        plan = $5,
+        modulos_activos = $6,
+        admin_pin = $7,
+        storage_quota_bytes = $8,
+        storage_used_bytes = $9,
+        updated_at = $10
+      WHERE id = $11
       RETURNING *;
     `;
     const values = [
@@ -88,6 +109,8 @@ export class PostgresTenantRepository implements ITenantRepository {
       tenant.slug,
       tenant.taxId,
       tenant.status,
+      tenant.plan,
+      JSON.stringify(tenant.modulosActivos),
       tenant.adminPin || '123456',
       tenant.storageQuotaBytes,
       tenant.storageUsedBytes,
@@ -102,5 +125,104 @@ export class PostgresTenantRepository implements ITenantRepository {
   public async listAll(): Promise<Tenant[]> {
     const res = await dbPool.query('SELECT * FROM public.tenants ORDER BY created_at DESC');
     return res.rows.map((row) => this.mapRowToTenant(row));
+  }
+
+  public async listAllWithStats(): Promise<TenantStatsDTO[]> {
+    const tenants = await this.listAll();
+    const result: TenantStatsDTO[] = [];
+
+    for (const tenant of tenants) {
+      let sucursalesCount = 0;
+      let usuariosCount = 0;
+
+      try {
+        const sucRes = await dbPool.query(`
+          SELECT COUNT(*)::int AS count 
+          FROM information_schema.tables 
+          WHERE table_schema = $1 AND table_name = 'sucursales'
+        `, [tenant.schemaName]);
+
+        if (sucRes.rows[0]?.count > 0) {
+          const countRes = await dbPool.query(`SELECT COUNT(*)::int AS total FROM "${tenant.schemaName}".sucursales`);
+          sucursalesCount = countRes.rows[0]?.total || 0;
+        }
+
+        const usrRes = await dbPool.query(`
+          SELECT COUNT(*)::int AS count 
+          FROM information_schema.tables 
+          WHERE table_schema = $1 AND table_name = 'usuarios'
+        `, [tenant.schemaName]);
+
+        if (usrRes.rows[0]?.count > 0) {
+          const countRes = await dbPool.query(`SELECT COUNT(*)::int AS total FROM "${tenant.schemaName}".usuarios`);
+          usuariosCount = countRes.rows[0]?.total || 0;
+        }
+      } catch {
+        // En caso de que el esquema aún no esté inicializado
+      }
+
+      result.push({
+        tenant,
+        sucursalesCount,
+        usuariosCount,
+      });
+    }
+
+    return result;
+  }
+
+  public async getTenantDetalle(id: string): Promise<TenantDetalleDTO | null> {
+    const tenant = await this.findById(id);
+    if (!tenant) return null;
+
+    let sucursales: any[] = [];
+    let usuarios: any[] = [];
+
+    try {
+      const sucRes = await dbPool.query(
+        `SELECT id, nombre, codigo, direccion, telefono, ciudad, pin_acceso, activo 
+         FROM "${tenant.schemaName}".sucursales ORDER BY created_at ASC`
+      );
+      sucursales = sucRes.rows.map((r) => ({
+        id: r.id,
+        nombre: r.nombre,
+        codigo: r.codigo,
+        direccion: r.direccion,
+        telefono: r.telefono,
+        ciudad: r.ciudad,
+        pinAcceso: r.pin_acceso,
+        activo: r.activo,
+      }));
+    } catch {
+      // Ignorar si no existe tabla aún
+    }
+
+    try {
+      const usrRes = await dbPool.query(
+        `SELECT u.id, u.nombre, u.email, u.activo, u.sucursal_id, r.nombre as rol_nombre, r.slug as rol_slug
+         FROM "${tenant.schemaName}".usuarios u
+         LEFT JOIN "${tenant.schemaName}".roles r ON u.rol_id = r.id
+         ORDER BY u.created_at ASC`
+      );
+      usuarios = usrRes.rows.map((r) => ({
+        id: r.id,
+        nombre: r.nombre,
+        email: r.email,
+        activo: r.activo,
+        sucursalId: r.sucursal_id,
+        rolNombre: r.rol_nombre,
+        rolSlug: r.rol_slug,
+      }));
+    } catch {
+      // Ignorar si no existe tabla aún
+    }
+
+    return {
+      tenant,
+      sucursales,
+      usuarios,
+      sucursalesCount: sucursales.length,
+      usuariosCount: usuarios.length,
+    };
   }
 }

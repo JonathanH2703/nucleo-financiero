@@ -17,12 +17,19 @@ export class TenantSchemaManager {
           tax_id VARCHAR(50) NOT NULL UNIQUE,
           schema_name VARCHAR(100) NOT NULL UNIQUE,
           status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+          plan VARCHAR(50) NOT NULL DEFAULT 'basico',
+          modulos_activos JSONB NOT NULL DEFAULT '["pos", "inventario", "ajustes"]'::jsonb,
           admin_pin VARCHAR(20) NOT NULL DEFAULT '123456',
           storage_quota_bytes BIGINT NOT NULL DEFAULT 5368709120, -- 5GB por defecto
           storage_used_bytes BIGINT NOT NULL DEFAULT 0,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+
+        -- Garantizar compatibilidad hacia adelante con columnas agregadas
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS admin_pin VARCHAR(20) DEFAULT '123456';
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS plan VARCHAR(50) DEFAULT 'basico';
+        ALTER TABLE public.tenants ADD COLUMN IF NOT EXISTS modulos_activos JSONB DEFAULT '["pos", "inventario", "ajustes"]'::jsonb;
 
         CREATE INDEX IF NOT EXISTS idx_tenants_slug ON public.tenants(slug);
         CREATE INDEX IF NOT EXISTS idx_tenants_tax_id ON public.tenants(tax_id);

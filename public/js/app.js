@@ -248,9 +248,20 @@ class App {
           <!-- Badge de Empresa Activa (Aislamiento Visible) -->
           <div class="sidebar-tenant-badge">
             <div class="tenant-status-dot"></div>
-            <div class="tenant-badge-info">
+            <div class="tenant-badge-info" style="display: flex; flex-direction: column; gap: 2px;">
               <span class="tenant-badge-name">${tenant.name}</span>
-              <span class="tenant-badge-city">${tenant.city}</span>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span class="tenant-badge-city">${tenant.city || 'Colombia'}</span>
+                <span class="badge" style="font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; ${
+                  tenant.plan === 'intermedio'
+                    ? 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
+                    : (tenant.plan === 'personalizado'
+                      ? 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;'
+                      : 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;')
+                }">
+                  ${tenant.plan === 'intermedio' ? '⭐ Plan Crecimiento' : (tenant.plan === 'personalizado' ? '⚡ Personalizado' : '🌱 Plan Básico')}
+                </span>
+              </div>
             </div>
           </div>
 

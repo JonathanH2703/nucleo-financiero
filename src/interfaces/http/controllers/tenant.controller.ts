@@ -2,11 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { PostgresTenantRepository } from '../../../infrastructure/repositories/postgres-tenant.repository.js';
 import { CreateTenantUseCase } from '../../../application/use-cases/tenant/create-tenant.use-case.js';
-import { ListTenantsUseCase } from '../../../application/use-cases/tenant/list-tenants.use-case.js';
+import { TenantPlan } from '../../../domain/entities/tenant.entity.js';
 
 const tenantRepository = new PostgresTenantRepository();
 const createTenantUseCase = new CreateTenantUseCase(tenantRepository);
-const listTenantsUseCase = new ListTenantsUseCase(tenantRepository);
 
 const createTenantSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -15,6 +14,8 @@ const createTenantSchema = z.object({
     .min(2, 'El slug debe tener al menos 2 caracteres')
     .regex(/^[a-z0-9_-]+$/, 'El slug solo puede contener letras minúsculas, números, guiones y guiones bajos'),
   taxId: z.string().min(4, 'El NIT o identificación fiscal debe ser válido'),
+  plan: z.enum(['basico', 'intermedio', 'personalizado']).optional(),
+  modulosActivos: z.array(z.string()).optional(),
   adminPin: z.string().min(4, 'El PIN debe tener al menos 4 dígitos').optional(),
   storageQuotaBytes: z.number().positive().optional(),
 });
@@ -37,11 +38,33 @@ export class TenantController {
 
   public static async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const tenants = await listTenantsUseCase.execute();
+      const tenantsWithStats = await tenantRepository.listAllWithStats();
       res.json({
         success: true,
-        total: tenants.length,
-        data: tenants,
+        total: tenantsWithStats.length,
+        data: tenantsWithStats.map((item) => ({
+          ...item.tenant,
+          sucursalesCount: item.sucursalesCount,
+          usuariosCount: item.usuariosCount,
+        })),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async getDetalle(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = String(req.params.id);
+      const detalle = await tenantRepository.getTenantDetalle(id);
+      if (!detalle) {
+        res.status(404).json({ success: false, message: 'Empresa no encontrada' });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: detalle,
       });
     } catch (error) {
       next(error);
@@ -61,9 +84,19 @@ export class TenantController {
       if (req.body.taxId) tenant.taxId = req.body.taxId;
       if (req.body.adminPin) tenant.adminPin = req.body.adminPin;
       if (req.body.status) tenant.status = req.body.status;
+      if (req.body.plan) {
+        tenant.setPlan(req.body.plan as TenantPlan);
+      }
+      if (Array.isArray(req.body.modulosActivos)) {
+        tenant.setModulosActivos(req.body.modulosActivos);
+      }
 
       const updated = await tenantRepository.update(tenant);
-      res.json({ success: true, message: 'Empresa actualizada exitosamente', data: updated });
+      res.json({
+        success: true,
+        message: 'Configuración de empresa y módulos actualizada exitosamente',
+        data: updated,
+      });
     } catch (error) {
       next(error);
     }

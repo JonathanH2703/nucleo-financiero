@@ -97,6 +97,10 @@ export class ApiClient {
     return this.request('/tenants');
   }
 
+  static async getTenantDetalle(id) {
+    return this.request(`/tenants/${id}/detalle`);
+  }
+
   static async createTenant(tenantData) {
     return this.request('/tenants', {
       method: 'POST',
@@ -108,6 +112,13 @@ export class ApiClient {
     return this.request(`/tenants/${id}`, {
       method: 'PUT',
       body: JSON.stringify(tenantData),
+    });
+  }
+
+  static async updateTenantPlan(id, { plan, modulosActivos }) {
+    return this.request(`/tenants/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ plan, modulosActivos }),
     });
   }
 

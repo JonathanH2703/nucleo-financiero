@@ -116,6 +116,33 @@ class AppState {
     return ROLE_DEFINITIONS[slug] || ROLE_DEFINITIONS.mesero;
   }
 
+  isModuleActive(viewOrModuleId) {
+    if (!this.currentUser) return false;
+    if (this.currentUser.esSuperAdmin || this.getRoleSlug() === 'super_admin') return true;
+    if (!this.currentTenant) return true;
+
+    const activeList = this.currentTenant.modulosActivos || (
+      this.currentTenant.plan === 'intermedio'
+        ? ['pos', 'inventario', 'facturacion', 'compras', 'empresas', 'reportes', 'ajustes']
+        : ['pos', 'inventario', 'ajustes']
+    );
+
+    // Vistas base de administración interna que se conservan si el rol lo permite
+    if (['dashboard', 'ajustes', 'tenants', 'rbac'].includes(viewOrModuleId)) {
+      return true;
+    }
+
+    if (viewOrModuleId === 'facturacion') return activeList.includes('facturacion');
+    if (viewOrModuleId === 'empresas' || viewOrModuleId === 'clientes') return activeList.includes('empresas');
+    if (viewOrModuleId === 'pos') return activeList.includes('pos');
+    if (viewOrModuleId === 'inventario') return activeList.includes('inventario');
+    if (viewOrModuleId === 'contabilidad') return activeList.includes('contabilidad');
+    if (viewOrModuleId === 'reportes') return activeList.includes('reportes');
+    if (viewOrModuleId === 'compras') return activeList.includes('compras');
+
+    return activeList.includes(viewOrModuleId);
+  }
+
   canAccessView(viewName) {
     if (!this.currentUser) return viewName === 'login';
     if (viewName === 'login') return true;
@@ -123,6 +150,11 @@ class AppState {
     const slug = this.getRoleSlug();
     if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
       return true; // Bypass total para Super Administrador
+    }
+
+    // Restricción por plan del tenant (Feature Flags)
+    if (!this.isModuleActive(viewName)) {
+      return false;
     }
 
     const roleDef = this.getRoleDefinition();
@@ -139,11 +171,12 @@ class AppState {
     if (this.currentUser.esSuperAdmin || slug === 'super_admin') {
       return ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
     }
-    if (slug === 'admin_negocio') {
-      return ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'];
-    }
-    const roleDef = this.getRoleDefinition();
-    return roleDef?.allowedViews || ['pos', 'ajustes'];
+
+    const baseViews = (slug === 'admin_negocio')
+      ? ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes']
+      : (this.getRoleDefinition()?.allowedViews || ['pos', 'ajustes']);
+
+    return baseViews.filter((view) => this.isModuleActive(view));
   }
 
   setClienteSeleccionadoPreviamente(cliente) {
@@ -185,10 +218,19 @@ class AppState {
 
   setTenant(tenantOrSlug) {
     if (typeof tenantOrSlug === 'object' && tenantOrSlug !== null) {
+      const plan = tenantOrSlug.plan || 'basico';
+      const modulosActivos = Array.isArray(tenantOrSlug.modulosActivos)
+        ? tenantOrSlug.modulosActivos
+        : (plan === 'intermedio'
+          ? ['pos', 'inventario', 'facturacion', 'compras', 'empresas', 'reportes', 'ajustes']
+          : ['pos', 'inventario', 'ajustes']);
+
       this.currentTenant = {
         ...tenantOrSlug,
         nit: tenantOrSlug.taxId || tenantOrSlug.nit || 'NIT',
         category: tenantOrSlug.category || 'Comercio / Empresa',
+        plan,
+        modulosActivos,
         sucursales: tenantOrSlug.sucursales || ['Sede Principal'],
       };
       sessionStorage.setItem('nf_tenant_slug', this.currentTenant.slug);

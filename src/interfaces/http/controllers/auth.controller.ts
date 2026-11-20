@@ -57,6 +57,8 @@ export class AuthController {
             slug: tenant.slug,
             taxId: tenant.taxId,
             schemaName: tenant.schemaName,
+            plan: tenant.plan,
+            modulosActivos: tenant.modulosActivos,
           },
           usuario: {
             id: `admin_${tenant.id}`,
@@ -93,6 +95,8 @@ export class AuthController {
             slug: tenant.slug,
             taxId: tenant.taxId,
             schemaName: tenant.schemaName,
+            plan: tenant.plan,
+            modulosActivos: tenant.modulosActivos,
           },
           sucursal: {
             id: sucursal.id,
@@ -138,6 +142,8 @@ export class AuthController {
             slug: tenant.slug,
             taxId: tenant.taxId,
             schemaName: tenant.schemaName,
+            plan: tenant.plan,
+            modulosActivos: tenant.modulosActivos,
           },
           sucursal: usuario.sucursalId ? {
             id: usuario.sucursalId,
@@ -199,6 +205,8 @@ export class AuthController {
           name: 'Plataforma Núcleo Financiero',
           slug: 'public',
           taxId: '000000000',
+          plan: 'master',
+          modulosActivos: ['dashboard', 'pos', 'inventario', 'facturacion', 'compras', 'empresas', 'contabilidad', 'reportes', 'tenants', 'rbac', 'ajustes'],
         },
         usuario: {
           id: 'usr_super_admin_master',
