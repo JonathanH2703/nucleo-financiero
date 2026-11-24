@@ -53,8 +53,20 @@ export class InventarioView {
     return `$ ${Number(val || 0).toLocaleString('es-CO')}`;
   }
 
+  static getPlanCapabilities() {
+    const plan = state.currentTenant?.plan || 'basico';
+    const modulos = Array.isArray(state.currentTenant?.modulosActivos) ? state.currentTenant.modulosActivos : [];
+    const isBasic = plan === 'basico';
+    const hasDian = !isBasic || modulos.includes('facturacion');
+    const hasMultiBodega = !isBasic;
+    return { isBasic, hasDian, hasMultiBodega };
+  }
+
   static render() {
-    const isSmallBusiness = state.currentTenant?.plan === 'basico';
+    const { isBasic, hasDian, hasMultiBodega } = this.getPlanCapabilities();
+    if (!hasMultiBodega && this.activeTab === 'bodegas') {
+      this.activeTab = 'catalogo';
+    }
 
     this.container.innerHTML = `
       <div class="inventario-view-container" style="max-width: 1260px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; padding-bottom: 50px;">
@@ -72,11 +84,11 @@ export class InventarioView {
                 <div style="display: flex; align-items: center; gap: 8px; margin-top: 3px;">
                   <span style="font-size: 13px; color: var(--text-muted);">${this.escapeHtml(state.currentTenant?.name || '')}</span>
                   <span class="badge" style="font-size: 11px; font-weight: 800; ${
-                    isSmallBusiness
+                    isBasic
                       ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;'
                       : 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
                   }">
-                    ${isSmallBusiness ? 'Modo Comercio Ágil' : 'Modo Integral Multi-Bodega'}
+                    ${isBasic ? 'Modo Comercio Ágil' : 'Modo Integral Multi-Bodega'}
                   </span>
                 </div>
               </div>
@@ -129,10 +141,14 @@ export class InventarioView {
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
             <div style="width: 44px; height: 44px; border-radius: 12px; background: #faf5ff; color: #7c3aed; display: flex; align-items: center; justify-content: center;">${Icons.building(20)}</div>
             <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Bodega Activa</div>
-              <select id="select-bodega-activa" style="width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main); background: transparent; border: none; outline: none; cursor: pointer; padding: 2px 0; text-overflow: ellipsis;">
-                <option value="">Cargando bodegas...</option>
-              </select>
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${hasMultiBodega ? 'Bodega Activa' : 'Punto de Despacho'}</div>
+              ${hasMultiBodega ? `
+                <select id="select-bodega-activa" style="width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main); background: transparent; border: none; outline: none; cursor: pointer; padding: 2px 0; text-overflow: ellipsis;">
+                  <option value="">Cargando bodegas...</option>
+                </select>
+              ` : `
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-main); padding: 2px 0;">Mostrador / Sede Única</div>
+              `}
             </div>
           </div>
         </div>
@@ -143,14 +159,16 @@ export class InventarioView {
             ${Icons.package(15)} Catálogo & Existencias
           </button>
           <button type="button" class="inv-tab-btn ${this.activeTab === 'kardex' ? 'active' : ''}" data-tab="kardex" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'kardex' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'kardex' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
-            ${Icons.fileText(15)} Kardex de Movimientos
+            ${Icons.fileText(15)} ${isBasic ? 'Movimientos de Stock' : 'Kardex de Movimientos'}
           </button>
           <button type="button" class="inv-tab-btn ${this.activeTab === 'ajustes' ? 'active' : ''}" data-tab="ajustes" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'ajustes' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'ajustes' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
-            ${Icons.ajustes(15)} Ajustes & Cuadres Físicos
+            ${Icons.ajustes(15)} ${isBasic ? 'Cuadre Físico' : 'Ajustes & Cuadres Físicos'}
           </button>
-          <button type="button" class="inv-tab-btn ${this.activeTab === 'bodegas' ? 'active' : ''}" data-tab="bodegas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'bodegas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'bodegas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
-            ${Icons.building(15)} Bodegas & Ubicaciones
-          </button>
+          ${hasMultiBodega ? `
+            <button type="button" class="inv-tab-btn ${this.activeTab === 'bodegas' ? 'active' : ''}" data-tab="bodegas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'bodegas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'bodegas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
+              ${Icons.building(15)} Bodegas & Ubicaciones
+            </button>
+          ` : ''}
         </div>
 
         <!-- Contenedor Dinámico -->
@@ -172,15 +190,17 @@ export class InventarioView {
           </div>
 
           <form id="form-crear-producto">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 12px; margin-bottom: 14px;">
+            <div style="display: grid; grid-template-columns: ${hasDian ? '1fr 1fr 2fr' : '1fr 2fr'}; gap: 12px; margin-bottom: 14px;">
               <div>
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">SKU / Código *</label>
-                <input type="text" id="prod-codigo" required placeholder="Ej: CAF-500" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 700; box-sizing: border-box;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">${hasDian ? 'SKU / Código *' : 'Código (opcional)'}</label>
+                <input type="text" id="prod-codigo" ${hasDian ? 'required' : ''} placeholder="Ej: CAF-500" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 700; box-sizing: border-box;">
               </div>
-              <div>
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Código Barras</label>
-                <input type="text" id="prod-barcode" placeholder="EAN-13 opcional" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); box-sizing: border-box;">
-              </div>
+              ${hasDian ? `
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Código Barras</label>
+                  <input type="text" id="prod-barcode" placeholder="EAN-13 opcional" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); box-sizing: border-box;">
+                </div>
+              ` : ''}
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Nombre del Producto *</label>
                 <input type="text" id="prod-nombre" required placeholder="Ej: Café Especial 500g" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 600; box-sizing: border-box;">
@@ -211,7 +231,7 @@ export class InventarioView {
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+            <div style="display: grid; grid-template-columns: ${hasDian ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 12px; margin-bottom: 8px;">
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Costo Unitario ($)</label>
                 <input type="number" id="prod-costo" min="0" step="any" value="0" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 600; box-sizing: border-box;">
@@ -220,15 +240,17 @@ export class InventarioView {
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Precio Venta ($) *</label>
                 <input type="number" id="prod-precio" required min="0" step="any" placeholder="5000" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: #059669; font-weight: 800; box-sizing: border-box;">
               </div>
-              <div>
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Impuesto DIAN</label>
-                <select id="prod-impuesto" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); box-sizing: border-box;">
-                  <option value="EXCLUIDO">Excluido / Exento (0%)</option>
-                  <option value="INC_8">Impoconsumo (8%)</option>
-                  <option value="IVA_19">IVA General (19%)</option>
-                  <option value="IVA_5">IVA Reducido (5%)</option>
-                </select>
-              </div>
+              ${hasDian ? `
+                <div>
+                  <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Impuesto DIAN</label>
+                  <select id="prod-impuesto" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); box-sizing: border-box;">
+                    <option value="EXCLUIDO">Excluido / Exento (0%)</option>
+                    <option value="INC_8">Impoconsumo (8%)</option>
+                    <option value="IVA_19">IVA General (19%)</option>
+                    <option value="IVA_5">IVA Reducido (5%)</option>
+                  </select>
+                </div>
+              ` : ''}
             </div>
             <div id="prod-margen-preview" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; min-height: 16px;"></div>
 
@@ -604,6 +626,7 @@ export class InventarioView {
   }
 
   static renderKardexTab() {
+    const { isBasic } = this.getPlanCapabilities();
     let filtered = this.kardex || [];
     if (this.kardexFilterTipo !== 'TODOS') {
       filtered = filtered.filter(m => m.tipo === this.kardexFilterTipo);
@@ -616,8 +639,8 @@ export class InventarioView {
       <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: var(--shadow-sm);">
         <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">${Icons.fileText(16)} Historial Inmutable de Kardex</h3>
-            <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Trazabilidad cronológica con saldo anterior y nuevo por cada movimiento.</p>
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">${Icons.fileText(16)} ${isBasic ? 'Historial de Entradas y Salidas' : 'Historial Inmutable de Kardex'}</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">${isBasic ? 'Control ágil de ingresos, ventas y salidas de mercancía.' : 'Trazabilidad cronológica con saldo anterior y nuevo por cada movimiento.'}</p>
           </div>
 
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
@@ -626,9 +649,8 @@ export class InventarioView {
               <option value="ENTRADA" ${this.kardexFilterTipo === 'ENTRADA' ? 'selected' : ''}>ENTRADA</option>
               <option value="VENTA" ${this.kardexFilterTipo === 'VENTA' ? 'selected' : ''}>VENTA</option>
               <option value="SALIDA" ${this.kardexFilterTipo === 'SALIDA' ? 'selected' : ''}>SALIDA</option>
-              <option value="MERMA" ${this.kardexFilterTipo === 'MERMA' ? 'selected' : ''}>MERMA</option>
               <option value="AJUSTE_POSITIVO" ${this.kardexFilterTipo === 'AJUSTE_POSITIVO' ? 'selected' : ''}>AJUSTE (+)</option>
-              <option value="AJUSTE_NEGATIVO" ${this.kardexFilterTipo === 'AJUSTE_NEGATIVO' ? 'selected' : ''}>AJUSTE (-)</option>
+              <option value="AJUSTE_NEGATIVO" ${this.kardexFilterTipo === 'AJUSTE_NEGATIVO' ? 'selected' : ''}>MERMA / AJUSTE (-)</option>
             </select>
 
             <select id="kardex-filter-prod" style="padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 12px; font-weight: 600; max-width: 200px;">
@@ -1058,14 +1080,14 @@ export class InventarioView {
 
         try {
           const sku = document.getElementById('prod-codigo').value.trim();
-          const codigoBarras = document.getElementById('prod-barcode').value.trim();
+          const codigoBarras = document.getElementById('prod-barcode')?.value?.trim() || '';
           const nombre = document.getElementById('prod-nombre').value.trim();
           const descripcion = document.getElementById('prod-descripcion').value.trim();
           const categoriaId = document.getElementById('prod-categoria').value;
           const unidadMedida = document.getElementById('prod-unidad').value;
           const costo = Number(document.getElementById('prod-costo').value || 0);
           const precioBase = Number(document.getElementById('prod-precio').value || 0);
-          const tipoImpuesto = document.getElementById('prod-impuesto').value;
+          const tipoImpuesto = document.getElementById('prod-impuesto')?.value || 'EXCLUIDO';
           const stockInicial = Number(document.getElementById('prod-stock-inicial').value || 0);
           const stockMinimo = Number(document.getElementById('prod-stock-minimo').value || 5);
           const esServicio = Boolean(document.getElementById('prod-es-servicio')?.checked);
@@ -1282,14 +1304,16 @@ export class InventarioView {
 
     if (producto) {
       document.getElementById('prod-codigo').value = producto.sku || '';
-      document.getElementById('prod-barcode').value = producto.codigoBarras || '';
+      const elBarcode = document.getElementById('prod-barcode');
+      if (elBarcode) elBarcode.value = producto.codigoBarras || '';
       document.getElementById('prod-nombre').value = producto.nombre || '';
       document.getElementById('prod-descripcion').value = producto.descripcion || '';
       if (selCat && producto.categoriaId) selCat.value = producto.categoriaId;
       document.getElementById('prod-unidad').value = producto.unidadMedida || 'UNIDAD';
       document.getElementById('prod-costo').value = producto.costo ?? 0;
       document.getElementById('prod-precio').value = producto.precioBase ?? 0;
-      document.getElementById('prod-impuesto').value = producto.tipoImpuesto || 'EXCLUIDO';
+      const elImpuesto = document.getElementById('prod-impuesto');
+      if (elImpuesto) elImpuesto.value = producto.tipoImpuesto || 'EXCLUIDO';
 
       const isS = Boolean(producto.esServicio);
       if (checkServicio) checkServicio.checked = isS;
