@@ -95,6 +95,14 @@ export class CobrarComandaUseCase {
       if (targetBodegaId) {
         for (const item of comanda.items) {
           try {
+            // Si el ítem es un servicio, no descuenta inventario físico
+            if (this.posRepo.getProductoById) {
+              const prod = await this.posRepo.getProductoById(schemaName, item.productoId);
+              if (prod && prod.esServicio) {
+                continue;
+              }
+            }
+
             await this.inventarioRepo.registrarMovimiento(
               schemaName,
               new MovimientoInventario({

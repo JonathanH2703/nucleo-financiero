@@ -710,3 +710,35 @@ html[data-theme="dark"] .summary-total-line .amount {
   }
 }
 
+/* ==========================================================================
+   IMPRESIÓN DE TIRILLA TÉRMICA (58mm / 80mm) POS
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #thermal-receipt-printable, #thermal-receipt-printable * {
+    visibility: visible !important;
+  }
+  #thermal-receipt-printable {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 78mm !important;
+    max-width: 78mm !important;
+    margin: 0 !important;
+    padding: 2mm 1mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  @page {
+    size: auto;
+    margin: 2mm;
+  }
+}
+

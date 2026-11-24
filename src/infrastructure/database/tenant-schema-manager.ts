@@ -198,6 +198,7 @@ export class TenantSchemaManager {
           requiere_kds BOOLEAN NOT NULL DEFAULT false,
           stock_actual NUMERIC(12, 2) NOT NULL DEFAULT 0,
           stock_minimo NUMERIC(12, 2) NOT NULL DEFAULT 5,
+          es_servicio BOOLEAN NOT NULL DEFAULT false,
           activo BOOLEAN NOT NULL DEFAULT true,
           imagen_url VARCHAR(500),
           imagen_key VARCHAR(500),
@@ -209,6 +210,8 @@ export class TenantSchemaManager {
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+
+        ALTER TABLE "${schemaName}".productos ADD COLUMN IF NOT EXISTS es_servicio BOOLEAN NOT NULL DEFAULT false;
 
         CREATE INDEX IF NOT EXISTS idx_productos_categoria ON "${schemaName}".productos(categoria_id);
         CREATE INDEX IF NOT EXISTS idx_productos_codigo_barras ON "${schemaName}".productos(codigo_barras);

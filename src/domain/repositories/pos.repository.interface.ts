@@ -25,6 +25,7 @@ export interface IPosRepository {
   listKdsItems(schemaName: string): Promise<{ item: ItemComanda; comandaNumero: string; puntoAtencion?: string }[]>;
   updateComandaEstado(schemaName: string, id: string, estado: EstadoComanda): Promise<void>;
   updateItemKdsEstado(schemaName: string, itemId: string, estado: EstadoPreparacionItem): Promise<void>;
+  getProductoById?(schemaName: string, id: string): Promise<Producto | null>;
 }
 
 export interface IFacturacionRepository {

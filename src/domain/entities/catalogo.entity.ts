@@ -52,6 +52,7 @@ export interface ProductoProps {
   requiereKds?: boolean;
   stockActual?: number;
   stockMinimo?: number;
+  esServicio?: boolean;
   activo?: boolean;
   // Campos extendidos para inventario, imágenes y variantes
   imagenUrl?: string;
@@ -79,6 +80,7 @@ export class Producto {
   public readonly requiereKds: boolean;
   public readonly stockActual: number;
   public readonly stockMinimo: number;
+  public readonly esServicio: boolean;
   public readonly activo: boolean;
   public readonly imagenUrl?: string;
   public readonly imagenKey?: string;
@@ -104,6 +106,7 @@ export class Producto {
     this.requiereKds = props.requiereKds ?? false;
     this.stockActual = Number(props.stockActual ?? 0);
     this.stockMinimo = Number(props.stockMinimo ?? 5);
+    this.esServicio = Boolean(props.esServicio);
     this.activo = props.activo ?? true;
     this.imagenUrl = props.imagenUrl;
     this.imagenKey = props.imagenKey;

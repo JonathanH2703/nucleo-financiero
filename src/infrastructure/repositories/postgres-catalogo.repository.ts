@@ -97,12 +97,12 @@ export class PostgresCatalogoRepository implements ICatalogoRepository {
       `INSERT INTO "${s}".productos (
         id, categoria_id, nombre, descripcion, sku, codigo_barras,
         precio_base, costo, tipo_impuesto, unidad_medida, requiere_kds,
-        stock_actual, stock_minimo, activo, imagen_url, imagen_key, marca,
+        stock_actual, stock_minimo, es_servicio, activo, imagen_url, imagen_key, marca,
         tiene_lotes, tiene_vencimiento, unidad_medida_compra, factor_conversion_compra,
         created_at, updated_at
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
-        $15, $16, $17, $18, $19, $20, $21, $22, $23
+        $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
       )`,
       [
         p.id,
@@ -118,6 +118,7 @@ export class PostgresCatalogoRepository implements ICatalogoRepository {
         p.requiereKds,
         p.stockActual,
         p.stockMinimo,
+        p.esServicio ?? false,
         p.activo,
         p.imagenUrl || null,
         p.imagenKey || null,
@@ -155,6 +156,7 @@ export class PostgresCatalogoRepository implements ICatalogoRepository {
       requiereKds: 'requiere_kds',
       stockActual: 'stock_actual',
       stockMinimo: 'stock_minimo',
+      esServicio: 'es_servicio',
       activo: 'activo',
       imagenUrl: 'imagen_url',
       imagenKey: 'imagen_key',
@@ -571,6 +573,7 @@ export class PostgresCatalogoRepository implements ICatalogoRepository {
       requiereKds: Boolean(r.requiere_kds),
       stockActual: Number(r.stock_actual),
       stockMinimo: Number(r.stock_minimo),
+      esServicio: Boolean(r.es_servicio),
       activo: Boolean(r.activo),
       imagenUrl: r.imagen_url,
       imagenKey: r.imagen_key,

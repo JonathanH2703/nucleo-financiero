@@ -191,7 +191,14 @@ export class InventarioView {
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+            <div style="margin-bottom: 14px; background: rgba(37, 99, 235, 0.08); border: 1px dashed rgba(37, 99, 235, 0.4); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="prod-es-servicio" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb;">
+              <label for="prod-es-servicio" style="font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer;">
+                💼 Es un Servicio / Mano de Obra (No descuenta stock físico ni genera alertas)
+              </label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;" id="prod-stock-inputs-row">
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Stock Inicial</label>
                 <input type="number" id="prod-stock-inicial" min="0" value="0" style="width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 700;">
@@ -285,7 +292,7 @@ export class InventarioView {
     }
 
     if (this.filterStockBajo) {
-      filtered = filtered.filter(p => Number(p.stockActual || 0) <= Number(p.stockMinimo || 5));
+      filtered = filtered.filter(p => !p.esServicio && Number(p.stockActual || 0) <= Number(p.stockMinimo || 5));
     }
 
     return `
@@ -338,16 +345,20 @@ export class InventarioView {
                 </thead>
                 <tbody>
                   ${filtered.map(p => {
+                    const isServicio = Boolean(p.esServicio);
                     const stock = Number(p.stockActual || 0);
                     const min = Number(p.stockMinimo || 5);
-                    const isLow = stock <= min;
+                    const isLow = !isServicio && stock <= min;
                     const cat = this.categorias.find(c => c.id === p.categoriaId);
 
                     return `
                       <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;" onmouseover="this.style.background='var(--bg-subtle)'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 12px 16px; font-family: monospace; font-weight: 700; color: var(--text-muted);">${p.codigo || 'S/C'}</td>
                         <td style="padding: 12px 16px;">
-                          <div style="font-weight: 700; color: var(--text-main);">${p.nombre}</div>
+                          <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                            ${p.nombre}
+                            ${isServicio ? `<span style="font-size: 10px; font-weight: 800; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 1px 6px;">💼 SERVICIO</span>` : ''}
+                          </div>
                           ${p.descripcion ? `<div style="font-size: 11px; color: var(--text-muted);">${p.descripcion}</div>` : ''}
                         </td>
                         <td style="padding: 12px 16px;">
@@ -357,18 +368,28 @@ export class InventarioView {
                         <td style="padding: 12px 16px; text-align: right; color: var(--text-muted);">$ ${Number(p.costo || 0).toLocaleString('es-CO')}</td>
                         <td style="padding: 12px 16px; text-align: right; font-weight: 800; color: #059669;">$ ${Number(p.precioBase || 0).toLocaleString('es-CO')}</td>
                         <td style="padding: 12px 16px; text-align: center;">
-                          <span class="badge" style="${
-                            isLow
-                              ? 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800;'
-                              : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 800;'
-                          }">
-                            ${stock} ${isLow ? '⚠️' : '✓'}
-                          </span>
+                          ${isServicio ? `
+                            <span class="badge" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-weight: 800;">
+                              💼 SERVICIO
+                            </span>
+                          ` : `
+                            <span class="badge" style="${
+                              isLow
+                                ? 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800;'
+                                : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 800;'
+                            }">
+                              ${stock} ${isLow ? '⚠️' : '✓'}
+                            </span>
+                          `}
                         </td>
                         <td style="padding: 12px 16px; text-align: center;">
-                          <button type="button" class="btn-recargar-stock" data-id="${p.id}" data-nombre="${p.nombre}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                            + Stock
-                          </button>
+                          ${isServicio ? `
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">No aplica</span>
+                          ` : `
+                            <button type="button" class="btn-recargar-stock" data-id="${p.id}" data-nombre="${p.nombre}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                              + Stock
+                            </button>
+                          `}
                         </td>
                       </tr>
                     `;
@@ -541,8 +562,8 @@ export class InventarioView {
     const elBajo = document.getElementById('stat-stock-bajo');
     const selectBodega = document.getElementById('select-bodega-activa');
 
-    const totalStock = this.productos.reduce((acc, p) => acc + Number(p.stockActual || 0), 0);
-    const bajoStock = this.productos.filter(p => Number(p.stockActual || 0) <= Number(p.stockMinimo || 5)).length;
+    const totalStock = this.productos.reduce((acc, p) => acc + (p.esServicio ? 0 : Number(p.stockActual || 0)), 0);
+    const bajoStock = this.productos.filter(p => !p.esServicio && Number(p.stockActual || 0) <= Number(p.stockMinimo || 5)).length;
 
     if (elProds) elProds.textContent = String(this.productos.length);
     if (elStock) elStock.textContent = String(totalStock);
@@ -582,7 +603,41 @@ export class InventarioView {
             <option value="${c.id}">${c.nombre}</option>
           `).join('');
         }
+        const checkServicio = document.getElementById('prod-es-servicio');
+        const row = document.getElementById('prod-stock-inputs-row');
+        const stInit = document.getElementById('prod-stock-inicial');
+        const stMin = document.getElementById('prod-stock-minimo');
+        if (checkServicio) checkServicio.checked = false;
+        if (row) row.style.opacity = '1';
+        if (stInit) { stInit.disabled = false; stInit.value = '0'; }
+        if (stMin) { stMin.disabled = false; stMin.value = '5'; }
+
         if (modal) modal.style.display = 'flex';
+      });
+    }
+
+    // Toggle de servicio en creación
+    const checkServicioEl = document.getElementById('prod-es-servicio');
+    if (checkServicioEl) {
+      checkServicioEl.addEventListener('change', (e) => {
+        const isS = e.target.checked;
+        const row = document.getElementById('prod-stock-inputs-row');
+        const stInit = document.getElementById('prod-stock-inicial');
+        const stMin = document.getElementById('prod-stock-minimo');
+        if (row && stInit && stMin) {
+          if (isS) {
+            stInit.value = '0';
+            stMin.value = '0';
+            stInit.disabled = true;
+            stMin.disabled = true;
+            row.style.opacity = '0.4';
+          } else {
+            stInit.disabled = false;
+            stMin.disabled = false;
+            stMin.value = '5';
+            row.style.opacity = '1';
+          }
+        }
       });
     }
 
@@ -622,6 +677,7 @@ export class InventarioView {
           const precioBase = Number(document.getElementById('prod-precio').value || 0);
           const stockInicial = Number(document.getElementById('prod-stock-inicial').value || 0);
           const stockMinimo = Number(document.getElementById('prod-stock-minimo').value || 5);
+          const esServicio = Boolean(document.getElementById('prod-es-servicio')?.checked);
 
           const res = await ApiClient.createProducto({
             codigo,
@@ -630,8 +686,9 @@ export class InventarioView {
             unidadMedida,
             costo,
             precioBase,
-            stockInicial,
-            stockMinimo,
+            stockInicial: esServicio ? 0 : stockInicial,
+            stockMinimo: esServicio ? 0 : stockMinimo,
+            esServicio,
             bodegaId: this.selectedBodegaId || (this.bodegas[0]?.id),
           });
 

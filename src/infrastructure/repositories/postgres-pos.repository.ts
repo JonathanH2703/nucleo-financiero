@@ -64,6 +64,7 @@ export class PostgresPosRepository
       requiereKds: r.requiere_kds,
       stockActual: Number(r.stock_actual),
       stockMinimo: Number(r.stock_minimo),
+      esServicio: Boolean(r.es_servicio),
       activo: r.activo,
     }));
   }
@@ -87,6 +88,7 @@ export class PostgresPosRepository
       requiereKds: r.requiere_kds,
       stockActual: Number(r.stock_actual),
       stockMinimo: Number(r.stock_minimo),
+      esServicio: Boolean(r.es_servicio),
       activo: r.activo,
     });
   }
@@ -110,6 +112,7 @@ export class PostgresPosRepository
       requiereKds: r.requiere_kds,
       stockActual: Number(r.stock_actual),
       stockMinimo: Number(r.stock_minimo),
+      esServicio: Boolean(r.es_servicio),
       activo: r.activo,
     });
   }
