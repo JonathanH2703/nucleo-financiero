@@ -14,9 +14,13 @@ export class TenantsAdminView {
     this.container = container;
     this.tenants = [];
     this.sucursales = [];
+    this.allSucursales = [];
     this.activeTenantDetail = null;
     this.selectedTenant = state.currentTenant;
     this.activeTab = state.currentUser?.esSuperAdmin ? 'empresas' : 'sucursales';
+    this.sucFilter = '';
+    this.empPage = 1;
+    this.sucPage = 1;
     this.isLoading = true;
 
     this.render();
@@ -63,10 +67,10 @@ export class TenantsAdminView {
         ${isSuperAdmin ? `
           <div style="display: flex; gap: 10px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 2px;">
             <button type="button" class="admin-tab-btn ${this.activeTab === 'empresas' ? 'active' : ''}" data-tab="empresas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'empresas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'empresas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer;">
-              Empresas Clientes (${this.tenants.length})
+              Empresas Clientes (<span id="tab-count-empresas">${this.tenants.length}</span>)
             </button>
             <button type="button" class="admin-tab-btn ${this.activeTab === 'sucursales' ? 'active' : ''}" data-tab="sucursales" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'sucursales' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'sucursales' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer;">
-              Sedes Físicas (${this.sucursales.length})
+              Sedes Físicas (<span id="tab-count-sucursales">${isSuperAdmin ? this.allSucursales.length : this.sucursales.length}</span>)
             </button>
           </div>
         ` : ''}
@@ -219,9 +223,16 @@ export class TenantsAdminView {
       `;
     }
 
+    const pageSize = 6;
+    const currentPage = this.empPage || 1;
+    const totalPages = Math.max(1, Math.ceil(this.tenants.length / pageSize));
+    const validPage = Math.min(currentPage, totalPages);
+    const paged = this.tenants.slice((validPage - 1) * pageSize, validPage * pageSize);
+
     return `
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">${this.tenants.length} empresa${this.tenants.length !== 1 ? 's' : ''} registrada${this.tenants.length !== 1 ? 's' : ''}</div>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
-        ${this.tenants.map((t) => {
+        ${paged.map((t) => {
       const isIntermedio = t.plan === 'intermedio';
       const isPersonalizado = t.plan === 'personalizado';
       const modulos = Array.isArray(t.modulosActivos) ? t.modulosActivos : [];
@@ -296,33 +307,79 @@ export class TenantsAdminView {
           `;
     }).join('')}
       </div>
+      ${this.renderPagination(validPage, totalPages, 'emp')}
     `;
   }
 
   static renderSucursalesTab() {
-    if (this.sucursales.length === 0) {
+    const isSuperAdmin = Boolean(state.currentUser?.esSuperAdmin);
+    const sourceList = isSuperAdmin ? (this.allSucursales || []) : (this.sucursales || []);
+
+    // Aplicar filtro por empresa (solo super admin)
+    let filtered = sourceList;
+    if (isSuperAdmin && this.sucFilter) {
+      filtered = sourceList.filter(s => s.tenantSlug === this.sucFilter);
+    }
+
+    // Paginación
+    const pageSize = 8;
+    const currentPage = this.sucPage || 1;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const validPage = Math.min(currentPage, totalPages);
+    const paged = filtered.slice((validPage - 1) * pageSize, validPage * pageSize);
+
+    // Barra de filtros (solo super admin)
+    const filterBar = isSuperAdmin ? `
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; background: var(--bg-card); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap;">Filtrar por empresa:</label>
+          <select id="suc-filter-empresa" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13px; font-weight: 600; min-width: 220px;">
+            <option value="">Todas las empresas</option>
+            ${this.tenants.map(t => `<option value="${t.slug}" ${this.sucFilter === t.slug ? 'selected' : ''}>${t.name}</option>`).join('')}
+          </select>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted); margin-left: auto;">${filtered.length} sede${filtered.length !== 1 ? 's' : ''} registrada${filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+    ` : '';
+
+    if (paged.length === 0) {
       return `
+        ${filterBar}
         <div style="background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 50px; text-align: center;">
           <div style="color: var(--text-muted); margin-bottom: 12px;">${Icons.mapPin(36)}</div>
-          <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">No hay sucursales configuradas</h3>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Crea la primera sucursal para que tu personal pueda ingresar con un PIN exclusivo al punto de venta.</p>
-          <button type="button" class="btn-nueva-sucursal-trigger" style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">
-            + Registrar Primera Sucursal
-          </button>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">${this.sucFilter ? 'No hay sedes para esta empresa' : 'No hay sucursales configuradas'}</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+            ${this.sucFilter
+              ? 'La empresa seleccionada aún no tiene sedes registradas.'
+              : 'Crea la primera sucursal para que tu personal pueda ingresar con un PIN exclusivo al punto de venta.'}
+          </p>
+          ${!this.sucFilter ? `
+            <button type="button" class="btn-nueva-sucursal-trigger" style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">
+              + Registrar Primera Sucursal
+            </button>
+          ` : ''}
         </div>
       `;
     }
 
     return `
+      ${filterBar}
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px;">
-        ${this.sucursales.map((s) => `
+        ${paged.map((s) => `
           <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                 <span style="color: #059669;">${Icons.mapPin(20)}</span>
-                <span class="badge" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 11px;">
-                  CÓDIGO: ${s.codigo}
-                </span>
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                  ${isSuperAdmin && s.tenantName ? `
+                    <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-weight: 700; font-size: 10px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis;">
+                      ${s.tenantName}
+                    </span>
+                  ` : ''}
+                  <span class="badge" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 11px;">
+                    CÓDIGO: ${s.codigo}
+                  </span>
+                </div>
               </div>
               <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0;">${s.nombre}</h3>
               <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">${s.direccion || 'Sin dirección registrada'} · ${s.ciudad || 'Colombia'}</p>
@@ -332,10 +389,10 @@ export class TenantsAdminView {
                 <div>
                   <div style="font-size: 11px; font-weight: 700; color: #166534; text-transform: uppercase;">PIN de Acceso POS</div>
                   <div style="font-size: 20px; font-weight: 900; color: #15803d; letter-spacing: 4px; font-family: monospace;">
-                    ${s.pinAcceso || '1001'}
+                    ${s.pinAcceso || s.pin_acceso || '1001'}
                   </div>
                 </div>
-                <button type="button" class="btn-editar-pin" data-id="${s.id}" data-pin="${s.pinAcceso || '1001'}" data-nombre="${s.nombre}" style="background: #ffffff; border: 1px solid #86efac; color: #15803d; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                <button type="button" class="btn-editar-pin" data-id="${s.id}" data-pin="${s.pinAcceso || s.pin_acceso || '1001'}" data-nombre="${s.nombre}" style="background: #ffffff; border: 1px solid #86efac; color: #15803d; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
                   Actualizar PIN
                 </button>
               </div>
@@ -343,10 +400,42 @@ export class TenantsAdminView {
 
             <div style="font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
               <span>Tel: ${s.telefono || 'No registrado'}</span>
-              <span style="color: #059669; font-weight: 700;">● Sede Activa</span>
+              <span style="color: ${s.activo !== false ? '#059669' : '#dc2626'}; font-weight: 700;">● ${s.activo !== false ? 'Sede Activa' : 'Inactiva'}</span>
             </div>
           </div>
         `).join('')}
+      </div>
+      ${this.renderPagination(validPage, totalPages, 'suc')}
+    `;
+  }
+
+  static renderPagination(currentPage, totalPages, prefix) {
+    if (totalPages <= 1) return '';
+
+    const btnBase = 'padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;';
+    const btnActive = 'background: #2563eb; color: #fff; border: 1px solid #2563eb;';
+    const btnNormal = 'background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-subtle);';
+    const btnDisabled = 'opacity: 0.4; cursor: default; pointer-events: none;';
+
+    let pages = '';
+    for (let i = 1; i <= totalPages; i++) {
+      if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+        const isActive = i === currentPage;
+        pages += `<button type="button" class="page-btn" data-prefix="${prefix}" data-page="${i}" style="${btnBase} ${isActive ? btnActive : btnNormal}">${i}</button>`;
+      } else if ((i === 2 && currentPage > 4) || (i === totalPages - 1 && currentPage < totalPages - 3)) {
+        pages += '<span style="color: var(--text-muted); padding: 0 4px;">...</span>';
+      }
+    }
+
+    return `
+      <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+        <button type="button" class="page-btn" data-prefix="${prefix}" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''} style="${btnBase} ${currentPage <= 1 ? btnDisabled : btnNormal}">
+          Anterior
+        </button>
+        ${pages}
+        <button type="button" class="page-btn" data-prefix="${prefix}" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''} style="${btnBase} ${currentPage >= totalPages ? btnDisabled : btnNormal}">
+          Siguiente
+        </button>
       </div>
     `;
   }
@@ -359,9 +448,10 @@ export class TenantsAdminView {
       const promises = [ApiClient.listSucursales()];
       if (isSuperAdmin) {
         promises.push(ApiClient.listTenants());
+        promises.push(ApiClient.listAllSucursalesGlobal());
       }
 
-      const [sucRes, tenRes] = await Promise.all(promises);
+      const [sucRes, tenRes, globalSucRes] = await Promise.all(promises);
 
       if (sucRes && sucRes.success) {
         this.sucursales = sucRes.data || [];
@@ -371,6 +461,10 @@ export class TenantsAdminView {
 
       if (tenRes && tenRes.success) {
         this.tenants = tenRes.data || [];
+      }
+
+      if (globalSucRes && globalSucRes.success) {
+        this.allSucursales = globalSucRes.data || [];
       }
     } catch (err) {
       console.warn('Error cargando sucursales/tenants desde API:', err);
@@ -384,6 +478,12 @@ export class TenantsAdminView {
           : this.renderSucursalesTab();
         this.bindDynamicEvents();
       }
+
+      // Actualizar contadores de pestañas
+      const tabEmp = document.getElementById('tab-count-empresas');
+      const tabSuc = document.getElementById('tab-count-sucursales');
+      if (tabEmp) tabEmp.textContent = this.tenants.length;
+      if (tabSuc) tabSuc.textContent = isSuperAdmin ? this.allSucursales.length : this.sucursales.length;
     }
   }
 
@@ -616,6 +716,8 @@ export class TenantsAdminView {
     document.querySelectorAll('.admin-tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         this.activeTab = btn.getAttribute('data-tab');
+        if (this.activeTab === 'sucursales') { this.sucPage = 1; }
+        if (this.activeTab === 'empresas') { this.empPage = 1; }
         this.render();
         this.loadData();
       });
@@ -762,15 +864,54 @@ export class TenantsAdminView {
       });
     });
 
-    // Botón Seleccionar Tenant (Super Admin)
+    // Botón Ver Sucursales (filtra por empresa seleccionada)
     document.querySelectorAll('.btn-seleccionar-tenant').forEach((btn) => {
       btn.addEventListener('click', () => {
         const slug = btn.getAttribute('data-slug');
-        const found = this.tenants.find((t) => t.slug === slug);
-        state.setTenant(found || slug);
+        this.sucFilter = slug;
+        this.sucPage = 1;
         this.activeTab = 'sucursales';
         this.render();
-        this.loadData();
+      });
+    });
+
+    // Filtro de empresa en sedes
+    const sucFilterSelect = document.getElementById('suc-filter-empresa');
+    if (sucFilterSelect) {
+      sucFilterSelect.addEventListener('change', (e) => {
+        this.sucFilter = e.target.value;
+        this.sucPage = 1;
+        const content = document.getElementById('admin-content-area');
+        if (content) {
+          content.innerHTML = this.renderSucursalesTab();
+          this.bindDynamicEvents();
+        }
+        const tabSuc = document.getElementById('tab-count-sucursales');
+        if (tabSuc) {
+          const all = this.allSucursales || [];
+          const filtered = this.sucFilter ? all.filter(s => s.tenantSlug === this.sucFilter) : all;
+          tabSuc.textContent = filtered.length;
+        }
+      });
+    }
+
+    // Paginación
+    document.querySelectorAll('.page-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        const prefix = btn.getAttribute('data-prefix');
+        const page = parseInt(btn.getAttribute('data-page'), 10);
+        if (isNaN(page) || page < 1) return;
+        if (prefix === 'emp') this.empPage = page;
+        if (prefix === 'suc') this.sucPage = page;
+        const content = document.getElementById('admin-content-area');
+        if (content) {
+          const isSuperAdmin = Boolean(state.currentUser?.esSuperAdmin);
+          content.innerHTML = (this.activeTab === 'empresas' && isSuperAdmin)
+            ? this.renderEmpresasTab()
+            : this.renderSucursalesTab();
+          this.bindDynamicEvents();
+        }
       });
     });
 

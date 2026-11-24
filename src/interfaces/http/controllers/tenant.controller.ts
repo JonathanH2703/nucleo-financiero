@@ -101,4 +101,17 @@ export class TenantController {
       next(error);
     }
   }
+
+  public static async listAllSucursales(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const sucursales = await tenantRepository.listAllSucursalesGlobal();
+      res.json({
+        success: true,
+        total: sucursales.length,
+        data: sucursales,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

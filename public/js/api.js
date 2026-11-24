@@ -108,6 +108,10 @@ export class ApiClient {
     return this.request(`/tenants/${id}/detalle`);
   }
 
+  static async listAllSucursalesGlobal() {
+    return this.request('/tenants/sucursales-global');
+  }
+
   static async createTenant(tenantData) {
     return this.request('/tenants', {
       method: 'POST',

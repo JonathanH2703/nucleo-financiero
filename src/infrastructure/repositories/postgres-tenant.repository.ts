@@ -264,4 +264,37 @@ export class PostgresTenantRepository implements ITenantRepository {
       usuariosCount: usuarios.length,
     };
   }
+
+  public async listAllSucursalesGlobal(): Promise<any[]> {
+    const tenants = await this.listAll();
+    const allSucursales: any[] = [];
+
+    for (const tenant of tenants) {
+      try {
+        const res = await dbPool.query(
+          `SELECT id, nombre, codigo, direccion, telefono, ciudad, pin_acceso, activa
+           FROM "${tenant.schemaName}".sucursales ORDER BY created_at ASC`
+        );
+        for (const row of res.rows) {
+          allSucursales.push({
+            id: row.id,
+            nombre: row.nombre,
+            codigo: row.codigo,
+            direccion: row.direccion,
+            telefono: row.telefono,
+            ciudad: row.ciudad,
+            pinAcceso: row.pin_acceso,
+            activo: row.activa,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            tenantSlug: tenant.slug,
+          });
+        }
+      } catch (err: any) {
+        logger.warn({ err: err?.message, schema: tenant.schemaName }, 'listAllSucursalesGlobal: error leyendo sucursales');
+      }
+    }
+
+    return allSucursales;
+  }
 }
