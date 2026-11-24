@@ -12,9 +12,13 @@ export class CreateProductoUseCase {
     if (props.precioBase === undefined || props.precioBase < 0) {
       throw new Error('El precio base debe ser un valor numérico mayor o igual a cero.');
     }
+    if (props.costo !== undefined && props.costo < 0) {
+      throw new Error('El costo unitario no puede ser negativo.');
+    }
 
     const producto = new Producto({
       ...props,
+      sku: props.sku?.trim() || (props as any).codigo?.trim() || undefined,
       id: props.id || `prod_${uuidv4().substring(0, 8)}`,
     });
 

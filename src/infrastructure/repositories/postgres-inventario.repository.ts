@@ -36,9 +36,14 @@ export class PostgresInventarioRepository implements IInventarioRepository {
 
       // Calcular saldo según tipo de movimiento
       const tiposEntrada: TipoMovimientoInventario[] = ['ENTRADA', 'AJUSTE_POSITIVO', 'TRASLADO_ENTRADA', 'DEVOLUCION'];
+      const tiposSalidaEstricta: TipoMovimientoInventario[] = ['SALIDA', 'AJUSTE_NEGATIVO', 'TRASLADO_SALIDA'];
+
       if (tiposEntrada.includes(mov.tipo)) {
         saldoNuevo = saldoAnterior + mov.cantidad;
       } else {
+        if (tiposSalidaEstricta.includes(mov.tipo) && saldoAnterior < mov.cantidad) {
+          throw new Error(`Stock insuficiente en bodega (disponible: ${saldoAnterior}, solicitado: ${mov.cantidad}).`);
+        }
         saldoNuevo = saldoAnterior - mov.cantidad;
       }
 

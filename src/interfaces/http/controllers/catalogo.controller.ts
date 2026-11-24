@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { PostgresCatalogoRepository } from '../../../infrastructure/repositories/postgres-catalogo.repository.js';
+import { PostgresInventarioRepository } from '../../../infrastructure/repositories/postgres-inventario.repository.js';
+import { PostgresBodegaRepository } from '../../../infrastructure/repositories/postgres-bodega.repository.js';
+import { MovimientoInventario } from '../../../domain/entities/inventario.entity.js';
 import { CreateProductoUseCase } from '../../../application/use-cases/catalogo/create-producto.use-case.js';
 import { UpdateProductoUseCase } from '../../../application/use-cases/catalogo/update-producto.use-case.js';
 import { CreateCategoriaUseCase } from '../../../application/use-cases/catalogo/create-categoria.use-case.js';
@@ -9,6 +12,8 @@ import { ListaPrecio, PrecioProducto } from '../../../domain/entities/lista-prec
 import { v4 as uuidv4 } from 'uuid';
 
 const catalogoRepo = new PostgresCatalogoRepository();
+const inventarioRepo = new PostgresInventarioRepository();
+const bodegaRepo = new PostgresBodegaRepository();
 const createProductoUseCase = new CreateProductoUseCase(catalogoRepo);
 const updateProductoUseCase = new UpdateProductoUseCase(catalogoRepo);
 const createCategoriaUseCase = new CreateCategoriaUseCase(catalogoRepo);
@@ -119,7 +124,36 @@ export class CatalogoController {
   public static async createProducto(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const tenant = (req as any).tenant;
+      const stockInicial = Number(req.body.stockInicial || 0);
       const producto = await createProductoUseCase.execute(tenant.schemaName, req.body);
+
+      // Si tiene stock inicial físico (> 0), asentar en stock_bodegas y Kardex para mantener consistencia multi-bodega
+      if (!producto.esServicio && stockInicial > 0) {
+        let bodegaId = req.body.bodegaId as string | undefined;
+        if (!bodegaId) {
+          const bodegas = await bodegaRepo.listBodegas(tenant.schemaName);
+          bodegaId = bodegas[0]?.id;
+        }
+        if (bodegaId) {
+          await inventarioRepo.registrarMovimiento(
+            tenant.schemaName,
+            new MovimientoInventario({
+              id: `mov_${uuidv4().substring(0, 10)}`,
+              productoId: producto.id,
+              bodegaId,
+              tipo: 'ENTRADA',
+              cantidad: stockInicial,
+              costoUnitario: producto.costo || 0,
+              saldoAnterior: 0,
+              saldoNuevo: stockInicial,
+              referenciaDocumento: producto.sku || producto.id,
+              referenciaTipo: 'INVENTARIO_INICIAL',
+              notas: 'Stock inicial al registrar producto',
+            })
+          );
+        }
+      }
+
       res.status(201).json({ success: true, message: 'Producto creado exitosamente', data: producto });
     } catch (err) {
       next(err);
