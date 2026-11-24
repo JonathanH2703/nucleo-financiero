@@ -139,8 +139,8 @@ export class LoginView {
                   type="text" 
                   id="nit-input" 
                   class="form-input" 
-                  placeholder="Ej: 901.445.772-0" 
-                  value="901.445.772-0" 
+                  placeholder="Ej: 900.123.456-7" 
+                  value="" 
                   required 
                   autofocus
                   autocomplete="organization"
@@ -164,7 +164,7 @@ export class LoginView {
                     class="form-input" 
                     placeholder="••••" 
                     maxlength="6" 
-                    value="123456" 
+                    value="" 
                     style="font-size: 22px; letter-spacing: 8px; text-align: center; font-weight: 800;" 
                     required
                     autocomplete="current-password"
@@ -197,13 +197,110 @@ export class LoginView {
               </button>
             </form>
 
+            <!-- Registro de Nueva Empresa / Demostración -->
+            <div style="margin-top: 16px; text-align: center;">
+              <button type="button" id="btn-open-register-tenant" style="background: none; border: none; font-size: 13px; color: var(--color-primary, #0284c7); font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: underline; padding: 4px 8px;">
+                ✨ ¿No tienes empresa registrada? Registrar mi negocio
+              </button>
+            </div>
+
+            <!-- Demo Hint -->
+            <div style="margin-top: 14px; padding: 10px 14px; background: rgba(2, 132, 199, 0.05); border-radius: 10px; border: 1px dashed rgba(2, 132, 199, 0.3); font-size: 11.5px; color: #475569; line-height: 1.4;">
+              💡 <b>Demostración de prueba:</b> Si deseas explorar antes de crear tu empresa, puedes ingresar con NIT: <span style="font-weight: 700; color: #0284c7; user-select: all; cursor: pointer; text-decoration: underline;" id="fill-demo-nit" title="Clic para rellenar">901.445.772-0</span> y PIN: <span style="font-weight: 700; color: #0284c7; user-select: all; cursor: pointer; text-decoration: underline;" id="fill-demo-pin" title="Clic para rellenar">123456</span>.
+            </div>
+
             <!-- Acceso Administrador del Sistema -->
-            <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border-subtle); text-align: center;">
-              <button type="button" id="btn-open-master-admin" style="background: none; border: none; font-size: 13px; color: #64748b; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease;">
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-subtle); text-align: center;">
+              <button type="button" id="btn-open-master-admin" style="background: none; border: none; font-size: 12.5px; color: #64748b; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease;">
                 <span>🛡️</span> Acceso Administrador del Sistema (Plataforma)
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- MODAL REGISTRAR NUEVA EMPRESA -->
+      <div id="modal-register-tenant-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); align-items: center; justify-content: center; z-index: 2200; padding: 20px; overflow-y: auto;">
+        <div style="background: var(--bg-card); border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); padding: 28px; border: 1px solid var(--border-subtle); position: relative; max-height: 92vh; overflow-y: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 42px; height: 42px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 22px;">🏢</div>
+              <div>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Registrar mi Empresa</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Crea tu espacio de trabajo aislado en segundos</p>
+              </div>
+            </div>
+            <button type="button" id="btn-close-register-modal" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; color: var(--text-muted); cursor: pointer;">✕</button>
+          </div>
+
+          <div id="register-alert" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; margin-bottom: 14px; align-items: center; gap: 8px;"></div>
+
+          <form id="form-register-tenant">
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Nombre Comercial o Razón Social *</label>
+              <input 
+                type="text" 
+                id="reg-name-input" 
+                placeholder="Ej: Minimercado Express / Barbería Barber King" 
+                required 
+                style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 14px; font-weight: 600;"
+              >
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">NIT / Identificación *</label>
+                <input 
+                  type="text" 
+                  id="reg-nit-input" 
+                  placeholder="Ej: 900.887.654-1" 
+                  required 
+                  style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13.5px;"
+                >
+              </div>
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Identificador (Slug) *</label>
+                <input 
+                  type="text" 
+                  id="reg-slug-input" 
+                  placeholder="ej: minimercado-express" 
+                  required 
+                  style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13.5px; font-family: monospace;"
+                >
+              </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Tipo de Negocio / Plan Inicial</label>
+              <select 
+                id="reg-plan-select" 
+                style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13px;"
+              >
+                <option value="basico">Plan Básico — Comercio, Minimercado, Barbería (POS, Caja, Inventario)</option>
+                <option value="intermedio">Plan Crecimiento — Restaurante, Servicios, Facturación DIAN</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">PIN de Acceso Administrador (4 a 6 dígitos) *</label>
+              <input 
+                type="password" 
+                id="reg-pin-input" 
+                placeholder="••••••" 
+                maxlength="6" 
+                required 
+                style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 18px; letter-spacing: 6px; text-align: center; font-weight: 800;"
+              >
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Este PIN será tu clave para ingresar al sistema junto con tu NIT.</div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" id="btn-cancel-register" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
+              <button type="submit" id="btn-submit-register" style="padding: 10px 22px; border-radius: 10px; border: none; background: #0284c7; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);">
+                🚀 Crear Empresa y Entrar
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -233,7 +330,7 @@ export class LoginView {
                 id="master-pin-input" 
                 placeholder="••••••" 
                 maxlength="6" 
-                value="999999"
+                value="" 
                 required 
                 style="width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 22px; letter-spacing: 8px; text-align: center; font-weight: 800;"
               >
@@ -371,6 +468,137 @@ export class LoginView {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.submitLogin();
+      });
+    }
+
+    // Demo Autofill Helpers
+    const fillNit = document.getElementById('fill-demo-nit');
+    const fillPin = document.getElementById('fill-demo-pin');
+    if (fillNit) {
+      fillNit.addEventListener('click', () => {
+        nitInput.value = '901.445.772-0';
+        pinInput.value = '123456';
+      });
+    }
+    if (fillPin) {
+      fillPin.addEventListener('click', () => {
+        nitInput.value = '901.445.772-0';
+        pinInput.value = '123456';
+      });
+    }
+
+    // Modal Registro Nueva Empresa
+    const btnOpenRegister = document.getElementById('btn-open-register-tenant');
+    const modalRegister = document.getElementById('modal-register-tenant-backdrop');
+    const btnCloseRegister = document.getElementById('btn-close-register-modal');
+    const btnCancelRegister = document.getElementById('btn-cancel-register');
+    const formRegister = document.getElementById('form-register-tenant');
+    const regNameInput = document.getElementById('reg-name-input');
+    const regSlugInput = document.getElementById('reg-slug-input');
+    const regAlert = document.getElementById('register-alert');
+    const btnSubmitRegister = document.getElementById('btn-submit-register');
+
+    const closeRegisterModal = () => {
+      if (modalRegister) modalRegister.style.display = 'none';
+      if (regAlert) regAlert.style.display = 'none';
+    };
+
+    if (btnOpenRegister && modalRegister) {
+      btnOpenRegister.addEventListener('click', () => {
+        modalRegister.style.display = 'flex';
+        if (regNameInput) regNameInput.focus();
+      });
+    }
+
+    if (btnCloseRegister) btnCloseRegister.addEventListener('click', closeRegisterModal);
+    if (btnCancelRegister) btnCancelRegister.addEventListener('click', closeRegisterModal);
+
+    // Auto-generación de slug a partir del nombre
+    if (regNameInput && regSlugInput) {
+      regNameInput.addEventListener('input', () => {
+        if (!regSlugInput.dataset.manual) {
+          regSlugInput.value = regNameInput.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9_-]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        }
+      });
+      regSlugInput.addEventListener('input', () => {
+        regSlugInput.dataset.manual = 'true';
+      });
+    }
+
+    // Envío del registro de nueva empresa
+    if (formRegister) {
+      formRegister.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = regNameInput.value.trim();
+        const taxId = document.getElementById('reg-nit-input').value.trim();
+        const slug = regSlugInput.value.trim();
+        const plan = document.getElementById('reg-plan-select').value;
+        const adminPin = document.getElementById('reg-pin-input').value.trim();
+
+        if (!name || !taxId || !slug || !adminPin) {
+          if (regAlert) {
+            regAlert.style.display = 'flex';
+            regAlert.style.background = '#fee2e2';
+            regAlert.style.color = '#b91c1c';
+            regAlert.textContent = '❌ Por favor completa todos los campos obligatorios.';
+          }
+          return;
+        }
+
+        btnSubmitRegister.disabled = true;
+        btnSubmitRegister.innerHTML = '⏳ Creando base de datos aislada...';
+        if (regAlert) regAlert.style.display = 'none';
+
+        try {
+          const createRes = await ApiClient.createTenant({
+            name,
+            slug,
+            taxId,
+            plan,
+            adminPin,
+          });
+
+          if (createRes.success) {
+            if (regAlert) {
+              regAlert.style.display = 'flex';
+              regAlert.style.background = '#dcfce7';
+              regAlert.style.color = '#15803d';
+              regAlert.textContent = '✅ ¡Empresa aprovisionada exitosamente! Iniciando sesión...';
+            }
+
+            // Iniciar sesión inmediatamente con el nuevo Tenant
+            try {
+              const loginRes = await ApiClient.loginNitPin(taxId, adminPin);
+              if (loginRes.success && loginRes.usuario) {
+                closeRegisterModal();
+                this.handleSuccessfulAuth(loginRes);
+                return;
+              }
+            } catch (authErr) {
+              console.warn('Auto-login falló tras registro, prellenando credenciales:', authErr);
+            }
+
+            closeRegisterModal();
+            nitInput.value = taxId;
+            pinInput.value = adminPin;
+            alert('🎉 Empresa creada exitosamente. Haz clic en "Ingresar al Sistema" para acceder.');
+          }
+        } catch (err) {
+          if (regAlert) {
+            regAlert.style.display = 'flex';
+            regAlert.style.background = '#fee2e2';
+            regAlert.style.color = '#b91c1c';
+            regAlert.textContent = `❌ ${err.message || 'Error al aprovisionar la empresa'}`;
+          }
+        } finally {
+          btnSubmitRegister.disabled = false;
+          btnSubmitRegister.innerHTML = '🚀 Crear Empresa y Entrar';
+        }
       });
     }
 

@@ -675,7 +675,7 @@ export class PosView {
     container.innerHTML = `
       <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
         <div style="font-weight: 900; font-size: 15px; text-transform: uppercase;">${tenantName}</div>
-        <div style="font-size: 11px;">NIT: 901.445.772-0 · Régimen Común</div>
+        <div style="font-size: 11px;">NIT: ${state.currentTenant?.taxId || state.currentTenant?.nit || '222222222222'} · Régimen Común</div>
         <div style="font-size: 10px; color: #444;">${tenantType} · POS Núcleo Financiero</div>
       </div>
 
