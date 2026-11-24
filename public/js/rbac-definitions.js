@@ -7,8 +7,8 @@ export const ROLE_DEFINITIONS = {
   super_admin: {
     nombre: 'Super Administrador',
     slug: 'super_admin',
-    allowedViews: ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
-    defaultView: 'dashboard',
+    allowedViews: ['tenants', 'dashboard', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
+    defaultView: 'tenants',
     defaultModule: 'gestion',
     canSwitchModule: true,
     desc: 'Acceso universal maestro sin restricciones a todos los módulos y empresas',

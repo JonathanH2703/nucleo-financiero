@@ -565,31 +565,47 @@ export class PostgresPosRepository
     cuentasPorCobrar: number;
   }> {
     const s = sanitizeSchema(schemaName);
-    const res = await dbPool.query(`
-      SELECT
-        COALESCE(SUM(total_pagar), 0) AS total_facturado,
-        COALESCE(SUM(CASE WHEN estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS total_cobrado,
-        COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL') THEN total_pagar ELSE 0 END), 0) AS total_pendiente,
-        COALESCE(SUM(CASE WHEN estado_dian = 'VENCIDA' THEN total_pagar ELSE 0 END), 0) AS total_vencido,
-        COALESCE(SUM(CASE WHEN estado_dian = 'ANULADA' THEN total_pagar ELSE 0 END), 0) AS total_anulado,
-        COUNT(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) THEN 1 END) AS facturas_este_mes,
-        COALESCE(SUM(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) AND estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS ingreso_este_mes,
-        COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL', 'VENCIDA') THEN total_pagar ELSE 0 END), 0) AS cuentas_por_cobrar
-      FROM "${s}".facturas_fiscales
-      WHERE tipo_documento != 'NOTA_CREDITO_DIAN'
-    `);
+    try {
+      const res = await dbPool.query(`
+        SELECT
+          COALESCE(SUM(total_pagar), 0) AS total_facturado,
+          COALESCE(SUM(CASE WHEN estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS total_cobrado,
+          COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL') THEN total_pagar ELSE 0 END), 0) AS total_pendiente,
+          COALESCE(SUM(CASE WHEN estado_dian = 'VENCIDA' THEN total_pagar ELSE 0 END), 0) AS total_vencido,
+          COALESCE(SUM(CASE WHEN estado_dian = 'ANULADA' THEN total_pagar ELSE 0 END), 0) AS total_anulado,
+          COUNT(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) THEN 1 END) AS facturas_este_mes,
+          COALESCE(SUM(CASE WHEN fecha_emision >= date_trunc('month', CURRENT_DATE) AND estado_dian = 'ACEPTADA' THEN total_pagar ELSE 0 END), 0) AS ingreso_este_mes,
+          COALESCE(SUM(CASE WHEN estado_dian IN ('PENDIENTE', 'PAGO_PARCIAL', 'VENCIDA') THEN total_pagar ELSE 0 END), 0) AS cuentas_por_cobrar
+        FROM "${s}".facturas_fiscales
+        WHERE tipo_documento != 'NOTA_CREDITO_DIAN'
+      `);
 
-    const row = res.rows[0];
-    return {
-      totalFacturado: Number(row.total_facturado),
-      totalCobrado: Number(row.total_cobrado),
-      totalPendiente: Number(row.total_pendiente),
-      totalVencido: Number(row.total_vencido),
-      totalAnulado: Number(row.total_anulado),
-      facturasEsteMes: Number(row.facturas_este_mes),
-      ingresoEsteMes: Number(row.ingreso_este_mes),
-      cuentasPorCobrar: Number(row.cuentas_por_cobrar),
-    };
+      const row = res.rows[0];
+      return {
+        totalFacturado: Number(row.total_facturado),
+        totalCobrado: Number(row.total_cobrado),
+        totalPendiente: Number(row.total_pendiente),
+        totalVencido: Number(row.total_vencido),
+        totalAnulado: Number(row.total_anulado),
+        facturasEsteMes: Number(row.facturas_este_mes),
+        ingresoEsteMes: Number(row.ingreso_este_mes),
+        cuentasPorCobrar: Number(row.cuentas_por_cobrar),
+      };
+    } catch (err: any) {
+      if (err.code === '42P01') {
+        return {
+          totalFacturado: 0,
+          totalCobrado: 0,
+          totalPendiente: 0,
+          totalVencido: 0,
+          totalAnulado: 0,
+          facturasEsteMes: 0,
+          ingresoEsteMes: 0,
+          cuentasPorCobrar: 0,
+        };
+      }
+      throw err;
+    }
   }
 
   /**

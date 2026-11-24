@@ -205,7 +205,8 @@ export class AuthController {
           name: 'Plataforma Núcleo Financiero',
           slug: 'public',
           taxId: '000000000',
-          plan: 'master',
+          schemaName: 'public',
+          plan: 'intermedio',
           modulosActivos: ['dashboard', 'pos', 'inventario', 'facturacion', 'compras', 'empresas', 'contabilidad', 'reportes', 'tenants', 'rbac', 'ajustes'],
         },
         usuario: {

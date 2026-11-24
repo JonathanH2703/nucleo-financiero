@@ -6,6 +6,34 @@ import {
 } from '../../domain/repositories/tenant.repository.interface.js';
 import { Tenant, TenantPlan, TenantStatus } from '../../domain/entities/tenant.entity.js';
 
+export const SYSTEM_MASTER_TENANT = new Tenant({
+  id: 'tenant_system_master',
+  name: 'Plataforma Núcleo Financiero',
+  slug: 'public',
+  taxId: '000000000',
+  schemaName: 'public',
+  status: 'ACTIVE' as TenantStatus,
+  plan: 'intermedio' as TenantPlan,
+  modulosActivos: [
+    'dashboard',
+    'pos',
+    'inventario',
+    'facturacion',
+    'compras',
+    'empresas',
+    'contabilidad',
+    'reportes',
+    'tenants',
+    'rbac',
+    'ajustes',
+  ],
+  adminPin: '999999',
+  storageQuotaBytes: 107374182400,
+  storageUsedBytes: 0,
+  createdAt: new Date('2026-01-01T00:00:00.000Z'),
+  updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+});
+
 export class PostgresTenantRepository implements ITenantRepository {
   private mapRowToTenant(row: any): Tenant {
     let modulos: string[] = [];
@@ -37,18 +65,28 @@ export class PostgresTenantRepository implements ITenantRepository {
   }
 
   public async findById(id: string): Promise<Tenant | null> {
+    if (id === 'tenant_system_master' || id === 'public') {
+      return SYSTEM_MASTER_TENANT;
+    }
     const res = await dbPool.query('SELECT * FROM public.tenants WHERE id = $1', [id]);
     if (res.rows.length === 0) return null;
     return this.mapRowToTenant(res.rows[0]);
   }
 
   public async findBySlug(slug: string): Promise<Tenant | null> {
-    const res = await dbPool.query('SELECT * FROM public.tenants WHERE slug = $1', [slug]);
+    const clean = String(slug || '').trim().toLowerCase();
+    if (clean === 'public') {
+      return SYSTEM_MASTER_TENANT;
+    }
+    const res = await dbPool.query('SELECT * FROM public.tenants WHERE slug = $1', [clean]);
     if (res.rows.length === 0) return null;
     return this.mapRowToTenant(res.rows[0]);
   }
 
   public async findByTaxId(taxId: string): Promise<Tenant | null> {
+    if (String(taxId || '').trim() === '000000000') {
+      return SYSTEM_MASTER_TENANT;
+    }
     const clean = taxId.replace(/[^0-9a-zA-Z]/g, '');
     const res = await dbPool.query(
       `SELECT * FROM public.tenants 

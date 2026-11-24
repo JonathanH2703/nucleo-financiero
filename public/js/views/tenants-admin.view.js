@@ -222,23 +222,22 @@ export class TenantsAdminView {
     return `
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
         ${this.tenants.map((t) => {
-          const isIntermedio = t.plan === 'intermedio';
-          const isPersonalizado = t.plan === 'personalizado';
-          const modulos = Array.isArray(t.modulosActivos) ? t.modulosActivos : [];
+      const isIntermedio = t.plan === 'intermedio';
+      const isPersonalizado = t.plan === 'personalizado';
+      const modulos = Array.isArray(t.modulosActivos) ? t.modulosActivos : [];
 
-          return `
+      return `
             <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; transition: transform 0.2s, box-shadow 0.2s;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                   <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--bg-subtle); color: #0284c7;">${Icons.building(20)}</span>
                   <div style="display: flex; gap: 6px; align-items: center;">
-                    <span class="badge" style="${
-                      isIntermedio
-                        ? 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
-                        : (isPersonalizado
-                          ? 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;'
-                          : 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;')
-                    } font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                    <span class="badge" style="${isIntermedio
+          ? 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
+          : (isPersonalizado
+            ? 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;'
+            : 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;')
+        } font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
                       ${isIntermedio ? 'Plan Crecimiento' : (isPersonalizado ? 'Personalizado' : 'Plan Básico')}
                     </span>
                     <span class="badge" style="background: ${t.status === 'ACTIVE' ? '#ecfdf5' : '#fef2f2'}; color: ${t.status === 'ACTIVE' ? '#059669' : '#dc2626'}; border: 1px solid ${t.status === 'ACTIVE' ? '#a7f3d0' : '#fecaca'}; font-weight: 700; font-size: 10px;">
@@ -295,7 +294,7 @@ export class TenantsAdminView {
               </div>
             </div>
           `;
-        }).join('')}
+    }).join('')}
       </div>
     `;
   }
@@ -366,6 +365,8 @@ export class TenantsAdminView {
 
       if (sucRes && sucRes.success) {
         this.sucursales = sucRes.data || [];
+      } else {
+        this.sucursales = [];
       }
 
       if (tenRes && tenRes.success) {
@@ -373,6 +374,7 @@ export class TenantsAdminView {
       }
     } catch (err) {
       console.warn('Error cargando sucursales/tenants desde API:', err);
+      this.sucursales = [];
     } finally {
       this.isLoading = false;
       const content = document.getElementById('admin-content-area');
@@ -764,7 +766,8 @@ export class TenantsAdminView {
     document.querySelectorAll('.btn-seleccionar-tenant').forEach((btn) => {
       btn.addEventListener('click', () => {
         const slug = btn.getAttribute('data-slug');
-        state.setTenant(slug);
+        const found = this.tenants.find((t) => t.slug === slug);
+        state.setTenant(found || slug);
         this.activeTab = 'sucursales';
         this.render();
         this.loadData();

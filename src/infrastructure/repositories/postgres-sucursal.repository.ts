@@ -99,8 +99,15 @@ export class PostgresSucursalRepository implements ISucursalRepository {
 
   public async listSucursales(schemaName: string): Promise<Sucursal[]> {
     const s = sanitizeSchema(schemaName);
-    const res = await dbPool.query(`SELECT * FROM "${s}".sucursales WHERE activa = true ORDER BY nombre ASC`);
-    return res.rows.map((r) => this.mapRow(r));
+    try {
+      const res = await dbPool.query(`SELECT * FROM "${s}".sucursales WHERE activa = true ORDER BY nombre ASC`);
+      return res.rows.map((r) => this.mapRow(r));
+    } catch (err: any) {
+      if (err.code === '42P01') {
+        return [];
+      }
+      throw err;
+    }
   }
 
   private mapRow(r: any): Sucursal {

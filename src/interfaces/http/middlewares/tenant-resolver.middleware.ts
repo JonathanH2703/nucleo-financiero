@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { PostgresTenantRepository } from '../../../infrastructure/repositories/postgres-tenant.repository.js';
+import { PostgresTenantRepository, SYSTEM_MASTER_TENANT } from '../../../infrastructure/repositories/postgres-tenant.repository.js';
 import { TenantContext } from '../../../core/context/tenant-context.js';
 import { TenantMissingError, TenantNotFoundError } from '../../../core/errors/tenant-errors.js';
+import { Tenant } from '../../../domain/entities/tenant.entity.js';
 
 const tenantRepository = new PostgresTenantRepository();
 
@@ -30,9 +31,16 @@ export async function tenantResolverMiddleware(
     }
 
     // 3. Buscar tenant por ID o por Slug
-    let tenant = await tenantRepository.findById(identifier);
-    if (!tenant) {
-      tenant = await tenantRepository.findBySlug(identifier.toLowerCase());
+    let tenant: Tenant | null = null;
+    const cleanId = String(identifier).trim().toLowerCase();
+
+    if (cleanId === 'public' || identifier === 'tenant_system_master') {
+      tenant = SYSTEM_MASTER_TENANT;
+    } else {
+      tenant = await tenantRepository.findById(identifier);
+      if (!tenant) {
+        tenant = await tenantRepository.findBySlug(cleanId);
+      }
     }
 
     if (!tenant || tenant.status !== 'ACTIVE') {

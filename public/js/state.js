@@ -236,6 +236,21 @@ class AppState {
       sessionStorage.setItem('nf_tenant_slug', this.currentTenant.slug);
       sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
       this.notify('tenant_changed', this.currentTenant);
+    } else if (typeof tenantOrSlug === 'string' && tenantOrSlug.trim()) {
+      const slug = tenantOrSlug.trim().toLowerCase();
+      this.currentTenant = {
+        id: `tenant_${slug}`,
+        name: slug.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
+        slug: slug,
+        nit: 'NIT',
+        category: 'Comercio / Empresa',
+        plan: 'intermedio',
+        modulosActivos: ['dashboard', 'pos', 'inventario', 'facturacion', 'compras', 'empresas', 'contabilidad', 'reportes', 'tenants', 'rbac', 'ajustes'],
+        sucursales: ['Sede Principal'],
+      };
+      sessionStorage.setItem('nf_tenant_slug', slug);
+      sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
+      this.notify('tenant_changed', this.currentTenant);
     }
   }
 

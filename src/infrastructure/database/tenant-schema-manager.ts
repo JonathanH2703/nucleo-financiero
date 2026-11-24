@@ -33,7 +33,27 @@ export class TenantSchemaManager {
 
         CREATE INDEX IF NOT EXISTS idx_tenants_slug ON public.tenants(slug);
         CREATE INDEX IF NOT EXISTS idx_tenants_tax_id ON public.tenants(tax_id);
+
+        -- Garantizar registro del tenant maestro del sistema
+        INSERT INTO public.tenants (
+          id, name, slug, tax_id, schema_name, status, plan, modulos_activos, admin_pin, storage_quota_bytes, storage_used_bytes
+        ) VALUES (
+          'tenant_system_master', 'Plataforma Núcleo Financiero', 'public', '000000000', 'public', 'ACTIVE', 'intermedio',
+          '["dashboard", "pos", "inventario", "facturacion", "compras", "empresas", "contabilidad", "reportes", "tenants", "rbac", "ajustes"]'::jsonb,
+          '999999', 107374182400, 0
+        ) ON CONFLICT (id) DO UPDATE SET
+          status = 'ACTIVE',
+          schema_name = 'public',
+          slug = 'public';
       `);
+
+      // Asegurar que las tablas de negocio existan también en public para evitar errores de tabla no existente
+      try {
+        await this.provisionTenantSchema('public');
+      } catch (e) {
+        logger.warn({ err: e }, 'Aviso: esquema de tablas en public ya aprovisionado o en proceso');
+      }
+
       logger.info('Esquema global public.tenants inicializado correctamente');
     } catch (error) {
       logger.error({ error }, 'Error al inicializar esquema public.tenants');
