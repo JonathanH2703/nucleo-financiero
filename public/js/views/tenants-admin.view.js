@@ -100,8 +100,8 @@ export class TenantsAdminView {
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
               <div>
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">NIT / Identificación Fiscal *</label>
-                <input type="text" id="emp-nit" class="form-input" placeholder="Ej: 901.889.334-2" required style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">NIT o Cédula (C.C.) *</label>
+                <input type="text" id="emp-nit" class="form-input" placeholder="Ej: 901.889.334-2 o 1.020.345.678" required style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
               </div>
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Slug / Código de Esquema *</label>
@@ -247,7 +247,7 @@ export class TenantsAdminView {
                 </div>
 
                 <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0;">${t.name}</h3>
-                <div style="font-size: 13px; font-weight: 700; color: #2563eb; margin-bottom: 12px;">NIT: ${t.taxId || t.tax_id}</div>
+                <div style="font-size: 13px; font-weight: 700; color: #2563eb; margin-bottom: 12px;">NIT / C.C.: ${t.taxId || t.tax_id}</div>
 
                 <!-- Métricas Clave de la Empresa -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
@@ -415,7 +415,7 @@ export class TenantsAdminView {
       badge.style.background = isIntermedio ? '#eff6ff' : (isPersonalizado ? '#f5f3ff' : '#f0fdf4');
       badge.style.color = isIntermedio ? '#2563eb' : (isPersonalizado ? '#7c3aed' : '#16a34a');
       title.textContent = t.name;
-      subtitle.textContent = `NIT: ${t.taxId} · Esquema PostgreSQL: ${t.schemaName} · PIN Maestro: ${t.adminPin || '123456'}`;
+      subtitle.textContent = `NIT / C.C.: ${t.taxId} · Esquema: ${t.schemaName} · PIN Maestro: ${t.adminPin || '123456'}`;
 
       content.innerHTML = `
         <div style="display: flex; flex-direction: column; gap: 20px;">

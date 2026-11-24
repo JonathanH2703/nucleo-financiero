@@ -243,7 +243,7 @@ export class AjustesView {
               <div style="font-family: var(--font-mono); font-weight: 700; color: #2563eb; margin-top: 2px;">tenant_${tenant.slug}</div>
             </div>
             <div>
-              <span style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700;">NIT Fiscal:</span>
+              <span style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 700;">NIT / Cédula Fiscal:</span>
               <div style="font-weight: 700; color: var(--text-main); margin-top: 2px;">${tenant.nit}</div>
             </div>
             <div>

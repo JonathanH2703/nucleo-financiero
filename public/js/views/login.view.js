@@ -122,7 +122,7 @@ export class LoginView {
 
             <div class="login-form-header">
               <h2 class="login-form-title">Iniciar Sesión</h2>
-              <p class="login-form-subtitle">Ingresa el NIT de tu empresa y tu PIN de acceso corporativo</p>
+              <p class="login-form-subtitle">Ingresa el NIT o Cédula (C.C.) de tu negocio y tu PIN de acceso</p>
             </div>
 
             <!-- Alerta de Error / Éxito -->
@@ -130,17 +130,17 @@ export class LoginView {
 
             <!-- Formulario Principal -->
             <form id="login-form">
-              <!-- NIT de la Empresa -->
+              <!-- NIT o Cédula de la Empresa -->
               <div class="form-group">
                 <label class="form-label" for="nit-input">
-                  <span>NIT de la Empresa</span>
+                  <span>NIT o Cédula (C.C.)</span>
                   <span style="font-size: 11px; color: #2563eb; font-weight: 600;">Colombia</span>
                 </label>
                 <input 
                   type="text" 
                   id="nit-input" 
                   class="form-input" 
-                  placeholder="Ej: 900.123.456-7" 
+                  placeholder="Ej: 900.123.456-7 o 1.020.345.678" 
                   value="" 
                   required 
                   autofocus
@@ -436,7 +436,7 @@ export class LoginView {
 
     if (!nit || !pin) {
       alertBox.className = 'login-alert error';
-      alertBox.textContent = 'Por favor ingresa el NIT de la empresa y el PIN de acceso.';
+      alertBox.textContent = 'Por favor ingresa el NIT o Cédula del negocio y el PIN de acceso.';
       alertBox.style.display = 'flex';
       return;
     }

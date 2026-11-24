@@ -22,7 +22,7 @@ export class AuthController {
       const { nit, pin } = req.body;
 
       if (!nit || !pin) {
-        res.status(400).json({ success: false, message: 'El NIT de la empresa y el PIN de acceso son obligatorios.' });
+        res.status(400).json({ success: false, message: 'El NIT o Cédula del negocio y el PIN de acceso son obligatorios.' });
         return;
       }
 
@@ -32,7 +32,7 @@ export class AuthController {
       if (!tenant) {
         res.status(401).json({
           success: false,
-          message: `No se encontró ninguna empresa registrada con el NIT: ${nit}. Verifica los datos e intenta nuevamente.`,
+          message: `No se encontró ningún comercio o empresa registrada con el NIT o Cédula: ${nit}. Verifica los datos e intenta nuevamente.`,
         });
         return;
       }
