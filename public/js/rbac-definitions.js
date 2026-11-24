@@ -1,0 +1,123 @@
+/**
+ * CATÁLOGO DE ROLES Y PERMISOS RBAC — NÚCLEO FINANCIERO
+ * Define los perfiles con control de acceso granular y matriz de permisos por rol.
+ */
+
+export const ROLE_DEFINITIONS = {
+  super_admin: {
+    nombre: 'Super Administrador',
+    slug: 'super_admin',
+    allowedViews: ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'contabilidad', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
+    defaultView: 'dashboard',
+    defaultModule: 'gestion',
+    canSwitchModule: true,
+    desc: 'Acceso universal maestro sin restricciones a todos los módulos y empresas',
+    badgeClass: 'badge-superadmin',
+    color: '#f59e0b',
+    permisos: [
+      'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.comanda.anular', 'pos.descuento.aplicar', 'pos.mesas.gestionar',
+      'kds.monitor.ver', 'kds.estado.actualizar',
+      'catalogo.ver', 'catalogo.editar', 'inventario.ajustar',
+      'facturacion.emitir', 'facturacion.reportes.ver',
+      'contabilidad.declaraciones.ver', 'contabilidad.asientos.crear',
+      'usuarios.gestionar', 'roles.personalizar', 'tenants.gestionar', 'sucursales.gestionar',
+    ],
+  },
+  admin_negocio: {
+    nombre: 'Administrador de Sede / Negocio',
+    slug: 'admin_negocio',
+    allowedViews: ['dashboard', 'tenants', 'facturacion', 'empresas', 'pos', 'clientes', 'inventario', 'reportes', 'rbac', 'ajustes'],
+    defaultView: 'dashboard',
+    defaultModule: 'gestion',
+    canSwitchModule: true,
+    desc: 'Gestión general de la empresa, sucursales, ventas, inventario, facturación DIAN y equipo',
+    badgeClass: 'badge-admin',
+    color: '#2563eb',
+    permisos: [
+      'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.comanda.anular', 'pos.descuento.aplicar', 'pos.mesas.gestionar',
+      'catalogo.ver', 'catalogo.editar', 'inventario.ajustar',
+      'facturacion.emitir', 'facturacion.reportes.ver',
+      'usuarios.gestionar', 'sucursales.gestionar',
+    ],
+  },
+  gerente_operativo: {
+    nombre: 'Gerente Operativo',
+    slug: 'gerente_operativo',
+    allowedViews: ['dashboard', 'facturacion', 'empresas', 'pos', 'inventario', 'reportes', 'ajustes'],
+    defaultView: 'dashboard',
+    defaultModule: 'gestion',
+    canSwitchModule: true,
+    desc: 'Supervisión de sala, cortes de caja, abastecimiento e informes del día',
+    badgeClass: 'badge-gerente',
+    color: '#4f46e5',
+    permisos: [
+      'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.comanda.anular', 'pos.descuento.aplicar', 'pos.mesas.gestionar',
+      'kds.monitor.ver', 'kds.estado.actualizar',
+      'catalogo.ver', 'catalogo.editar', 'inventario.ajustar',
+      'facturacion.reportes.ver',
+    ],
+  },
+  cajero: {
+    nombre: 'Cajero / Punto de Venta',
+    slug: 'cajero',
+    allowedViews: ['pos', 'facturacion', 'empresas', 'clientes', 'ajustes'],
+    defaultView: 'pos',
+    defaultModule: 'pos',
+    canSwitchModule: false,
+    desc: 'Operación de caja, cobro rápido, arqueo y emisión de facturas DIAN',
+    badgeClass: 'badge-cajero',
+    color: '#059669',
+    permisos: [
+      'pos.comanda.crear', 'pos.comanda.cobrar', 'pos.descuento.aplicar',
+      'catalogo.ver',
+      'facturacion.emitir',
+    ],
+  },
+  mesero: {
+    nombre: 'Mesero / Salón',
+    slug: 'mesero',
+    allowedViews: ['pos', 'ajustes'],
+    defaultView: 'pos',
+    defaultModule: 'pos',
+    canSwitchModule: false,
+    desc: 'Toma de pedidos en mesas, comandas y despacho a cocina. Sin acceso a finanzas ni inventario',
+    badgeClass: 'badge-mesero',
+    color: '#d97706',
+    permisos: [
+      'pos.comanda.crear', 'pos.mesas.gestionar',
+      'catalogo.ver',
+    ],
+  },
+  cocinero: {
+    nombre: 'Jefe de Cocina / KDS',
+    slug: 'cocinero',
+    allowedViews: ['pos', 'inventario', 'ajustes'],
+    defaultView: 'pos',
+    defaultModule: 'pos',
+    canSwitchModule: false,
+    desc: 'Monitor de preparación KDS y consulta de insumos y recetas de cocina',
+    badgeClass: 'badge-cocina',
+    color: '#dc2626',
+    permisos: [
+      'kds.monitor.ver', 'kds.estado.actualizar',
+      'catalogo.ver',
+    ],
+  },
+  contador: {
+    nombre: 'Contador / Revisor Fiscal',
+    slug: 'contador',
+    allowedViews: ['dashboard', 'facturacion', 'contabilidad', 'reportes', 'clientes', 'ajustes'],
+    defaultView: 'contabilidad',
+    defaultModule: 'gestion',
+    canSwitchModule: false,
+    desc: 'Módulo tributario DIAN (F-350, F-300), estados de facturación y auditoría contable',
+    badgeClass: 'badge-contador',
+    color: '#7c3aed',
+    permisos: [
+      'facturacion.reportes.ver',
+      'contabilidad.declaraciones.ver', 'contabilidad.asientos.crear',
+    ],
+  },
+};
+
+export const DEMO_TENANTS = [];

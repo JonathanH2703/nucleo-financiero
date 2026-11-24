@@ -205,9 +205,9 @@ export class DashboardView {
           <div class="forecast-header">
             <div>
               <h3>Proyección de Ingresos — Q4 2026</h3>
-              <p>Histórico + Forecast IA · Noviembre y Diciembre proyectados</p>
+              <p>Histórico y Estimación Presupuestal · Cierre proyectado del periodo</p>
             </div>
-            <a href="#" class="forecast-link" onclick="alert('Pronóstico con modelo predictivo de series temporales.'); return false;">Ver análisis completo ↗</a>
+            <a href="#" class="forecast-link" id="btn-ver-contabilidad" onclick="return false;">Ver balance contable ↗</a>
           </div>
 
           <div class="forecast-columns">
@@ -277,6 +277,14 @@ export class DashboardView {
 
     if (btnDian) {
       btnDian.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.setView('contabilidad');
+      });
+    }
+
+    const btnVerConta = document.getElementById('btn-ver-contabilidad');
+    if (btnVerConta) {
+      btnVerConta.addEventListener('click', (e) => {
         e.preventDefault();
         state.setView('contabilidad');
       });

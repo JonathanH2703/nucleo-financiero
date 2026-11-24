@@ -17,34 +17,34 @@ export class PlaceholderView {
 
     this.container.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 20px;">
-        <!-- Banner de Funcionalidad No Operativa -->
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: #991b1b;">
-            <span style="font-size: 22px;">🛠️</span>
+        <!-- Banner de Módulo Corporativo -->
+        <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-subtle, #e2e8f0); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-main, #0f172a);">
+            <span style="font-size: 22px;">💼</span>
             <div>
-              <b>MÓDULO EN DESARROLLO — FUNCIONALIDAD NO OPERATIVA</b>
-              <div style="font-size: 12px; opacity: 0.9;">
-                Esta pantalla contiene datos de prueba demostrativos. La lógica transaccional de ${config.title} está programada para la siguiente fase.
+              <b>MÓDULO COMPLEMENTARIO EMPRESARIAL</b>
+              <div style="font-size: 12px; color: var(--text-muted, #64748b);">
+                Servicio gestionado bajo plan corporativo. Consulta la configuración activa para ${state.currentTenant?.name || 'tu empresa'}.
               </div>
             </div>
           </div>
-          <span style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-            Modo Visual
+          <span style="background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+            Licencia
           </span>
         </div>
 
-        <!-- Tarjeta de Contenido con Datos de Muestra -->
+        <!-- Tarjeta de Contenido -->
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 24px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 12px;">
               <span style="font-size: 26px;">${config.icon}</span>
               <div>
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main);">${config.title}</h3>
-                <p style="font-size: 13px; color: var(--text-muted);">${config.desc} · ${state.currentTenant.name}</p>
+                <p style="font-size: 13px; color: var(--text-muted);">${config.desc} · ${state.currentTenant?.name || 'Empresa'}</p>
               </div>
             </div>
 
-            <button class="btn-primary" onclick="alert('Funcionalidad en desarrollo.')" disabled style="opacity: 0.6; cursor: not-allowed;">
+            <button class="btn-primary" disabled style="opacity: 0.7; cursor: default;">
               + ${config.actionBtn}
             </button>
           </div>
@@ -139,9 +139,9 @@ export class PlaceholderView {
           renderBody: () => `
             <div style="text-align: center; padding: 40px 20px; color: #64748b;">
               <span style="font-size: 48px; display: block; margin-bottom: 12px;">📊</span>
-              <p style="font-size: 15px; font-weight: 700; color: #0f172a;">Motor de Analítica Q4 en Construcción</p>
+              <p style="font-size: 15px; font-weight: 700; color: #0f172a;">Consolidación de Indicadores y Analítica</p>
               <p style="font-size: 13px; max-width: 480px; margin: 8px auto;">
-                Próximamente disponible: Reportes de flujo de caja libre, rentabilidad neta por producto y exportación a Excel y PowerBI.
+                Reportes avanzados de flujo de caja libre, rentabilidad por línea y exportación contable bajo demanda institucional.
               </p>
             </div>
           `,

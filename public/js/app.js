@@ -17,7 +17,7 @@ import { RestrictedView } from './views/restricted.view.js';
 import { EmpresasView } from './views/empresas.view.js?v=3.5';
 import { TenantsAdminView } from './views/tenants-admin.view.js';
 import { InventarioView } from './views/inventario.view.js';
-import { ROLE_DEFINITIONS } from './demo-fixtures.js';
+import { ROLE_DEFINITIONS } from './rbac-definitions.js';
 
 // Catálogo maestro de navegación del sistema (Estructura de Producción)
 const MASTER_NAV_ITEMS = [
@@ -179,18 +179,6 @@ class App {
     const roleBadgeColor = roleDef.color || '#2563eb';
 
     this.root.innerHTML = `
-      <!-- Banner de Entorno Dev -->
-      <div class="dev-env-banner">
-        <div class="dev-banner-left">
-          <span class="badge-pill">Dev</span>
-          <span>Schema: <code>${tenant.slug}</code></span>
-        </div>
-        <div class="tenant-indicator">
-          <span class="dev-banner-user">${user.nombre} · <span style="color: ${roleBadgeColor};">${user.rol.nombre}</span></span>
-          <button type="button" class="btn-switch-tenant" id="btn-quick-switch-tenant" title="Cambiar Empresa">↻ Empresa</button>
-        </div>
-      </div>
-
       <div class="app-container">
         <!-- Sidebar Izquierda con Navegación Dinámica según Rol -->
         <!-- Backdrop oscuro para sidebar drawer en móvil/tablet -->
@@ -304,7 +292,7 @@ class App {
                 </div>
               </div>
 
-              <button type="button" class="btn-icon desktop-only" title="Notificaciones DIAN" onclick="alert('Sistema de notificaciones DIAN: Todos los servicios operativos.')">
+              <button type="button" class="btn-icon desktop-only" id="btn-topbar-notifications" title="Notificaciones del Sistema">
                 🔔
               </button>
 
@@ -564,11 +552,11 @@ class App {
       });
     }
 
-    // Botón para cambiar de empresa rápidamente
-    const btnSwitchTenant = document.getElementById('btn-quick-switch-tenant');
-    if (btnSwitchTenant) {
-      btnSwitchTenant.addEventListener('click', () => {
-        state.logout();
+    // Notificaciones del Sistema
+    const btnNotif = document.getElementById('btn-topbar-notifications');
+    if (btnNotif) {
+      btnNotif.addEventListener('click', () => {
+        // Notificaciones operativas silenciosas
       });
     }
   }

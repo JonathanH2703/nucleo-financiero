@@ -4,7 +4,7 @@
  * navegación protegida por perfiles, carrito POS y motor de temas.
  */
 
-import { DEMO_TENANTS, ROLE_DEFINITIONS } from './demo-fixtures.js';
+import { ROLE_DEFINITIONS } from './rbac-definitions.js';
 
 class AppState {
   constructor() {
@@ -22,10 +22,10 @@ class AppState {
       try {
         this.currentTenant = JSON.parse(savedTenantJson);
       } catch {
-        this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
+        this.currentTenant = null;
       }
     } else {
-      this.currentTenant = DEMO_TENANTS.find((t) => t.slug === savedTenantSlug) || DEMO_TENANTS[0];
+      this.currentTenant = null;
     }
     this.currentUser = savedUserJson ? JSON.parse(savedUserJson) : null;
     this.currentModule = savedModule;
@@ -236,14 +236,6 @@ class AppState {
       sessionStorage.setItem('nf_tenant_slug', this.currentTenant.slug);
       sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
       this.notify('tenant_changed', this.currentTenant);
-      return;
-    }
-    const tenant = DEMO_TENANTS.find((t) => t.slug === tenantOrSlug);
-    if (tenant) {
-      this.currentTenant = tenant;
-      sessionStorage.setItem('nf_tenant_slug', tenant.slug);
-      sessionStorage.setItem('nf_tenant_data', JSON.stringify(this.currentTenant));
-      this.notify('tenant_changed', tenant);
     }
   }
 
@@ -347,8 +339,12 @@ class AppState {
 
   logout() {
     this.currentUser = null;
+    this.currentTenant = null;
     sessionStorage.removeItem('nf_user');
+    sessionStorage.removeItem('nf_tenant_data');
+    sessionStorage.removeItem('nf_tenant_slug');
     sessionStorage.removeItem('nf_view');
+    sessionStorage.removeItem('nf_module');
     this.clearCart();
     this.setView('login');
   }

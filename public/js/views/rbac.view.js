@@ -5,7 +5,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
-import { ROLE_DEFINITIONS } from '../demo-fixtures.js';
+import { ROLE_DEFINITIONS } from '../rbac-definitions.js';
 
 export class RbacView {
   static async mount(container) {
@@ -20,11 +20,11 @@ export class RbacView {
 
   static renderSkeleton() {
     const user = state.currentUser || {
-      nombre: 'Usuario Demostrativo',
-      email: 'demo@nucleo.co',
-      rol: { nombre: 'Super Administrador', slug: 'super_admin' },
+      nombre: 'Administrador General',
+      email: 'admin@empresa.com',
+      rol: { nombre: 'Administrador de Sede / Negocio', slug: 'admin_negocio' },
       permisos: [],
-      esSuperAdmin: true,
+      esSuperAdmin: false,
     };
 
     const isSuperAdmin = user.esSuperAdmin || user.rol.slug === 'super_admin';

@@ -14,7 +14,7 @@ export class AjustesView {
   static render() {
     const currentThemeSetting = state.themeSetting; // 'light' | 'dark' | 'system'
     const effectiveTheme = state.getEffectiveTheme(); // 'light' | 'dark'
-    const user = state.currentUser || { nombre: 'Usuario Demo', email: 'demo@nucleo.co', rol: { nombre: 'Administrador' } };
+    const user = state.currentUser || { nombre: 'Usuario Corporativo', email: 'admin@empresa.com', rol: { nombre: 'Administrador' } };
     const tenant = state.currentTenant;
 
     this.container.innerHTML = `
