@@ -4,6 +4,7 @@
  */
 
 import { state } from '../state.js';
+import { Icons } from '../icons.js';
 
 export class RestrictedView {
   static mount(container, attemptedView = 'este módulo') {
@@ -13,8 +14,8 @@ export class RestrictedView {
 
     container.innerHTML = `
       <div style="max-width: 680px; margin: 40px auto; padding: 32px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); text-align: center;">
-        <div style="width: 64px; height: 64px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px auto;">
-          🛡️
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+          ${Icons.shield(32)}
         </div>
 
         <span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -30,8 +31,8 @@ export class RestrictedView {
         </p>
 
         <div style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; text-align: left; margin-bottom: 24px; font-size: 13px;">
-          <div style="font-weight: 700; color: var(--text-main); margin-bottom: 6px;">
-            🔒 Principio de Menor Privilegio (Seguridad Empresarial):
+          <div style="font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            ${Icons.lock(14)} Principio de Menor Privilegio (Seguridad Empresarial):
           </div>
           <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
             Núcleo Financiero aísla estrictamente el inventario general, la facturación global y las declaraciones tributarias de los roles operativos de sala para evitar fugas de información y modificaciones no auditadas.

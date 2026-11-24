@@ -4,6 +4,7 @@
  */
 
 import { state } from '../state.js';
+import { Icons } from '../icons.js';
 
 export class AjustesView {
   static mount(container) {
@@ -22,8 +23,8 @@ export class AjustesView {
         <!-- Encabezado de Ajustes -->
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px 28px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 14px;">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-              ⚙️
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+              ${Icons.ajustes(22)}
             </div>
             <div>
               <h2 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 2px;">Ajustes del Sistema y Preferencias</h2>
@@ -39,7 +40,9 @@ export class AjustesView {
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 20px;">🎨</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.ajustes(18)}
+              </span>
               <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Apariencia y Tema Visual</h3>
             </div>
             <span style="font-size: 12px; color: var(--text-muted);">
@@ -68,7 +71,7 @@ export class AjustesView {
             ">
               <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                  <div style="font-size: 32px;">☀️</div>
+                  <div style="color: #d97706;">${Icons.sun(32)}</div>
                   <div style="
                     width: 20px;
                     height: 20px;
@@ -108,7 +111,7 @@ export class AjustesView {
             ">
               <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                  <div style="font-size: 32px;">🌙</div>
+                  <div style="color: var(--primary-500);">${Icons.moon(32)}</div>
                   <div style="
                     width: 20px;
                     height: 20px;
@@ -148,7 +151,7 @@ export class AjustesView {
             ">
               <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                  <div style="font-size: 32px;">💻</div>
+                  <div style="color: var(--primary-500);">${Icons.monitor(32)}</div>
                   <div style="
                     width: 20px;
                     height: 20px;
@@ -178,7 +181,7 @@ export class AjustesView {
         <!-- SECCIÓN 2: PARÁMETROS DEL PUNTO DE VENTA (POS) -->
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <span style="font-size: 20px;">☕</span>
+            <span style="display: inline-flex; color: #2563eb;">${Icons.pos(20)}</span>
             <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Configuración de Operación del POS</h3>
           </div>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
@@ -210,9 +213,9 @@ export class AjustesView {
               <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Modo de Comanda por Defecto</div>
               <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Vista inicial al ingresar al Punto de Venta</div>
               <select style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--bg-card); color: var(--text-main); font-size: 12px;">
-                <option value="Mesa" selected>🍽️ Servicio a la Mesa</option>
-                <option value="Mostrador">🛒 Mostrador / Escáner</option>
-                <option value="Vitrina">🍰 Vitrina / Venta Rápida</option>
+                <option value="Mesa" selected>Servicio a la Mesa</option>
+                <option value="Mostrador">Mostrador / Escáner</option>
+                <option value="Vitrina">Vitrina / Venta Rápida</option>
               </select>
             </div>
           </div>
@@ -221,7 +224,9 @@ export class AjustesView {
         <!-- SECCIÓN 3: AISLAMIENTO MULTI-TENANT & POSTGRESQL -->
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <span style="font-size: 20px;">🏛️</span>
+            <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+              ${Icons.building(18)}
+            </span>
             <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Aislamiento Multi-Tenant (PostgreSQL Neon)</h3>
           </div>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
@@ -252,7 +257,9 @@ export class AjustesView {
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 20px;">👤</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.user(18)}
+              </span>
               <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main);">Tu Perfil y Permisos Activos</h3>
             </div>
             <span class="badge" style="background: var(--primary-50); color: var(--primary-600); border: 1px solid var(--primary-100); font-weight: 700;">
@@ -276,7 +283,7 @@ export class AjustesView {
           </div>
 
           <div style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-            💡 <b>Control de Acceso:</b> Los módulos no incluidos en esta lista (como finanzas, contabilidad o inventario general) están restringidos para este perfil operativo.
+            <b>Control de Acceso:</b> Los módulos no incluidos en esta lista (como finanzas, contabilidad o inventario general) están restringidos para este perfil operativo.
           </div>
         </div>
 

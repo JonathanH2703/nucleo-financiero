@@ -7,6 +7,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class TenantsAdminView {
   static async mount(container) {
@@ -31,7 +32,7 @@ export class TenantsAdminView {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 18px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-              <span style="font-size: 26px;">🏢</span>
+              <span style="display: inline-flex; color: #2563eb;">${Icons.building(26)}</span>
               <h1 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin: 0;">
                 ${isSuperAdmin ? 'Administración de Clientes SaaS & Planes' : `Sucursales y Sedes de ${state.currentTenant.name}`}
               </h1>
@@ -45,7 +46,7 @@ export class TenantsAdminView {
 
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button type="button" id="btn-refresh-admin" style="background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              🔄 Actualizar
+              ${Icons.refresh(14)} Actualizar
             </button>
             ${isSuperAdmin ? `
               <button type="button" id="btn-nueva-empresa" style="background: #2563eb; color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
@@ -62,10 +63,10 @@ export class TenantsAdminView {
         ${isSuperAdmin ? `
           <div style="display: flex; gap: 10px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 2px;">
             <button type="button" class="admin-tab-btn ${this.activeTab === 'empresas' ? 'active' : ''}" data-tab="empresas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'empresas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'empresas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer;">
-              🏢 Empresas Clientes (${this.tenants.length})
+              Empresas Clientes (${this.tenants.length})
             </button>
             <button type="button" class="admin-tab-btn ${this.activeTab === 'sucursales' ? 'active' : ''}" data-tab="sucursales" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'sucursales' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'sucursales' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer;">
-              📍 Sedes Físicas (${this.sucursales.length})
+              Sedes Físicas (${this.sucursales.length})
             </button>
           </div>
         ` : ''}
@@ -84,7 +85,10 @@ export class TenantsAdminView {
       <div id="modal-empresa-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2100; padding: 20px;">
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 540px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3); padding: 26px 30px; border: 1px solid var(--border-subtle); position: relative;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 20px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">🏢 Registrar Nueva Empresa Cliente</h3>
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+              ${Icons.building(18)}
+              <span>Registrar Nueva Empresa Cliente</span>
+            </h3>
             <button type="button" class="close-modal-btn" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--text-muted); cursor: pointer;">✕</button>
           </div>
 
@@ -109,8 +113,8 @@ export class TenantsAdminView {
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Plan Inicial *</label>
                 <select id="emp-plan-select" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-weight: 600;">
-                  <option value="basico">🌱 Plan Básico (Pequeña Empresa)</option>
-                  <option value="intermedio">⭐ Plan Crecimiento (Mediana Empresa)</option>
+                  <option value="basico">Plan Básico (Pequeña Empresa)</option>
+                  <option value="intermedio">Plan Crecimiento (Mediana Empresa)</option>
                 </select>
               </div>
               <div>
@@ -121,8 +125,9 @@ export class TenantsAdminView {
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
               <button type="button" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
-              <button type="submit" id="btn-submit-empresa" style="padding: 10px 22px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-                🚀 Crear y Aprovisionar Esquema
+              <button type="submit" id="btn-submit-empresa" style="padding: 10px 22px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); display: inline-flex; align-items: center; gap: 6px;">
+                <span>Aprovisionar Esquema</span>
+                ${Icons.arrowRight(15)}
               </button>
             </div>
           </form>
@@ -133,7 +138,10 @@ export class TenantsAdminView {
       <div id="modal-sucursal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2100; padding: 20px;">
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 540px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3); padding: 26px 30px; border: 1px solid var(--border-subtle); position: relative;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 20px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">📍 Registrar Nueva Sucursal</h3>
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+              ${Icons.tenants(18)}
+              <span>Registrar Nueva Sucursal</span>
+            </h3>
             <button type="button" class="close-modal-btn" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--text-muted); cursor: pointer;">✕</button>
           </div>
 
@@ -222,7 +230,7 @@ export class TenantsAdminView {
             <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; transition: transform 0.2s, box-shadow 0.2s;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                  <span style="font-size: 26px;">🏛️</span>
+                  <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--bg-subtle); color: #0284c7;">${Icons.building(20)}</span>
                   <div style="display: flex; gap: 6px; align-items: center;">
                     <span class="badge" style="${
                       isIntermedio
@@ -230,8 +238,8 @@ export class TenantsAdminView {
                         : (isPersonalizado
                           ? 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;'
                           : 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;')
-                    } font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-                      ${isIntermedio ? '⭐ Plan Crecimiento' : (isPersonalizado ? '⚡ Personalizado' : '🌱 Plan Básico')}
+                    } font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                      ${isIntermedio ? 'Plan Crecimiento' : (isPersonalizado ? 'Personalizado' : 'Plan Básico')}
                     </span>
                     <span class="badge" style="background: ${t.status === 'ACTIVE' ? '#ecfdf5' : '#fef2f2'}; color: ${t.status === 'ACTIVE' ? '#059669' : '#dc2626'}; border: 1px solid ${t.status === 'ACTIVE' ? '#a7f3d0' : '#fecaca'}; font-weight: 700; font-size: 10px;">
                       ${t.status === 'ACTIVE' ? 'ACTIVA' : 'INACTIVA'}
@@ -258,13 +266,13 @@ export class TenantsAdminView {
                 <div style="margin-bottom: 12px;">
                   <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">Módulos Habilitados:</div>
                   <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                    ${modulos.includes('pos') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">☕ POS</span>' : ''}
-                    ${modulos.includes('inventario') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">📦 Stock</span>' : ''}
-                    ${modulos.includes('facturacion') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">📑 DIAN</span>' : ''}
-                    ${modulos.includes('compras') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">🚚 Compras</span>' : ''}
-                    ${modulos.includes('empresas') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">👥 Terceros</span>' : ''}
-                    ${modulos.includes('contabilidad') ? '<span class="badge" style="background: #fef3c7; color: #b45309; font-size: 10px;">🏛️ NIIF</span>' : ''}
-                    ${modulos.includes('reportes') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">📈 BI</span>' : ''}
+                    ${modulos.includes('pos') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">POS</span>' : ''}
+                    ${modulos.includes('inventario') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">Stock</span>' : ''}
+                    ${modulos.includes('facturacion') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">Facturación DIAN</span>' : ''}
+                    ${modulos.includes('compras') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">Compras</span>' : ''}
+                    ${modulos.includes('empresas') ? '<span class="badge" style="background: #eff6ff; color: #1d4ed8; font-size: 10px;">Terceros</span>' : ''}
+                    ${modulos.includes('contabilidad') ? '<span class="badge" style="background: #fef3c7; color: #b45309; font-size: 10px;">NIIF</span>' : ''}
+                    ${modulos.includes('reportes') ? '<span class="badge" style="background: #f1f5f9; color: #334155; font-size: 10px;">Analítica</span>' : ''}
                   </div>
                 </div>
 
@@ -277,10 +285,12 @@ export class TenantsAdminView {
               <!-- Acciones de Gestión de Cliente -->
               <div style="display: flex; gap: 8px; border-top: 1px solid var(--border-subtle); padding-top: 14px; flex-wrap: wrap;">
                 <button type="button" class="btn-gestionar-plan" data-id="${t.id}" style="flex: 1; min-width: 140px; padding: 9px 12px; border-radius: 8px; border: 1px solid #2563eb; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                  ⚙️ Gestionar Plan
+                  ${Icons.ajustes(14)}
+                  <span>Configurar Módulos</span>
                 </button>
-                <button type="button" class="btn-seleccionar-tenant" data-slug="${t.slug}" style="padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 700; font-size: 12px; cursor: pointer;">
-                  📍 Sedes ➔
+                <button type="button" class="btn-seleccionar-tenant" data-slug="${t.slug}" style="padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                  <span>Ver Sucursales</span>
+                  ${Icons.arrowRight(13)}
                 </button>
               </div>
             </div>
@@ -294,7 +304,7 @@ export class TenantsAdminView {
     if (this.sucursales.length === 0) {
       return `
         <div style="background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); padding: 50px; text-align: center;">
-          <span style="font-size: 40px; display: block; margin-bottom: 12px;">📍</span>
+          <div style="color: var(--text-muted); margin-bottom: 12px;">${Icons.mapPin(36)}</div>
           <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">No hay sucursales configuradas</h3>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Crea la primera sucursal para que tu personal pueda ingresar con un PIN exclusivo al punto de venta.</p>
           <button type="button" class="btn-nueva-sucursal-trigger" style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">
@@ -310,13 +320,13 @@ export class TenantsAdminView {
           <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <span style="font-size: 24px;">📍</span>
+                <span style="color: #059669;">${Icons.mapPin(20)}</span>
                 <span class="badge" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 700; font-size: 11px;">
                   CÓDIGO: ${s.codigo}
                 </span>
               </div>
               <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0;">${s.nombre}</h3>
-              <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">${s.direccion || 'Sin dirección registrada'} · ${s.ciudad || 'Bogotá D.C.'}</p>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">${s.direccion || 'Sin dirección registrada'} · ${s.ciudad || 'Colombia'}</p>
               
               <!-- Tarjeta de PIN de Acceso -->
               <div style="background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
@@ -327,7 +337,7 @@ export class TenantsAdminView {
                   </div>
                 </div>
                 <button type="button" class="btn-editar-pin" data-id="${s.id}" data-pin="${s.pinAcceso || '1001'}" data-nombre="${s.nombre}" style="background: #ffffff; border: 1px solid #86efac; color: #15803d; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                  ✏️ Cambiar PIN
+                  Actualizar PIN
                 </button>
               </div>
             </div>
@@ -399,7 +409,7 @@ export class TenantsAdminView {
       const isPersonalizado = t.plan === 'personalizado';
       const modulos = Array.isArray(t.modulosActivos) ? t.modulosActivos : [];
 
-      badge.textContent = isIntermedio ? '⭐ PLAN CRECIMIENTO' : (isPersonalizado ? '⚡ PERSONALIZADO' : '🌱 PLAN BÁSICO');
+      badge.textContent = isIntermedio ? 'PLAN CRECIMIENTO' : (isPersonalizado ? 'PERSONALIZADO' : 'PLAN BÁSICO');
       badge.style.background = isIntermedio ? '#eff6ff' : (isPersonalizado ? '#f5f3ff' : '#f0fdf4');
       badge.style.color = isIntermedio ? '#2563eb' : (isPersonalizado ? '#7c3aed' : '#16a34a');
       title.textContent = t.name;
@@ -414,12 +424,12 @@ export class TenantsAdminView {
             </label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <button type="button" id="btn-preset-basico" style="padding: 14px; border-radius: 12px; border: 2px solid ${!isIntermedio && !isPersonalizado ? '#16a34a' : 'var(--border-subtle)'}; background: ${!isIntermedio && !isPersonalizado ? '#f0fdf4' : 'var(--bg-subtle)'}; text-align: left; cursor: pointer;">
-                <div style="font-size: 14px; font-weight: 800; color: #16a34a; margin-bottom: 4px;">🌱 Plan Básico</div>
+                <div style="font-size: 14px; font-weight: 800; color: #16a34a; margin-bottom: 4px;">Plan Básico</div>
                 <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Para pequeñas empresas: POS en mostrador e Inventario básico diario.</div>
               </button>
 
               <button type="button" id="btn-preset-intermedio" style="padding: 14px; border-radius: 12px; border: 2px solid ${isIntermedio ? '#2563eb' : 'var(--border-subtle)'}; background: ${isIntermedio ? '#eff6ff' : 'var(--bg-subtle)'}; text-align: left; cursor: pointer;">
-                <div style="font-size: 14px; font-weight: 800; color: #2563eb; margin-bottom: 4px;">⭐ Plan Crecimiento</div>
+                <div style="font-size: 14px; font-weight: 800; color: #2563eb; margin-bottom: 4px;">Plan Crecimiento</div>
                 <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Para medianas empresas: Facturación DIAN, Compras, Proveedores y POS.</div>
               </button>
             </div>
@@ -433,42 +443,42 @@ export class TenantsAdminView {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: var(--bg-subtle); padding: 14px; border-radius: 12px; border: 1px solid var(--border-subtle);">
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="pos" ${modulos.includes('pos') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>☕ Punto de Venta (POS)</span>
+                <span>Punto de Venta (POS)</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="inventario" ${modulos.includes('inventario') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>📦 Inventario & Stock</span>
+                <span>Inventario & Stock</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="facturacion" ${modulos.includes('facturacion') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>📑 Facturación DIAN</span>
+                <span>Facturación DIAN</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="compras" ${modulos.includes('compras') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>🚚 Proveedores & Compras</span>
+                <span>Proveedores & Compras</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="empresas" ${modulos.includes('empresas') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>🏢 Terceros / CRM Clientes</span>
+                <span>Terceros / CRM Clientes</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="reportes" ${modulos.includes('reportes') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>📈 Reportes Analíticos BI</span>
+                <span>Reportes Analíticos BI</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="contabilidad" ${modulos.includes('contabilidad') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>🏛️ Contabilidad NIIF/PUC</span>
+                <span>Contabilidad NIIF/PUC</span>
               </label>
 
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
                 <input type="checkbox" class="mod-checkbox" value="ajustes" ${modulos.includes('ajustes') ? 'checked' : ''} style="width: 16px; height: 16px;">
-                <span>⚙️ Ajustes de Negocio</span>
+                <span>Ajustes de Negocio</span>
               </label>
             </div>
           </div>
@@ -480,7 +490,7 @@ export class TenantsAdminView {
             </label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; max-height: 140px; overflow-y: auto;">
-                <div style="font-size: 12px; font-weight: 800; color: #059669; margin-bottom: 6px;">📍 Sedes Registradas (${detalle.sucursales.length})</div>
+                <div style="font-size: 12px; font-weight: 800; color: #059669; margin-bottom: 6px;">Sedes Registradas (${detalle.sucursales.length})</div>
                 ${detalle.sucursales.length > 0 ? detalle.sucursales.map(s => `
                   <div style="font-size: 11px; padding: 4px 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
                     <span><b>${s.nombre}</b> (${s.codigo})</span>
@@ -490,7 +500,7 @@ export class TenantsAdminView {
               </div>
 
               <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; max-height: 140px; overflow-y: auto;">
-                <div style="font-size: 12px; font-weight: 800; color: #2563eb; margin-bottom: 6px;">👥 Usuarios Registrados (${detalle.usuarios.length})</div>
+                <div style="font-size: 12px; font-weight: 800; color: #2563eb; margin-bottom: 6px;">Usuarios Registrados (${detalle.usuarios.length})</div>
                 ${detalle.usuarios.length > 0 ? detalle.usuarios.map(u => `
                   <div style="font-size: 11px; padding: 4px 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
                     <span>${u.nombre}</span>
@@ -504,8 +514,8 @@ export class TenantsAdminView {
           <!-- Botón Guardar -->
           <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
             <button type="button" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
-            <button type="button" id="btn-save-plan" data-id="${t.id}" style="padding: 10px 24px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-              💾 Guardar Configuración de Módulos
+            <button type="button" id="btn-save-plan" data-id="${t.id}" style="padding: 10px 24px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); display: inline-flex; align-items: center; gap: 8px;">
+              ${Icons.save(15)} Guardar Configuración de Módulos
             </button>
           </div>
         </div>
@@ -515,7 +525,7 @@ export class TenantsAdminView {
       this.bindPlanModalEvents(t.id);
 
     } catch (err) {
-      content.innerHTML = `<div style="padding: 30px; text-align: center; color: #dc2626;">❌ Error cargando detalles: ${err.message}</div>`;
+      content.innerHTML = `<div style="padding: 30px; text-align: center; color: #dc2626;">Error cargando detalles: ${err.message}</div>`;
     }
   }
 
@@ -579,7 +589,7 @@ export class TenantsAdminView {
           });
 
           if (res.success) {
-            alert('✅ ¡Módulos y plan de la empresa actualizados exitosamente!');
+            alert('Módulos y plan de la empresa actualizados exitosamente.');
             document.getElementById('modal-plan-backdrop').style.display = 'none';
 
             // Si la empresa editada es la que está en sesión, refrescar el estado
@@ -590,10 +600,10 @@ export class TenantsAdminView {
             await this.loadData();
           }
         } catch (err) {
-          alert(`❌ Error actualizando plan: ${err.message}`);
+          alert(`Error actualizando plan: ${err.message}`);
         } finally {
           btnSave.disabled = false;
-          btnSave.textContent = '💾 Guardar Configuración de Módulos';
+          btnSave.innerHTML = `${Icons.save(15)} Guardar Configuración de Módulos`;
         }
       });
     }
@@ -646,7 +656,7 @@ export class TenantsAdminView {
         e.preventDefault();
         const submitBtn = document.getElementById('btn-submit-empresa');
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Aprovisionando esquema...';
+        submitBtn.textContent = 'Aprovisionando esquema...';
 
         try {
           const name = document.getElementById('emp-nombre').value.trim();
@@ -657,16 +667,16 @@ export class TenantsAdminView {
 
           const res = await ApiClient.createTenant({ name, taxId, slug, adminPin, plan });
           if (res.success) {
-            alert(`✅ ¡Empresa "${name}" registrada exitosamente con esquema aislado y plan ${plan}!`);
+            alert(`Empresa "${name}" registrada exitosamente con esquema aislado y plan ${plan}.`);
             document.getElementById('modal-empresa-backdrop').style.display = 'none';
             formEmpresa.reset();
             await this.loadData();
           }
         } catch (err) {
-          alert(`❌ Error al crear empresa: ${err.message}`);
+          alert(`Error al crear empresa: ${err.message}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '🚀 Crear y Aprovisionar Esquema';
+          submitBtn.innerHTML = `${Icons.save(15)} Crear y Aprovisionar Esquema`;
         }
       });
     }
@@ -678,7 +688,7 @@ export class TenantsAdminView {
         e.preventDefault();
         const submitBtn = document.getElementById('btn-submit-sucursal');
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Guardando...';
+        submitBtn.textContent = 'Guardando...';
 
         try {
           const nombre = document.getElementById('suc-nombre').value.trim();
@@ -698,16 +708,16 @@ export class TenantsAdminView {
           });
 
           if (res.success) {
-            alert(`✅ Sucursal "${nombre}" creada con éxito con PIN de acceso: ${pinAcceso}`);
+            alert(`Sucursal "${nombre}" creada con éxito con PIN de acceso: ${pinAcceso}`);
             document.getElementById('modal-sucursal-backdrop').style.display = 'none';
             formSucursal.reset();
             await this.loadData();
           }
         } catch (err) {
-          alert(`❌ Error al crear sucursal: ${err.message}`);
+          alert(`Error al crear sucursal: ${err.message}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '✓ Guardar Sucursal';
+          submitBtn.innerHTML = `${Icons.save(15)} Guardar Sucursal`;
         }
       });
     }
@@ -741,10 +751,10 @@ export class TenantsAdminView {
         if (nuevoPin && nuevoPin.trim() && nuevoPin.trim() !== currentPin) {
           try {
             await ApiClient.updateSucursal(id, { pinAcceso: nuevoPin.trim() });
-            alert(`✅ PIN de la sucursal "${nombre}" actualizado a: ${nuevoPin.trim()}`);
+            alert(`PIN de la sucursal "${nombre}" actualizado a: ${nuevoPin.trim()}`);
             await this.loadData();
           } catch (err) {
-            alert(`❌ Error actualizando PIN: ${err.message}`);
+            alert(`Error actualizando PIN: ${err.message}`);
           }
         }
       });

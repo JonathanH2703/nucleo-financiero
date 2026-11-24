@@ -9,6 +9,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class PosView {
   static async mount(container) {
@@ -170,11 +171,11 @@ export class PosView {
 
     if (btnCaja) {
       if (turno && turno.abierto) {
-        btnCaja.innerHTML = `💰 Caja Abierta ($${Number(turno.totalVentas || 0).toLocaleString('es-CO')})`;
+        btnCaja.innerHTML = `${Icons.creditCard(14)} Caja Abierta ($${Number(turno.totalVentas || 0).toLocaleString('es-CO')})`;
         btnCaja.style.borderColor = '#10b981';
         btnCaja.style.color = '#34d399';
       } else {
-        btnCaja.innerHTML = `🔴 Abrir Caja`;
+        btnCaja.innerHTML = `${Icons.lock(14)} Abrir Caja`;
         btnCaja.style.borderColor = '#ef4444';
         btnCaja.style.color = '#f87171';
       }
@@ -203,23 +204,23 @@ export class PosView {
           <div class="pos-top-toolbar" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <div class="pos-modes-group">
               <button type="button" class="pos-mode-btn ${this.currentMode === 'Mostrador' ? 'active' : ''}" data-mode="Mostrador">
-                <span>🛒 Mostrador</span>
+                <span>${Icons.pos(14)} Mostrador</span>
               </button>
               <button type="button" class="pos-mode-btn ${this.currentMode === 'Mesa' ? 'active' : ''}" data-mode="Mesa">
-                <span>🍽️ Mesa</span>
+                <span>${Icons.user(14)} Mesa</span>
               </button>
               <button type="button" class="pos-mode-btn ${this.currentMode === 'Vitrina' ? 'active' : ''}" data-mode="Vitrina">
-                <span>🍰 Vitrina</span>
+                <span>${Icons.package(14)} Vitrina</span>
               </button>
             </div>
 
             <!-- Botones Operativos de Turno y Ventas -->
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
               <button type="button" id="btn-caja-control" style="background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
-                💰 Control de Caja
+                ${Icons.dollarSign(14)} Control de Caja
               </button>
               <button type="button" id="btn-historial-ventas" style="background: var(--bg-card); border: 1px solid var(--border-subtle); padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                🧾 Ventas (<span id="count-ventas-badge">0</span>)
+                ${Icons.fileText(14)} Ventas (<span id="count-ventas-badge">0</span>)
               </button>
             </div>
 
@@ -231,9 +232,9 @@ export class PosView {
 
           <!-- Buscador y Tercero -->
           <div class="pos-search-row">
-            <input type="text" id="pos-search-input" class="pos-search-input" placeholder="🔍 Buscar por nombre o código de barras...">
-            <div class="pos-client-pill">
-              <span>👤 Consumidor final (222222222222)</span>
+            <input type="text" id="pos-search-input" class="pos-search-input" placeholder="Buscar por nombre o código de barras...">
+            <div class="pos-client-pill" style="display: inline-flex; align-items: center; gap: 6px;">
+              <span>${Icons.user(13)} Consumidor final (222222222222)</span>
             </div>
           </div>
 
@@ -274,7 +275,7 @@ export class PosView {
           <!-- Lista de ítems del pedido -->
           <div class="order-items-list" id="order-items-list">
             <div class="empty-order-placeholder">
-              <div class="icon">🛒</div>
+              <div class="icon">${Icons.shoppingCart(32)}</div>
               <p><b>Venta lista para empezar</b></p>
               <p style="font-size: 11px;">Selecciona productos del catálogo o usa el escáner.</p>
             </div>
@@ -286,14 +287,14 @@ export class PosView {
               Forma de Pago
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;" id="payment-method-selector">
-              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'EFECTIVO' ? 'active' : ''}" data-method="EFECTIVO" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'EFECTIVO' ? '#10b981' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'EFECTIVO' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'EFECTIVO' ? '#10b981' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer;">
-                💵 Efectivo
+              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'EFECTIVO' ? 'active' : ''}" data-method="EFECTIVO" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'EFECTIVO' ? '#10b981' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'EFECTIVO' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'EFECTIVO' ? '#10b981' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                ${Icons.dollarSign(13)} Efectivo
               </button>
-              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'TARJETA' ? 'active' : ''}" data-method="TARJETA" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'TARJETA' ? '#3b82f6' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'TARJETA' ? 'rgba(59, 130, 246, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'TARJETA' ? '#3b82f6' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer;">
-                💳 Tarjeta
+              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'TARJETA' ? 'active' : ''}" data-method="TARJETA" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'TARJETA' ? '#3b82f6' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'TARJETA' ? 'rgba(59, 130, 246, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'TARJETA' ? '#3b82f6' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                ${Icons.creditCard(13)} Tarjeta
               </button>
-              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? 'active' : ''}" data-method="TRANSFERENCIA" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? '#8b5cf6' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? 'rgba(139, 92, 246, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? '#8b5cf6' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer;">
-                📱 QR / Transf
+              <button type="button" class="btn-pay-method ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? 'active' : ''}" data-method="TRANSFERENCIA" style="padding: 6px 4px; border-radius: 8px; border: 1px solid ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? '#8b5cf6' : 'var(--border-subtle)'}; background: ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? 'rgba(139, 92, 246, 0.15)' : 'var(--bg-card)'}; color: ${this.selectedPaymentMethod === 'TRANSFERENCIA' ? '#8b5cf6' : 'var(--text-muted)'}; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                ${Icons.smartphone(13)} QR / Transf
               </button>
             </div>
           </div>
@@ -320,10 +321,10 @@ export class PosView {
 
             <div class="order-buttons-group">
               <button type="button" class="btn-kds-send" id="btn-send-kds">
-                <span>🍳 Enviar Cocina</span>
+                <span>Enviar Cocina</span>
               </button>
-              <button type="button" class="btn-pos-pay" id="btn-pos-pay">
-                <span>💳 Cobrar e Imprimir</span>
+              <button type="button" class="btn-pos-pay" id="btn-pos-pay" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>${Icons.printer(16)} Cobrar e Imprimir</span>
               </button>
             </div>
           </div>
@@ -333,13 +334,13 @@ export class PosView {
       <!-- Barra flotante móvil para abrir la comanda -->
       <div class="pos-mobile-order-bar" id="pos-mobile-order-bar">
         <div class="pos-mobile-order-info">
-          <div class="icon">🛏️</div>
+          <div class="icon">${Icons.pos(18)}</div>
           <div>
             <div style="font-size: 12px; font-weight: 700;">${state.selectedTable}</div>
             <div class="pos-mobile-bar-total" id="mobile-bar-total">$ 0</div>
           </div>
         </div>
-        <button type="button" class="btn-mobile-open-order" id="btn-mobile-open-order">📋 Ver Comanda</button>
+        <button type="button" class="btn-mobile-open-order" id="btn-mobile-open-order">${Icons.fileText(14)} Ver Comanda</button>
       </div>
 
       <!-- MODAL 1: TIRILLA TÉRMICA (58mm / 80mm) & WHATSAPP -->
@@ -347,7 +348,9 @@ export class PosView {
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4); border: 1px solid var(--border-subtle); display: flex; flex-direction: column;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border-subtle);">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 20px;">🖨️</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.printer(18)}
+              </span>
               <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0;">Tirilla Térmica POS</h3>
             </div>
             <button type="button" class="close-ticket-modal-btn" style="background: var(--bg-subtle); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; color: var(--text-muted); cursor: pointer;">✕</button>
@@ -363,10 +366,10 @@ export class PosView {
           <!-- Barra de Acciones del Ticket -->
           <div style="padding: 14px 20px; border-top: 1px solid var(--border-subtle); background: var(--bg-card); display: flex; gap: 10px; justify-content: flex-end;">
             <button type="button" id="btn-share-whatsapp" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: none; background: #16a34a; color: #ffffff; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <span>💬 WhatsApp</span>
+              <span>WhatsApp</span>
             </button>
             <button type="button" id="btn-print-receipt" style="flex: 1; padding: 10px 14px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <span>🖨️ Imprimir (80mm)</span>
+              <span>${Icons.printer(14)} Imprimir (80mm)</span>
             </button>
           </div>
         </div>
@@ -377,7 +380,9 @@ export class PosView {
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4); border: 1px solid var(--border-subtle); padding: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 22px;">💰</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                ${Icons.dollarSign(18)}
+              </span>
               <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Control de Caja & Turno</h3>
             </div>
             <button type="button" class="close-caja-modal-btn" style="background: var(--bg-subtle); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; color: var(--text-muted); cursor: pointer;">✕</button>
@@ -394,7 +399,9 @@ export class PosView {
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4); border: 1px solid var(--border-subtle); padding: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 22px;">🧾</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                ${Icons.fileText(18)}
+              </span>
               <div>
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">Ventas del Turno</h3>
                 <div style="font-size: 12px; color: var(--text-muted);">Reimpresión de tirillas y anulación de facturas con restitución</div>
@@ -445,7 +452,7 @@ export class PosView {
       if (grid) {
         grid.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #ef4444;">
-            ❌ Error al cargar catálogo: ${err.message}
+            Error al cargar catálogo: ${err.message}
           </div>
         `;
       }
@@ -514,10 +521,10 @@ export class PosView {
         return `
           <div class="pos-product-card" data-id="${p.id}" style="position: relative;">
             <div>
-              <div class="pos-product-icon-wrap">${icon}</div>
+              <div class="pos-product-icon-wrap" style="color: var(--primary-500);">${icon}</div>
               <div class="pos-product-name">${p.nombre}</div>
               <div class="pos-product-stock">
-                ${isServicio ? '💼 <b style="color: #60a5fa;">Servicio</b>' : `Stock: ${p.stockActual || 0} disp.`}
+                ${isServicio ? '<b style="color: #60a5fa;">Servicio</b>' : `Stock: ${p.stockActual || 0} disp.`}
               </div>
             </div>
             <div class="pos-product-price">$ ${precio}</div>
@@ -548,22 +555,10 @@ export class PosView {
 
   static getProductIcon(nombre, cat) {
     const n = (nombre + ' ' + (cat || '')).toLowerCase();
-    if (n.includes('corte') || n.includes('barba') || n.includes('peinado') || n.includes('cepillado')) return '✂️';
-    if (n.includes('manicure') || n.includes('pedicure') || n.includes('uña')) return '💅';
-    if (n.includes('masaje') || n.includes('facial') || n.includes('spa')) return '💆';
-    if (n.includes('mantenimiento') || n.includes('reparación') || n.includes('servicio')) return '🔧';
-    if (n.includes('ceviche') || n.includes('camarón')) return '🦐';
-    if (n.includes('queso') || n.includes('lacteo')) return '🧀';
-    if (n.includes('carne') || n.includes('lomo')) return '🥩';
-    if (n.includes('croissant') || n.includes('pan')) return '🥐';
-    if (n.includes('torta') || n.includes('pastel')) return '🍰';
-    if (n.includes('café') || n.includes('capuccino')) return '☕';
-    if (n.includes('empanada')) return '🥟';
-    if (n.includes('arroz') || n.includes('grano')) return '🌾';
-    if (n.includes('aceite')) return '🫒';
-    if (n.includes('leche')) return '🥛';
-    if (n.includes('huevo')) return '🥚';
-    return '📦';
+    if (n.includes('corte') || n.includes('barba') || n.includes('peinado') || n.includes('cepillado') || n.includes('manicure') || n.includes('pedicure') || n.includes('masaje') || n.includes('facial') || n.includes('spa')) {
+      return Icons.scissors(24);
+    }
+    return Icons.package(24);
   }
 
   // ================= RENDER COMANDA / CARRITO =================
@@ -582,7 +577,7 @@ export class PosView {
     if (state.cartItems.length === 0) {
       itemsList.innerHTML = `
         <div class="empty-order-placeholder">
-          <div class="icon">🛒</div>
+          <div class="icon">${Icons.shoppingCart(32)}</div>
           <p><b>Venta lista para empezar</b></p>
           <p style="font-size: 11px;">Selecciona productos del catálogo o usa el escáner.</p>
         </div>
@@ -753,7 +748,7 @@ export class PosView {
       .map((it) => `• ${it.quantity}x ${it.nombre} = $${(Number(it.precio || it.precio_base || 0) * it.quantity).toLocaleString('es-CO')}`)
       .join('\n');
 
-    const msg = `🧾 *RECIBO DE VENTA — ${tenantName}*
+    const msg = `*RECIBO DE VENTA — ${tenantName}*
 ----------------------------------------
 *Comprobante:* ${venta.comprobante}
 *Fecha:* ${new Date(venta.fecha).toLocaleString('es-CO')}
@@ -789,7 +784,7 @@ _Software POS Núcleo Financiero_`;
       // Formulario de Apertura de Caja
       content.innerHTML = `
         <div style="text-align: center; padding: 10px 0 20px;">
-          <div style="font-size: 40px; margin-bottom: 8px;">🔓</div>
+          <div style="margin-bottom: 8px; color: #10b981;">${Icons.lock(36)}</div>
           <h4 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Apertura de Turno de Caja</h4>
           <p style="font-size: 13px; color: var(--text-muted);">Ingresa el efectivo inicial disponible en gaveta (base de sencillo).</p>
         </div>
@@ -807,8 +802,8 @@ _Software POS Núcleo Financiero_`;
 
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button type="button" class="close-caja-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
-            <button type="submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: #10b981; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-              🟢 Iniciar Turno de Caja
+            <button type="submit" style="padding: 10px 22px; border-radius: 10px; border: none; background: #10b981; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); display: inline-flex; align-items: center; gap: 6px;">
+              Iniciar Turno de Caja
             </button>
           </div>
         </form>
@@ -832,7 +827,7 @@ _Software POS Núcleo Financiero_`;
             cantidadVentas: 0,
           };
           this.saveTurno(nuevoTurno);
-          alert(`✅ ¡Turno de caja iniciado con base de $${base.toLocaleString('es-CO')}!`);
+          alert(`Turno de caja iniciado con base de $${base.toLocaleString('es-CO')}`);
           modal.style.display = 'none';
         });
       }
@@ -843,11 +838,11 @@ _Software POS Núcleo Financiero_`;
       content.innerHTML = `
         <!-- Pestañas del Modal -->
         <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 4px; margin-bottom: 18px;">
-          <button type="button" id="tab-caja-x-btn" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.15); border: none; border-radius: 8px; font-weight: 700; color: #3b82f6; cursor: pointer;">
-            📊 Arqueo Parcial (Caja X)
+          <button type="button" id="tab-caja-x-btn" style="flex: 1; padding: 8px; background: rgba(59, 130, 246, 0.15); border: none; border-radius: 8px; font-weight: 700; color: #3b82f6; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            ${Icons.chartBar(14)} Arqueo Parcial (Caja X)
           </button>
-          <button type="button" id="tab-caja-z-btn" style="flex: 1; padding: 8px; background: transparent; border: none; border-radius: 8px; font-weight: 700; color: var(--text-muted); cursor: pointer;">
-            🔒 Cerrar Turno (Caja Z)
+          <button type="button" id="tab-caja-z-btn" style="flex: 1; padding: 8px; background: transparent; border: none; border-radius: 8px; font-weight: 700; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            ${Icons.lock(14)} Cerrar Turno (Caja Z)
           </button>
         </div>
 
@@ -869,15 +864,15 @@ _Software POS Núcleo Financiero_`;
               Ventas por Medio de Pago
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-              <span style="color: var(--text-muted);">💵 Ventas Efectivo:</span>
+              <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">${Icons.dollarSign(13)} Ventas Efectivo:</span>
               <span style="font-weight: 700; color: var(--text-main);">$ ${Number(turno.totalEfectivo || 0).toLocaleString('es-CO')}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-              <span style="color: var(--text-muted);">💳 Ventas Tarjetas:</span>
+              <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">${Icons.creditCard(13)} Ventas Tarjetas:</span>
               <span style="font-weight: 700; color: var(--text-main);">$ ${Number(turno.totalTarjetas || 0).toLocaleString('es-CO')}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
-              <span style="color: var(--text-muted);">📱 Ventas QR / Transferencias:</span>
+              <span style="color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">${Icons.smartphone(13)} Ventas QR / Transferencias:</span>
               <span style="font-weight: 700; color: var(--text-main);">$ ${Number(turno.totalTransferencias || 0).toLocaleString('es-CO')}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; border-top: 1px dashed var(--border-subtle); padding-top: 8px; margin-top: 6px; color: #10b981;">
@@ -896,7 +891,7 @@ _Software POS Núcleo Financiero_`;
         <!-- Vista Cierre Caja Z -->
         <div id="view-caja-z" style="display: none;">
           <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
-            <div style="font-size: 12px; font-weight: 700; color: #ef4444;">⚠️ Cierre Definitivo de Turno (Caja Z)</div>
+            <div style="font-size: 12px; font-weight: 700; color: #ef4444;">Cierre Definitivo de Turno (Caja Z)</div>
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Realiza el conteo físico de dinero en la gaveta para calcular diferencias.</div>
           </div>
 
@@ -909,7 +904,7 @@ _Software POS Núcleo Financiero_`;
 
           <!-- Indicador de Descuadre en Tiempo Real -->
           <div id="descuadre-indicator" style="padding: 12px 14px; border-radius: 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; margin-bottom: 16px; text-align: center; font-size: 13px; font-weight: 700; color: #10b981;">
-            ✅ Caja Cuadrada (Diferencia: $ 0)
+            Caja Cuadrada (Diferencia: $ 0)
           </div>
 
           <div style="margin-bottom: 18px;">
@@ -917,8 +912,8 @@ _Software POS Núcleo Financiero_`;
             <input type="text" id="cierre-notas-input" placeholder="Ej: Sin novedades, turno entregado con normalidad" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main);">
           </div>
 
-          <button type="button" id="btn-confirmar-cierre-z" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #dc2626; color: #ffffff; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);">
-            🔒 Asentar Cierre de Caja Z y Reiniciar Turno
+          <button type="button" id="btn-confirmar-cierre-z" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #dc2626; color: #ffffff; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35); display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            ${Icons.lock(16)} Asentar Cierre de Caja Z y Reiniciar Turno
           </button>
         </div>
       `;
@@ -962,17 +957,17 @@ _Software POS Núcleo Financiero_`;
             indDescuadre.style.background = 'rgba(16, 185, 129, 0.12)';
             indDescuadre.style.borderColor = '#10b981';
             indDescuadre.style.color = '#10b981';
-            indDescuadre.innerHTML = '✅ Caja Cuadrada Perfecta (Diferencia: $ 0)';
+            indDescuadre.innerHTML = 'Caja Cuadrada Perfecta (Diferencia: $ 0)';
           } else if (dif > 0) {
             indDescuadre.style.background = 'rgba(59, 130, 246, 0.12)';
             indDescuadre.style.borderColor = '#3b82f6';
             indDescuadre.style.color = '#3b82f6';
-            indDescuadre.innerHTML = `🟢 Sobrante de Caja: +$ ${dif.toLocaleString('es-CO')}`;
+            indDescuadre.innerHTML = `Sobrante de Caja: +$ ${dif.toLocaleString('es-CO')}`;
           } else {
             indDescuadre.style.background = 'rgba(239, 68, 68, 0.12)';
             indDescuadre.style.borderColor = '#ef4444';
             indDescuadre.style.color = '#ef4444';
-            indDescuadre.innerHTML = `🔴 Faltante de Dinero: -$ ${Math.abs(dif).toLocaleString('es-CO')}`;
+            indDescuadre.innerHTML = `Faltante de Dinero: -$ ${Math.abs(dif).toLocaleString('es-CO')}`;
           }
         });
       }
@@ -997,7 +992,7 @@ _Software POS Núcleo Financiero_`;
           turno.notasCierre = notas;
 
           this.saveTurno(turno);
-          alert(`🔒 ¡Turno de caja cerrado exitosamente!\nInforme Z guardado.\nTotal ventas: $${Number(turno.totalVentas || 0).toLocaleString('es-CO')}`);
+          alert(`Turno de caja cerrado exitosamente.\nInforme Z guardado.\nTotal ventas: $${Number(turno.totalVentas || 0).toLocaleString('es-CO')}`);
           modal.style.display = 'none';
         });
       }
@@ -1017,7 +1012,7 @@ _Software POS Núcleo Financiero_`;
     if (ventas.length === 0) {
       content.innerHTML = `
         <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-          <div style="font-size: 36px; margin-bottom: 8px;">🧾</div>
+          <div style="margin-bottom: 8px; color: #94a3b8;">${Icons.fileText(36)}</div>
           <p>No se han registrado ventas en el turno actual.</p>
         </div>
       `;
@@ -1059,8 +1054,8 @@ _Software POS Núcleo Financiero_`;
                       </span>
                     </td>
                     <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
-                      <button type="button" class="btn-reimprimir-tirilla" data-id="${v.id}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-right: 4px;">
-                        🖨️ Tirilla
+                      <button type="button" class="btn-reimprimir-tirilla" data-id="${v.id}" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-right: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                        ${Icons.printer(12)} Tirilla
                       </button>
                       ${
                         !v.anulada
@@ -1101,7 +1096,7 @@ _Software POS Núcleo Financiero_`;
           if (motivo !== null) {
             const ok = this.anularVenta(id, motivo);
             if (ok) {
-              alert('✅ Venta anulada con éxito. Inventario restaurado y caja ajustada.');
+              alert('Venta anulada con éxito. Inventario restaurado y caja ajustada.');
               this.openHistorialModal(); // Recargar tabla
             }
           }
@@ -1225,7 +1220,7 @@ _Software POS Núcleo Financiero_`;
           alert('Agregue primero productos a la comanda antes de despachar a cocina.');
           return;
         }
-        alert(`🍳 ¡Comanda despachada con éxito al Monitor de Cocina KDS para ${state.selectedTable || 'Mostrador'}!`);
+        alert(`Comanda despachada con éxito al Monitor de Cocina KDS para ${state.selectedTable || 'Mostrador'}.`);
       });
     }
 
@@ -1337,10 +1332,10 @@ _Software POS Núcleo Financiero_`;
           // Abrir modal de tirilla térmica inmediatamente
           this.mostrarTicketModal(nuevaVenta);
         } catch (err) {
-          alert(`❌ Error al procesar venta: ${err.message}`);
+          alert(`Error al procesar venta: ${err.message}`);
         } finally {
           btnPay.disabled = false;
-          btnPay.textContent = 'Cobrar e Imprimir';
+          btnPay.innerHTML = `<span>${Icons.printer(16)} Cobrar e Imprimir</span>`;
         }
       });
     }

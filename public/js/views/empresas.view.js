@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class EmpresasView {
   static async mount(container) {
@@ -25,8 +26,11 @@ export class EmpresasView {
         <!-- Header -->
         <div class="empresas-header-row">
           <div>
-            <h1 class="empresas-header-title">
-              <span>🏢</span> Directorio de Empresas y Terceros
+            <h1 class="empresas-header-title" style="display: flex; align-items: center; gap: 10px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.tenants(20)}
+              </span>
+              Directorio de Empresas y Terceros
             </h1>
             <p class="empresas-header-desc">
               Administra clientes, proveedores o entidades mixtas. Las empresas registradas aquí se autocompletan en la emisión de facturas.
@@ -34,10 +38,10 @@ export class EmpresasView {
           </div>
           <div class="empresas-header-actions" style="display: flex; gap: 10px; align-items: center;">
             <button type="button" class="btn-refresh-empresas" id="btn-refresh-empresas" style="background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              🔄 Actualizar
+              ${Icons.refresh(15)} Actualizar
             </button>
             <button type="button" class="btn-nueva-empresa" id="btn-nueva-empresa" style="background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;">
-              <span style="font-size: 16px; font-weight: 800;">+</span> Registrar Empresa
+              ${Icons.plus(16)} Registrar Empresa
             </button>
           </div>
         </div>
@@ -49,17 +53,17 @@ export class EmpresasView {
               Todos (${this.terceros.length})
             </button>
             <button type="button" class="empresa-filter-pill ${this.filtroTipo === 'cliente' ? 'active' : ''}" data-filtro="cliente">
-              👤 Solo Clientes
+              Solo Clientes
             </button>
             <button type="button" class="empresa-filter-pill ${this.filtroTipo === 'proveedor' ? 'active' : ''}" data-filtro="proveedor">
-              🚚 Solo Proveedores
+              Solo Proveedores
             </button>
             <button type="button" class="empresa-filter-pill ${this.filtroTipo === 'ambos' ? 'active' : ''}" data-filtro="ambos">
-              🔄 Ambos
+              Ambos
             </button>
           </div>
           <div style="position: relative; min-width: 280px;">
-            <input type="text" id="input-buscar-empresa" class="empresas-search-input" value="${this.searchTerm}" placeholder="🔍 Buscar por razón social, NIT o email...">
+            <input type="text" id="input-buscar-empresa" class="empresas-search-input" value="${this.searchTerm}" placeholder="Buscar por razón social, NIT o email...">
           </div>
         </div>
 
@@ -78,7 +82,7 @@ export class EmpresasView {
           <div class="modal-empresa-header" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
             <div>
               <h2 class="modal-empresa-title" style="font-size: 19px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                🏢 Registrar Empresa / Tercero
+                ${Icons.tenants(18)} Registrar Empresa / Tercero
               </h2>
               <p class="modal-empresa-subtitle" style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">
                 Completa los datos de la entidad y define su rol comercial en el sistema.
@@ -93,20 +97,20 @@ export class EmpresasView {
             <div class="clasificacion-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
               <div class="clasificacion-title" style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                 <span>CLASIFICACIÓN COMERCIAL *</span>
-                <span style="font-size: 11px; font-weight: 500; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px;">💡 Puedes marcar ambas</span>
+                <span style="font-size: 11px; font-weight: 500; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px;">Opciones combinables</span>
               </div>
               <div class="clasificacion-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <label class="clasificacion-card" id="card-es-cliente" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 10px; cursor: pointer; transition: all 0.2s ease;">
                   <input type="checkbox" id="chk-es-cliente" checked style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                   <div class="clasificacion-card-label" style="display: flex; flex-direction: column;">
-                    <strong style="font-size: 13px; color: #0f172a;">👤 Cliente</strong>
+                    <strong style="font-size: 13px; color: #0f172a; display: flex; align-items: center; gap: 6px;">${Icons.user(14)} Cliente</strong>
                     <span style="font-size: 11px; color: #64748b;">Emisión de facturas DIAN</span>
                   </div>
                 </label>
                 <label class="clasificacion-card" id="card-es-proveedor" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1.5px solid #cbd5e1; background: #ffffff; border-radius: 10px; cursor: pointer; transition: all 0.2s ease;">
                   <input type="checkbox" id="chk-es-proveedor" style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer;">
                   <div class="clasificacion-card-label" style="display: flex; flex-direction: column;">
-                    <strong style="font-size: 13px; color: #0f172a;">🚚 Proveedor</strong>
+                    <strong style="font-size: 13px; color: #0f172a; display: flex; align-items: center; gap: 6px;">${Icons.truck(14)} Proveedor</strong>
                     <span style="font-size: 11px; color: #64748b;">Compras y gastos</span>
                   </div>
                 </label>
@@ -167,7 +171,7 @@ export class EmpresasView {
                 Cancelar
               </button>
               <button type="submit" id="btn-guardar-empresa" class="btn-modal-guardar" style="background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 10px 24px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;">
-                💾 Guardar Empresa
+                ${Icons.save(16)} Guardar Empresa
               </button>
             </div>
           </form>
@@ -194,10 +198,10 @@ export class EmpresasView {
     if (filtrados.length === 0) {
       return `
         <div style="text-align: center; padding: 50px 20px; color: #64748b;">
-          <div style="font-size: 32px; margin-bottom: 10px;">🏢</div>
+          <div style="margin-bottom: 10px; color: #94a3b8;">${Icons.tenants(36)}</div>
           <p style="font-size: 15px; font-weight: 600; color: #0f172a; margin: 0 0 4px 0;">No se encontraron empresas</p>
           <p style="font-size: 13px; margin: 0 0 16px 0;">No hay registros que coincidan con el filtro o la búsqueda actual.</p>
-          <button type="button" class="btn-nueva-empresa" id="btn-crear-primer-tercero" style="background: #2563eb !important; color: #ffffff !important; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">+ Registrar la primera empresa</button>
+          <button type="button" class="btn-nueva-empresa" id="btn-crear-primer-tercero" style="background: #2563eb !important; color: #ffffff !important; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">${Icons.plus(16)} Registrar la primera empresa</button>
         </div>
       `;
     }
@@ -221,11 +225,11 @@ export class EmpresasView {
 
             let badgeHtml = '';
             if (esCliente && esProveedor) {
-              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);">🔄 Cliente + Proveedor</span>`;
+              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);">Cliente + Proveedor</span>`;
             } else if (esCliente) {
-              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2);">👤 Cliente</span>`;
+              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2);">${Icons.user(12)} Cliente</span>`;
             } else if (esProveedor) {
-              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">🚚 Proveedor</span>`;
+              badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">${Icons.truck(12)} Proveedor</span>`;
             } else {
               badgeHtml = `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;">Tercero</span>`;
             }
@@ -242,9 +246,9 @@ export class EmpresasView {
                   </span>
                 </td>
                 <td>${badgeHtml}</td>
-                <td style="color: #64748b;">📞 ${t.telefono || '—'}</td>
+                <td style="color: #64748b;">${t.telefono || '—'}</td>
                 <td style="color: #64748b;">
-                  <div>📍 ${t.ciudad || 'No especificada'}</div>
+                  <div>${t.ciudad || 'No especificada'}</div>
                   <div style="font-size: 11px;">${t.direccion || ''}</div>
                 </td>
                 <td style="text-align: right;">
@@ -462,7 +466,7 @@ export class EmpresasView {
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
-        btnSubmit.textContent = '💾 Guardar Empresa';
+        btnSubmit.innerHTML = `${Icons.save(16)} Guardar Empresa`;
       }
     }
   }

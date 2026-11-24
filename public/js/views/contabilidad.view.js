@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class ContabilidadView {
   static async mount(container) {
@@ -33,8 +34,11 @@ export class ContabilidadView {
         <!-- Encabezado Principal -->
         <div class="contabilidad-header-row">
           <div>
-            <h1 class="contabilidad-header-title">
-              <span>🏛️</span> Contabilidad Financiera & Fiscal
+            <h1 class="contabilidad-header-title" style="display: flex; align-items: center; gap: 10px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.contabilidad(20)}
+              </span>
+              Contabilidad Financiera & Fiscal
             </h1>
             <p class="contabilidad-header-desc">
               Gestión contable bajo NIIF · Libro Diario en partida doble · Plan Único de Cuentas (PUC) y liquidación fiscal DIAN para ${tenant.name}.
@@ -42,27 +46,27 @@ export class ContabilidadView {
           </div>
           <div class="contabilidad-header-actions" style="display: flex; gap: 10px; align-items: center;">
             <button type="button" class="btn-refresh-contab" id="btn-refresh-contab" style="background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              🔄 Actualizar
+              ${Icons.refresh(15)} Actualizar
             </button>
             <button type="button" class="btn-nuevo-asiento" id="btn-nuevo-asiento" style="background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 10px 20px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;">
-              <span style="font-size: 16px; font-weight: 800;">+</span> Registrar Asiento Manual
+              ${Icons.plus(16)} Registrar Asiento Manual
             </button>
           </div>
         </div>
 
         <!-- Pestañas Contables (Exclusivas de Contabilidad) -->
         <div class="contabilidad-nav-tabs">
-          <button type="button" class="contab-tab-btn ${this.activeTab === 'diario' ? 'active' : ''}" data-tab="diario">
-            📖 Libro Diario (Asientos)
+          <button type="button" class="contab-tab-btn ${this.activeTab === 'diario' ? 'active' : ''}" data-tab="diario" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.fileText(15)} Libro Diario (Asientos)
           </button>
-          <button type="button" class="contab-tab-btn ${this.activeTab === 'puc' ? 'active' : ''}" data-tab="puc">
-            📑 Catálogo de Cuentas (PUC)
+          <button type="button" class="contab-tab-btn ${this.activeTab === 'puc' ? 'active' : ''}" data-tab="puc" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.contabilidad(15)} Catálogo de Cuentas (PUC)
           </button>
-          <button type="button" class="contab-tab-btn ${this.activeTab === 'balance' ? 'active' : ''}" data-tab="balance">
-            ⚖️ Balance de Comprobación
+          <button type="button" class="contab-tab-btn ${this.activeTab === 'balance' ? 'active' : ''}" data-tab="balance" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.chartBar(15)} Balance de Comprobación
           </button>
-          <button type="button" class="contab-tab-btn ${this.activeTab === 'impuestos' ? 'active' : ''}" data-tab="impuestos">
-            🏛️ Liquidación DIAN (IVA & Retenciones)
+          <button type="button" class="contab-tab-btn ${this.activeTab === 'impuestos' ? 'active' : ''}" data-tab="impuestos" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.building(15)} Liquidación DIAN (IVA & Retenciones)
           </button>
         </div>
 
@@ -78,7 +82,7 @@ export class ContabilidadView {
           <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
             <div>
               <h2 style="font-size: 19px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                📝 Registrar Asiento Contable Manual
+                ${Icons.edit(18)} Registrar Asiento Contable Manual
               </h2>
               <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">
                 Ingresa los débitos y créditos con partida doble cuadrada conforme al PUC.
@@ -146,7 +150,7 @@ export class ContabilidadView {
               </div>
               <div id="status-cuadre-container" style="text-align: right;">
                 <span style="font-size: 12px; color: #64748b; display: block;">Diferencia:</span>
-                <span style="font-size: 14px; font-weight: 700; color: #059669;" id="val-diferencia">$ 0 (Cuadrado ✓)</span>
+                <span style="font-size: 14px; font-weight: 700; color: #059669;" id="val-diferencia">$ 0 (Cuadrado)</span>
               </div>
             </div>
 
@@ -156,7 +160,7 @@ export class ContabilidadView {
                 Cancelar
               </button>
               <button type="submit" id="btn-guardar-asiento" style="background: #2563eb !important; color: #ffffff !important; border: none !important; padding: 10px 24px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;">
-                💾 Guardar Asiento Contable
+                ${Icons.save(16)} Guardar Asiento Contable
               </button>
             </div>
           </form>
@@ -233,14 +237,14 @@ export class ContabilidadView {
         <div class="contabilidad-toolbar">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'todos' ? 'active' : ''}" data-tipo-asiento="todos">Todos (${this.asientos.length})</button>
-            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'FACTURA_VENTA' ? 'active' : ''}" data-tipo-asiento="FACTURA_VENTA">📑 Ventas DIAN</button>
-            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'MANUAL' ? 'active' : ''}" data-tipo-asiento="MANUAL">✍️ Asientos Manuales</button>
-            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'GASTO' ? 'active' : ''}" data-tipo-asiento="GASTO">🏢 Gastos & Operación</button>
+            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'FACTURA_VENTA' ? 'active' : ''}" data-tipo-asiento="FACTURA_VENTA">Ventas DIAN</button>
+            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'MANUAL' ? 'active' : ''}" data-tipo-asiento="MANUAL">Asientos Manuales</button>
+            <button type="button" class="empresa-filter-pill ${this.filtroTipoAsiento === 'GASTO' ? 'active' : ''}" data-tipo-asiento="GASTO">Gastos & Operación</button>
           </div>
           <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" id="input-buscar-asiento" class="contab-search-input" value="${this.searchTerm}" placeholder="🔍 Buscar por comprobante, cuenta o tercero...">
-            <button type="button" id="btn-exportar-asientos" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;">
-              📥 Exportar CSV
+            <input type="text" id="input-buscar-asiento" class="contab-search-input" value="${this.searchTerm}" placeholder="Buscar por comprobante, cuenta o tercero...">
+            <button type="button" id="btn-exportar-asientos" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+              ${Icons.download(14)} Exportar CSV
             </button>
           </div>
         </div>
@@ -249,7 +253,7 @@ export class ContabilidadView {
         <div style="padding: 20px;" id="asientos-list-container">
           ${filtrados.length === 0 ? `
             <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-              <div style="font-size: 32px; margin-bottom: 8px;">📖</div>
+              <div style="margin-bottom: 8px; color: #94a3b8;">${Icons.fileText(32)}</div>
               <p style="font-size: 14px; font-weight: 600; margin: 0;">No se encontraron asientos contables con el filtro actual</p>
             </div>
           ` : filtrados.map(a => `
@@ -257,7 +261,9 @@ export class ContabilidadView {
               <div class="asiento-card-header">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                   <span class="asiento-comprobante-badge">${a.numeroComprobante}</span>
-                  <span style="font-size: 12px; color: #64748b; font-weight: 500;">📅 ${a.fecha}</span>
+                  <span style="font-size: 12px; color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                    ${Icons.clock(13)} ${a.fecha}
+                  </span>
                   <span style="font-size: 13px; font-weight: 700; color: #0f172a;">${a.concepto}</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -320,7 +326,7 @@ export class ContabilidadView {
             <p style="font-size: 12px; color: #64748b; margin: 0;">Estructura contable activa con saldos en tiempo real calculados según Libro Diario.</p>
           </div>
           <div style="font-size: 12px; color: #64748b; background: #eff6ff; padding: 6px 14px; border-radius: 8px; border: 1px solid #bfdbfe;">
-            💡 <strong>1. Activo · 2. Pasivo · 3. Patrimonio · 4. Ingresos · 5. Gastos · 6. Costos</strong>
+            <strong>1. Activo · 2. Pasivo · 3. Patrimonio · 4. Ingresos · 5. Gastos · 6. Costos</strong>
           </div>
         </div>
 
@@ -392,7 +398,7 @@ export class ContabilidadView {
           </div>
           <div style="background: ${totales.estaCuadrado ? '#f0fdf4' : '#fef2f2'}; border: 1px solid ${totales.estaCuadrado ? '#bbf7d0' : '#fecaca'}; padding: 6px 14px; border-radius: 8px;">
             <strong style="color: ${totales.estaCuadrado ? '#166534' : '#991b1b'}; font-size: 13px;">
-              ${totales.estaCuadrado ? '✓ Balance Cuadrado (Sumas Iguales NIIF)' : `⚠️ Descuadre de $ ${totales.diferencia.toLocaleString('es-CO')}`}
+              ${totales.estaCuadrado ? 'Balance Cuadrado (Sumas Iguales NIIF)' : `Descuadre de $ ${totales.diferencia.toLocaleString('es-CO')}`}
             </strong>
           </div>
         </div>
@@ -448,10 +454,10 @@ export class ContabilidadView {
       <!-- Subpestañas F-300 / F-350 -->
       <div style="display: flex; gap: 8px; margin-bottom: 16px;">
         <button type="button" class="empresa-filter-pill ${this.taxSubtab === 'f300' ? 'active' : ''}" data-tax-subtab="f300" style="padding: 8px 18px; font-size: 13px;">
-          📑 Impuesto sobre las Ventas (IVA F-300)
+          Impuesto sobre las Ventas (IVA F-300)
         </button>
         <button type="button" class="empresa-filter-pill ${this.taxSubtab === 'f350' ? 'active' : ''}" data-tax-subtab="f350" style="padding: 8px 18px; font-size: 13px;">
-          🏛️ Retenciones en la Fuente (F-350)
+          Retenciones en la Fuente (F-350)
         </button>
       </div>
 
@@ -468,8 +474,8 @@ export class ContabilidadView {
                 Liquidación bimestral automatizada según facturas electrónicas emitidas y asientos de compras de ${tenant.name}.
               </p>
             </div>
-            <button type="button" id="btn-descargar-f300" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-              📥 Descargar Certificado DIAN (JSON)
+            <button type="button" id="btn-descargar-f300" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              ${Icons.download(14)} Descargar Certificado DIAN (JSON)
             </button>
           </div>
 
@@ -520,8 +526,8 @@ export class ContabilidadView {
                 Periodicidad mensual · Compras generales, servicios técnicos y honorarios según Estatuto Tributario.
               </p>
             </div>
-            <button type="button" id="btn-descargar-f350" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-              📥 Descargar Certificado DIAN (JSON)
+            <button type="button" id="btn-descargar-f350" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              ${Icons.download(14)} Descargar Certificado DIAN (JSON)
             </button>
           </div>
 
@@ -666,7 +672,9 @@ export class ContabilidadView {
             <div class="asiento-card-header">
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <span class="asiento-comprobante-badge">${a.numeroComprobante}</span>
-                <span style="font-size: 12px; color: #64748b; font-weight: 500;">📅 ${a.fecha}</span>
+                <span style="font-size: 12px; color: #64748b; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                  ${Icons.clock(13)} ${a.fecha}
+                </span>
                 <span style="font-size: 13px; font-weight: 700; color: #0f172a;">${a.concepto}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -901,7 +909,7 @@ export class ContabilidadView {
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
-        btnSubmit.textContent = '💾 Guardar Asiento Contable';
+        btnSubmit.innerHTML = `${Icons.save(16)} Guardar Asiento Contable`;
       }
     }
   }

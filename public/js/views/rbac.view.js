@@ -6,6 +6,7 @@
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
 import { ROLE_DEFINITIONS } from '../rbac-definitions.js';
+import { Icons } from '../icons.js';
 
 export class RbacView {
   static async mount(container) {
@@ -64,7 +65,9 @@ export class RbacView {
         <!-- Perfiles y Alcance Operativo del Sistema -->
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <span style="font-size: 20px;">🛡️</span>
+            <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+              ${Icons.shield(18)}
+            </span>
             <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main);">Matriz Oficial de Roles y Alcance de Acceso</h3>
           </div>
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
@@ -104,8 +107,8 @@ export class RbacView {
         <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 22px 28px; box-shadow: var(--shadow-sm);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
             <div>
-              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main);">
-                👥 Colaboradores y Usuarios de ${state.currentTenant.name}
+              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                ${Icons.users(18)} Colaboradores y Usuarios de ${state.currentTenant.name}
               </h3>
               <p style="font-size: 12px; color: var(--text-muted);">Usuarios con acceso autorizado a este establecimiento</p>
             </div>
@@ -126,7 +129,7 @@ export class RbacView {
         <div id="modal-usuario-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2100; padding: 20px;">
           <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.3); padding: 26px 30px; border: 1px solid var(--border-subtle); position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 20px;">
-              <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">👤 Registrar Nuevo Colaborador</h3>
+              <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">${Icons.user(18)} Registrar Nuevo Colaborador</h3>
               <button type="button" id="btn-cerrar-modal-usuario" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--text-muted); cursor: pointer;">✕</button>
             </div>
 
@@ -261,16 +264,16 @@ export class RbacView {
           });
 
           if (res.success) {
-            alert(`✅ Usuario "${nombre}" registrado exitosamente.`);
+            alert(`Usuario "${nombre}" registrado exitosamente.`);
             cerrarModal();
             form.reset();
             await this.loadData();
           }
         } catch (err) {
-          alert(`❌ Error al crear usuario: ${err.message}`);
+          alert(`Error al crear usuario: ${err.message}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '✓ Guardar Usuario';
+          submitBtn.innerHTML = `${Icons.save(15)} Guardar Usuario`;
         }
       });
     }

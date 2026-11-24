@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class LoginView {
   static mount(container) {
@@ -23,7 +24,7 @@ export class LoginView {
         <div class="login-hero-side">
           <div class="login-brand-header">
             <div class="login-brand-logo-card">
-              <div class="login-brand-logo-icon">🏛️</div>
+              <div class="login-brand-logo-icon" style="display: flex; align-items: center; justify-content: center;">${Icons.logo(28)}</div>
               <div class="login-brand-logo-text">
                 <h2>Núcleo Financiero</h2>
                 <p>Claridad Empresarial</p>
@@ -39,49 +40,49 @@ export class LoginView {
             <div class="login-carousel-wrapper" id="login-carousel">
               <!-- Slide 1: Core ERP -->
               <div class="login-carousel-slide active" data-slide="0">
-                <div class="carousel-tag sistema">🏛️ PLATAFORMA · NÚCLEO FINANCIERO</div>
+                <div class="carousel-tag sistema">CORE FINANCIERO · NIIF</div>
                 <h3 class="carousel-title">Aislamiento Empresarial & Contabilidad NIIF</h3>
                 <p class="carousel-desc">
                   Datos financieros y contables aislados por esquema PostgreSQL, libro diario automático, balance de comprobación y PUC colombiano oficial.
                 </p>
                 <div class="carousel-highlight">
-                  ✓ PUC oficial · Conciliación bancaria · Reportes fiscales en tiempo real
+                  PUC oficial · Conciliación bancaria · Reportes fiscales en tiempo real
                 </div>
               </div>
 
               <!-- Slide 2: Adquirencia Integrada -->
               <div class="login-carousel-slide" data-slide="1">
-                <div class="carousel-tag publicidad">💳 PAGOS · ADQUIRENCIA INTEGRADA</div>
+                <div class="carousel-tag publicidad">PAGOS & ADQUIRENCIA</div>
                 <h3 class="carousel-title">Pasarelas de Pago y Terminales Datáfono</h3>
                 <p class="carousel-desc">
                   Recibe pagos con tarjetas débito, crédito y transferencias interoperables con conciliación automática directa en tu caja.
                 </p>
                 <div class="carousel-highlight ad">
-                  ⚡ Terminales inalámbricas · Conciliación en tiempo real · Cero fricción
+                  Terminales inalámbricas · Conciliación en tiempo real · Cero fricción
                 </div>
               </div>
 
               <!-- Slide 3: Multi-Sucursal y Kardex -->
               <div class="login-carousel-slide" data-slide="2">
-                <div class="carousel-tag sistema">📦 OPERACIÓN · INVENTARIO & SUCURSALES</div>
+                <div class="carousel-tag sistema">OPERACIÓN · SUCURSALES</div>
                 <h3 class="carousel-title">Control Multi-Sucursal y Kardex Permanente</h3>
                 <p class="carousel-desc">
                   Acceso por sucursal mediante PIN seguro. Kardex valorizado bajo método promedio ponderado, control de existencias y traslados.
                 </p>
                 <div class="carousel-highlight">
-                  ✓ PIN por sucursal · Existencias por bodega · Mermas y traslados
+                  PIN por sucursal · Existencias por bodega · Mermas y traslados
                 </div>
               </div>
 
               <!-- Slide 4: Facturación Electrónica DIAN -->
               <div class="login-carousel-slide" data-slide="3">
-                <div class="carousel-tag publicidad">📑 TRIBUTARIO · FACTURACIÓN ELECTRÓNICA</div>
+                <div class="carousel-tag publicidad">TRIBUTARIO · FACTURACIÓN DIAN</div>
                 <h3 class="carousel-title">Emisión de Factura Electrónica DIAN</h3>
                 <p class="carousel-desc">
                   Generación inmediata bajo estándar UBL 2.1, CUFE, código QR y validación previa automática ante la DIAN.
                 </p>
                 <div class="carousel-highlight ad">
-                  ✓ Estándar UBL 2.1 oficial · CUFE · Validación DIAN en 2 segundos
+                  Estándar UBL 2.1 oficial · CUFE · Validación DIAN en 2 segundos
                 </div>
               </div>
 
@@ -112,7 +113,7 @@ export class LoginView {
           <div class="login-form-card">
             <!-- Branding visible en móvil/tablet -->
             <div class="login-mobile-brand">
-              <div class="login-brand-logo-icon">🏛️</div>
+              <div class="login-brand-logo-icon" style="display: flex; align-items: center; justify-content: center;">${Icons.logo(28)}</div>
               <div class="login-brand-logo-text">
                 <h2>Núcleo Financiero</h2>
                 <p>Claridad Empresarial</p>
@@ -132,7 +133,7 @@ export class LoginView {
               <!-- NIT de la Empresa -->
               <div class="form-group">
                 <label class="form-label" for="nit-input">
-                  <span>🏢 NIT de la Empresa</span>
+                  <span>NIT de la Empresa</span>
                   <span style="font-size: 11px; color: #2563eb; font-weight: 600;">Colombia</span>
                 </label>
                 <input 
@@ -151,10 +152,11 @@ export class LoginView {
               <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                   <label class="form-label" for="pin-input" style="margin-bottom: 0;">
-                    <span>🔑 PIN de Acceso</span>
+                    <span>PIN de Acceso</span>
                   </label>
-                  <button type="button" id="btn-toggle-numpad" style="background: none; border: none; font-size: 12px; color: #2563eb; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                    🔢 Teclado táctil
+                  <button type="button" id="btn-toggle-numpad" style="background: none; border: none; font-size: 12px; color: #2563eb; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                    ${Icons.numpad(14)}
+                    <span>Teclado táctil</span>
                   </button>
                 </div>
                 <div class="password-input-wrapper">
@@ -169,10 +171,10 @@ export class LoginView {
                     required
                     autocomplete="current-password"
                   >
-                  <button type="button" id="toggle-password-btn" class="password-toggle-btn">👁️</button>
+                  <button type="button" id="toggle-password-btn" class="password-toggle-btn" style="display: flex; align-items: center; justify-content: center;">${Icons.eye(16)}</button>
                 </div>
                 <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
-                  💡 Accede con el <b>PIN de administración</b> o con el <b>PIN de tu sucursal</b>.
+                  Accede con el PIN de administración general o el PIN asignado a tu sucursal.
                 </div>
               </div>
 
@@ -192,15 +194,17 @@ export class LoginView {
                 <button type="button" class="numpad-btn" data-val="back">⌫</button>
               </div>
 
-              <button type="submit" id="btn-submit" class="btn-submit-login">
-                🔒 Ingresar al Sistema ➔
+              <button type="submit" id="btn-submit" class="btn-submit-login" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>Ingresar al Sistema</span>
+                ${Icons.arrowRight(16)}
               </button>
             </form>
 
             <!-- Acceso Administrador del Sistema -->
             <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-subtle); text-align: center;">
               <button type="button" id="btn-open-master-admin" style="background: none; border: none; font-size: 12.5px; color: #64748b; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease;">
-                <span>🛡️</span> Administración de Plataforma
+                ${Icons.shield(15)}
+                <span>Administración de Plataforma</span>
               </button>
             </div>
           </div>
@@ -212,7 +216,9 @@ export class LoginView {
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 440px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); padding: 28px; border: 1px solid var(--border-subtle); position: relative;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px;">🛡️</div>
+              <div style="width: 40px; height: 40px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+                ${Icons.shield(20)}
+              </div>
               <div>
                 <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Administración de Plataforma</h3>
                 <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Gestión Maestro Multi-Tenant</p>
@@ -241,8 +247,9 @@ export class LoginView {
 
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
               <button type="button" id="btn-cancel-master" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
-              <button type="submit" id="btn-submit-master" style="padding: 10px 20px; border-radius: 10px; border: none; background: #b45309; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);">
-                🛡️ Ingresar al Panel Maestro
+              <button type="submit" id="btn-submit-master" style="padding: 10px 20px; border-radius: 10px; border: none; background: #0284c7; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); display: inline-flex; align-items: center; gap: 6px;">
+                <span>Ingresar al Panel Maestro</span>
+                ${Icons.arrowRight(15)}
               </button>
             </div>
           </form>
@@ -358,10 +365,10 @@ export class LoginView {
       togglePassBtn.addEventListener('click', () => {
         if (pinInput.type === 'password') {
           pinInput.type = 'text';
-          togglePassBtn.textContent = '🔒';
+          togglePassBtn.innerHTML = Icons.eyeOff(16);
         } else {
           pinInput.type = 'password';
-          togglePassBtn.textContent = '👁️';
+          togglePassBtn.innerHTML = Icons.eye(16);
         }
       });
     }
@@ -375,7 +382,6 @@ export class LoginView {
     }
 
     // Modal Super Admin (Administración de Plataforma)
-    const btnOpenMaster = document.getElementById('btn-open-master-admin');
     const btnOpenMaster = document.getElementById('btn-open-master-admin');
     const modalMaster = document.getElementById('modal-master-admin-backdrop');
     const btnCloseMaster = document.getElementById('btn-close-master-modal');
@@ -401,7 +407,7 @@ export class LoginView {
         const pin = document.getElementById('master-pin-input').value.trim();
         const submitBtn = document.getElementById('btn-submit-master');
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Verificando...';
+        submitBtn.textContent = 'Verificando...';
 
         try {
           const res = await ApiClient.loginAdminSistema(pin);
@@ -410,10 +416,10 @@ export class LoginView {
             this.handleSuccessfulAuth(res);
           }
         } catch (err) {
-          alert(`❌ Error: ${err.message || 'PIN maestro inválido'}`);
+          alert(`Error: ${err.message || 'PIN maestro inválido'}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '🛡️ Ingresar al Panel Maestro';
+          submitBtn.innerHTML = `<span>Ingresar al Panel Maestro</span> ${Icons.arrowRight(15)}`;
         }
       });
     }
@@ -430,31 +436,31 @@ export class LoginView {
 
     if (!nit || !pin) {
       alertBox.className = 'login-alert error';
-      alertBox.textContent = '❌ Por favor ingresa el NIT de la empresa y el PIN de acceso.';
+      alertBox.textContent = 'Por favor ingresa el NIT de la empresa y el PIN de acceso.';
       alertBox.style.display = 'flex';
       return;
     }
 
     try {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '⏳ Verificando credenciales...';
+      submitBtn.innerHTML = 'Verificando credenciales...';
 
       const res = await ApiClient.loginNitPin(nit, pin);
 
       if (res && res.success && res.usuario) {
         alertBox.className = 'login-alert success';
-        alertBox.textContent = `✅ ${res.message}`;
+        alertBox.textContent = res.message;
         alertBox.style.display = 'flex';
 
         this.handleSuccessfulAuth(res);
       }
     } catch (err) {
       alertBox.className = 'login-alert error';
-      alertBox.textContent = `❌ ${err.message || 'Error al iniciar sesión'}`;
+      alertBox.textContent = err.message || 'Error al iniciar sesión';
       alertBox.style.display = 'flex';
     } finally {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '🔒 Ingresar al Sistema ➔';
+      submitBtn.innerHTML = `<span>Ingresar al Sistema</span> ${Icons.arrowRight(16)}`;
     }
   }
 

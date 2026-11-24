@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class FacturacionView {
   static async mount(container) {
@@ -37,19 +38,22 @@ export class FacturacionView {
         <!-- Header de Facturación -->
         <div class="facturacion-header-card">
           <div class="facturacion-title-group">
-            <h2>
-              <span>📑 Facturación Electrónica DIAN</span>
+            <h2 style="display: flex; align-items: center; gap: 10px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.facturacion(20)}
+              </span>
+              <span>Facturación Electrónica DIAN</span>
               <span class="badge badge-aceptada">Habilitado DIAN 2026</span>
             </h2>
             <p>Registro de comprobantes fiscales UBL 2.1 · Resoluciones vigentes · ${state.currentTenant.name}</p>
           </div>
 
           <div class="facturacion-actions">
-            <button class="btn-secondary" id="btn-export-xml" title="Descargar paquete de comprobantes XML UBL 2.1">
-              📥 Descargar XMLs
+            <button class="btn-secondary" id="btn-export-xml" title="Descargar paquete de comprobantes XML UBL 2.1" style="display: inline-flex; align-items: center; gap: 6px;">
+              ${Icons.download(14)} Descargar XMLs
             </button>
-            <button class="btn-primary" id="btn-nueva-factura">
-              + Emitir Factura Directa
+            <button class="btn-primary" id="btn-nueva-factura" style="display: inline-flex; align-items: center; gap: 6px;">
+              ${Icons.plus(16)} Emitir Factura Directa
             </button>
           </div>
         </div>
@@ -57,31 +61,31 @@ export class FacturacionView {
         <!-- Tarjetas de Resumen Financiero (KPIs) -->
         <div class="financial-kpis-grid" id="financial-kpis-container">
           <div class="kpi-card">
-            <div class="kpi-icon-box blue">📊</div>
+            <div class="kpi-icon-box blue">${Icons.chartBar(20)}</div>
             <div class="kpi-info">
               <span class="kpi-label">Facturación Bruta Acumulada</span>
-              <span class="kpi-value" id="kpi-total-facturado">⏳ Cargando...</span>
+              <span class="kpi-value" id="kpi-total-facturado">Cargando...</span>
             </div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon-box green">💰</div>
+            <div class="kpi-icon-box green">${Icons.dollarSign(20)}</div>
             <div class="kpi-info">
               <span class="kpi-label">Total Recaudado / Cobrado</span>
-              <span class="kpi-value highlight-green" id="kpi-total-cobrado">⏳ Cargando...</span>
+              <span class="kpi-value highlight-green" id="kpi-total-cobrado">Cargando...</span>
             </div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon-box amber">⏳</div>
+            <div class="kpi-icon-box amber">${Icons.clock(20)}</div>
             <div class="kpi-info">
               <span class="kpi-label">Cuentas por Cobrar (Cartera)</span>
-              <span class="kpi-value highlight-amber" id="kpi-cuentas-cobrar">⏳ Cargando...</span>
+              <span class="kpi-value highlight-amber" id="kpi-cuentas-cobrar">Cargando...</span>
             </div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon-box purple">📑</div>
+            <div class="kpi-icon-box purple">${Icons.facturacion(20)}</div>
             <div class="kpi-info">
               <span class="kpi-label">Documentos este Mes</span>
-              <span class="kpi-value" id="kpi-facturas-mes">⏳ Cargando...</span>
+              <span class="kpi-value" id="kpi-facturas-mes">Cargando...</span>
             </div>
           </div>
         </div>
@@ -90,16 +94,16 @@ export class FacturacionView {
         <div class="table-filter-bar">
           <div class="filter-pills-row" id="filter-pills-container">
             <button class="filter-pill ${this.filterState === 'TODAS' ? 'active' : ''}" data-state="TODAS">Todas</button>
-            <button class="filter-pill ${this.filterState === 'ACEPTADA' ? 'active' : ''}" data-state="ACEPTADA">✓ Pagadas / Aceptadas</button>
-            <button class="filter-pill ${this.filterState === 'PENDIENTE' ? 'active' : ''}" data-state="PENDIENTE">⏱ Pendientes</button>
-            <button class="filter-pill ${this.filterState === 'PAGO_PARCIAL' ? 'active' : ''}" data-state="PAGO_PARCIAL">◐ Pago Parcial</button>
-            <button class="filter-pill ${this.filterState === 'RECHAZADA_DIAN' ? 'active' : ''}" data-state="RECHAZADA_DIAN">✕ Rechazada DIAN</button>
-            <button class="filter-pill ${this.filterState === 'VENCIDA' ? 'active' : ''}" data-state="VENCIDA">⚠ Vencidas</button>
-            <button class="filter-pill ${this.filterState === 'ANULADA' ? 'active' : ''}" data-state="ANULADA">⊘ Anuladas</button>
+            <button class="filter-pill ${this.filterState === 'ACEPTADA' ? 'active' : ''}" data-state="ACEPTADA">Pagadas / Aceptadas</button>
+            <button class="filter-pill ${this.filterState === 'PENDIENTE' ? 'active' : ''}" data-state="PENDIENTE">Pendientes</button>
+            <button class="filter-pill ${this.filterState === 'PAGO_PARCIAL' ? 'active' : ''}" data-state="PAGO_PARCIAL">Pago Parcial</button>
+            <button class="filter-pill ${this.filterState === 'RECHAZADA_DIAN' ? 'active' : ''}" data-state="RECHAZADA_DIAN">Rechazada DIAN</button>
+            <button class="filter-pill ${this.filterState === 'VENCIDA' ? 'active' : ''}" data-state="VENCIDA">Vencidas</button>
+            <button class="filter-pill ${this.filterState === 'ANULADA' ? 'active' : ''}" data-state="ANULADA">Anuladas</button>
           </div>
 
           <div class="search-box-wrapper">
-            <span class="search-icon-inside">🔍</span>
+            <span class="search-icon-inside">${Icons.search(14)}</span>
             <input type="text" id="invoice-search-input" class="search-input" placeholder="Buscar por número, cliente o NIT..." autocomplete="off">
           </div>
         </div>
@@ -244,7 +248,7 @@ export class FacturacionView {
         tbody.innerHTML = `
           <tr>
             <td colspan="10" style="text-align: center; padding: 40px; color: #dc2626;">
-              ❌ Error al consultar las facturas de la empresa: ${err.message}
+              Error al consultar las facturas de la empresa: ${err.message}
               <div style="margin-top: 10px;">
                 <button class="btn-secondary" id="btn-retry-load">Reintentar</button>
               </div>
@@ -547,7 +551,7 @@ export class FacturacionView {
         <div style="margin-bottom: 16px; background: #0f172a; color: #94a3b8; padding: 12px; border-radius: 8px; font-size: 11px; font-family: var(--font-mono);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <span style="color: #38bdf8; font-weight: bold;">CUFE (Código Único de Factura Electrónica):</span>
-            <button type="button" class="btn-copy-cufe" id="btn-copy-cufe" style="background: #1e293b; color: #f1f5f9; border: 1px solid #334155; padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">📋 Copiar</button>
+            <button type="button" class="btn-copy-cufe" id="btn-copy-cufe" style="background: #1e293b; color: #f1f5f9; border: 1px solid #334155; padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">Copiar</button>
           </div>
           <div style="word-break: break-all; color: #cbd5e1;">${f.cufe || 'CUFE-2026-DIAN-HASH-VALIDADO-SHA384-901445772'}</div>
         </div>
@@ -584,12 +588,12 @@ export class FacturacionView {
         <!-- Botonera de Acciones -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; gap: 8px;">
-            ${canPay ? `<button class="btn-primary" id="btn-modal-pay" style="background: #059669; border-color: #059669;">💰 Registrar Pago</button>` : ''}
-            ${canAnular ? `<button class="btn-secondary" id="btn-modal-anular" style="color: #dc2626; border-color: #fecaca;">🚫 Anular Factura</button>` : ''}
+            ${canPay ? `<button class="btn-primary" id="btn-modal-pay" style="background: #059669; border-color: #059669; display: inline-flex; align-items: center; gap: 6px;">${Icons.dollarSign(14)} Registrar Pago</button>` : ''}
+            ${canAnular ? `<button class="btn-secondary" id="btn-modal-anular" style="color: #dc2626; border-color: #fecaca; display: inline-flex; align-items: center; gap: 6px;">Anular Factura</button>` : ''}
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="btn-secondary" id="modal-download-pdf">📄 PDF Fiscal</button>
-            <button class="btn-secondary" id="modal-download-xml">📥 XML UBL 2.1</button>
+            <button class="btn-secondary" id="modal-download-pdf" style="display: inline-flex; align-items: center; gap: 6px;">${Icons.fileText(14)} PDF Fiscal</button>
+            <button class="btn-secondary" id="modal-download-xml" style="display: inline-flex; align-items: center; gap: 6px;">${Icons.download(14)} XML UBL 2.1</button>
             <button class="btn-primary" id="modal-close-action">Cerrar</button>
           </div>
         </div>
@@ -608,8 +612,8 @@ export class FacturacionView {
       if (btnCopy) {
         btnCopy.addEventListener('click', () => {
           navigator.clipboard.writeText(f.cufe || '');
-          btnCopy.textContent = '✓ Copiado';
-          setTimeout(() => (btnCopy.textContent = '📋 Copiar'), 2000);
+          btnCopy.textContent = 'Copiado';
+          setTimeout(() => (btnCopy.textContent = 'Copiar'), 2000);
         });
       }
 
@@ -674,7 +678,7 @@ export class FacturacionView {
       modalContent.innerHTML = `
         <button class="modal-close-btn" onclick="document.getElementById('invoice-modal-backdrop').classList.remove('open')">✕</button>
         <div style="text-align: center; padding: 40px; color: #dc2626;">
-          ❌ Error al cargar el comprobante: ${err.message}
+          Error al cargar el comprobante: ${err.message}
         </div>
       `;
     }
@@ -700,7 +704,9 @@ export class FacturacionView {
     content.innerHTML = `
       <button class="modal-close-btn" id="pay-modal-close-btn">✕</button>
       <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">💰 Registrar Pago / Abono</h3>
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+          ${Icons.dollarSign(18)} Registrar Pago / Abono
+        </h3>
         <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">
           Factura <b>${f.numeroCompleto}</b> · ${this.escapeHtml(f.clienteNombre)}
         </p>
@@ -731,11 +737,11 @@ export class FacturacionView {
         <div class="form-group-modal">
           <label>Medio de Pago *</label>
           <select id="pago-metodo" class="input-modal" required>
-            <option value="EFECTIVO">💵 Efectivo en Caja</option>
-            <option value="TARJETA">💳 Tarjeta Débito / Crédito</option>
-            <option value="TRANSFERENCIA">🏦 Transferencia Bancaria (Bancolombia, etc.)</option>
-            <option value="NEQUI">📱 Nequi</option>
-            <option value="DAVIPLATA">📱 Daviplata</option>
+            <option value="EFECTIVO">Efectivo en Caja</option>
+            <option value="TARJETA">Tarjeta Débito / Crédito</option>
+            <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+            <option value="NEQUI">Nequi</option>
+            <option value="DAVIPLATA">Daviplata</option>
           </select>
         </div>
 
@@ -786,7 +792,7 @@ export class FacturacionView {
         // Volver a abrir el detalle actualizado
         this.openInvoiceDetail(facturaId);
       } catch (err) {
-        errBox.textContent = `❌ ${err.message}`;
+        errBox.textContent = err.message;
         errBox.style.display = 'block';
         btnSubmit.disabled = false;
         btnSubmit.textContent = 'Confirmar Abono';
@@ -805,14 +811,14 @@ export class FacturacionView {
     content.innerHTML = `
       <button class="modal-close-btn" id="anular-modal-close-btn">✕</button>
       <div style="margin-bottom: 16px;">
-        <h3 style="font-size: 18px; font-weight: 800; color: #dc2626; margin: 0;">🚫 Anulación de Factura Fiscal</h3>
+        <h3 style="font-size: 18px; font-weight: 800; color: #dc2626; margin: 0;">Anulación de Factura Fiscal</h3>
         <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">
           Generación automática de <b>Nota de Crédito Electrónica</b> transmitida a la DIAN.
         </p>
       </div>
 
       <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #991b1b;">
-        ⚠️ <b>Atención legal:</b> La factura <b>${factura.numeroCompleto}</b> por valor de <b>$ ${Number(factura.totalPagar).toLocaleString('es-CO')}</b> será anulada fiscalmente. Se expedirá una Nota de Crédito tipo UBL 2.1 con su propio CUFE enlazado.
+        <b>Atención legal:</b> La factura <b>${factura.numeroCompleto}</b> por valor de <b>$ ${Number(factura.totalPagar).toLocaleString('es-CO')}</b> será anulada fiscalmente. Se expedirá una Nota de Crédito tipo UBL 2.1 con su propio CUFE enlazado.
       </div>
 
       <form id="form-anular-factura">
@@ -867,10 +873,10 @@ export class FacturacionView {
         await Promise.all([this.loadFacturas(), this.loadResumenFinanciero()]);
 
         if (res.notaCredito) {
-          alert(`✅ Factura anulada exitosamente.\nSe generó la Nota de Crédito: ${res.notaCredito.numeroCompleto}\nCUFE: ${res.notaCredito.cufe}`);
+          alert(`Factura anulada exitosamente.\nSe generó la Nota de Crédito: ${res.notaCredito.numeroCompleto}\nCUFE: ${res.notaCredito.cufe}`);
         }
       } catch (err) {
-        errBox.textContent = `❌ ${err.message}`;
+        errBox.textContent = err.message;
         errBox.style.display = 'block';
         btnSubmit.disabled = false;
         btnSubmit.textContent = 'Emitir Nota Crédito';
@@ -958,11 +964,11 @@ export class FacturacionView {
           <div class="form-group-modal">
             <label>Método de Pago *</label>
             <select id="emitir-metodo-pago" class="input-modal">
-              <option value="EFECTIVO">💵 Efectivo</option>
-              <option value="TARJETA">💳 Tarjeta Débito/Crédito</option>
-              <option value="TRANSFERENCIA">🏦 Transferencia Bancaria</option>
-              <option value="NEQUI">📱 Nequi</option>
-              <option value="DAVIPLATA">📱 Daviplata</option>
+              <option value="EFECTIVO">Efectivo</option>
+              <option value="TARJETA">Tarjeta Débito/Crédito</option>
+              <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+              <option value="NEQUI">Nequi</option>
+              <option value="DAVIPLATA">Daviplata</option>
             </select>
           </div>
           <div class="form-group-modal">
@@ -1025,7 +1031,7 @@ export class FacturacionView {
         <div class="tercero-autocomplete-item" data-nombre="${t.razonSocial}" data-nit="${t.numeroDocumento}">
           <div>
             <div class="tercero-item-name">${t.razonSocial}</div>
-            <div style="font-size: 11px; color: var(--text-muted);">${t.ciudad ? `📍 ${t.ciudad}` : ''} ${t.esCliente && t.esProveedor ? '· Cliente/Proveedor' : ''}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${t.ciudad || ''} ${t.esCliente && t.esProveedor ? '· Cliente/Proveedor' : ''}</div>
           </div>
           <div class="tercero-item-doc">${t.tipoDocumento || 'NIT'} ${t.numeroDocumento}</div>
         </div>
@@ -1138,7 +1144,7 @@ export class FacturacionView {
           this.openInvoiceDetail(res.data.id);
         }
       } catch (err) {
-        errBox.textContent = `❌ ${err.message}`;
+        errBox.textContent = err.message;
         errBox.style.display = 'block';
         btnSubmit.disabled = false;
         btnSubmit.textContent = 'Transmitir a DIAN';
@@ -1169,17 +1175,17 @@ export class FacturacionView {
   static getBadgeLabel(estado) {
     switch (estado) {
       case 'ACEPTADA':
-        return '✓ Pagada';
+        return 'Pagada';
       case 'PENDIENTE':
-        return '⏱ Pendiente';
+        return 'Pendiente';
       case 'RECHAZADA_DIAN':
-        return '✕ Rechazada DIAN';
+        return 'Rechazada DIAN';
       case 'PAGO_PARCIAL':
-        return '◐ Pago parcial';
+        return 'Pago parcial';
       case 'VENCIDA':
-        return '⚠ Vencida';
+        return 'Vencida';
       case 'ANULADA':
-        return '⊘ Anulada';
+        return 'Anulada';
       default:
         return estado || 'Desconocido';
     }
@@ -1188,15 +1194,15 @@ export class FacturacionView {
   static getMetodoPagoBadge(metodo) {
     switch (metodo) {
       case 'EFECTIVO':
-        return `<span class="badge-metodo metodo-efectivo">💵 Efectivo</span>`;
+        return `<span class="badge-metodo metodo-efectivo">Efectivo</span>`;
       case 'TARJETA':
-        return `<span class="badge-metodo metodo-tarjeta">💳 Tarjeta</span>`;
+        return `<span class="badge-metodo metodo-tarjeta">Tarjeta</span>`;
       case 'TRANSFERENCIA':
-        return `<span class="badge-metodo metodo-transferencia">🏦 Transf.</span>`;
+        return `<span class="badge-metodo metodo-transferencia">Transf.</span>`;
       case 'NEQUI':
-        return `<span class="badge-metodo metodo-nequi">📱 Nequi</span>`;
+        return `<span class="badge-metodo metodo-nequi">Nequi</span>`;
       case 'DAVIPLATA':
-        return `<span class="badge-metodo metodo-daviplata">📱 Daviplata</span>`;
+        return `<span class="badge-metodo metodo-daviplata">Daviplata</span>`;
       default:
         return `<span class="badge-metodo metodo-efectivo">${metodo || 'Efectivo'}</span>`;
     }

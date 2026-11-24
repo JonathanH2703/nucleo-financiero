@@ -18,6 +18,7 @@ import { EmpresasView } from './views/empresas.view.js?v=3.5';
 import { TenantsAdminView } from './views/tenants-admin.view.js';
 import { InventarioView } from './views/inventario.view.js';
 import { ROLE_DEFINITIONS } from './rbac-definitions.js';
+import { Icons } from './icons.js';
 
 // Catálogo maestro de navegación del sistema (Estructura de Producción)
 const MASTER_NAV_ITEMS = [
@@ -25,7 +26,7 @@ const MASTER_NAV_ITEMS = [
   {
     category: 'Principal',
     id: 'dashboard',
-    icon: '📊',
+    icon: Icons.dashboard(),
     title: 'Dashboard',
     module: 'gestion',
   },
@@ -34,14 +35,14 @@ const MASTER_NAV_ITEMS = [
   {
     category: 'Operación & Ventas',
     id: 'pos',
-    icon: '🛒',
+    icon: Icons.pos(),
     title: 'Punto de Venta (POS)',
     module: 'pos',
   },
   {
     category: 'Operación & Ventas',
     id: 'inventario',
-    icon: '📦',
+    icon: Icons.inventario(),
     title: 'Inventario & Stock',
     module: 'gestion',
   },
@@ -50,21 +51,21 @@ const MASTER_NAV_ITEMS = [
   {
     category: 'Finanzas & Facturación',
     id: 'facturacion',
-    icon: '📑',
+    icon: Icons.facturacion(),
     title: 'Facturación DIAN',
     module: 'gestion',
   },
   {
     category: 'Finanzas & Facturación',
     id: 'empresas',
-    icon: '🏢',
+    icon: Icons.empresas(),
     title: 'Terceros (Clientes / Prov.)',
     module: 'gestion',
   },
   {
     category: 'Finanzas & Facturación',
     id: 'contabilidad',
-    icon: '🏛️',
+    icon: Icons.contabilidad(),
     title: 'Contabilidad Fiscal',
     module: 'gestion',
   },
@@ -73,21 +74,21 @@ const MASTER_NAV_ITEMS = [
   {
     category: 'Sistema',
     id: 'tenants',
-    icon: '🏢',
+    icon: Icons.tenants(),
     title: 'Sedes y Sucursales',
     module: 'gestion',
   },
   {
     category: 'Sistema',
     id: 'rbac',
-    icon: '🛡️',
+    icon: Icons.rbac(),
     title: 'Usuarios y Roles',
     module: 'gestion',
   },
   {
     category: 'Sistema',
     id: 'ajustes',
-    icon: '⚙️',
+    icon: Icons.ajustes(),
     title: 'Ajustes',
     module: 'gestion',
   },
@@ -138,13 +139,13 @@ class App {
     // Configuración del botón de tema en Topbar
     const themeSetting = state.themeSetting; // 'light' | 'dark' | 'system'
     const effectiveTheme = state.getEffectiveTheme(); // 'light' | 'dark'
-    let themeIcon = '☀️';
+    let themeIcon = Icons.sun(16);
     let themeLabel = 'Claro';
     if (themeSetting === 'dark') {
-      themeIcon = '🌙';
+      themeIcon = Icons.moon(16);
       themeLabel = 'Oscuro';
     } else if (themeSetting === 'system') {
-      themeIcon = '💻';
+      themeIcon = Icons.monitor(16);
       themeLabel = effectiveTheme === 'dark' ? 'Auto (Oscuro)' : 'Auto (Claro)';
     }
 
@@ -187,7 +188,7 @@ class App {
         <aside class="sidebar" id="app-sidebar">
           <div class="sidebar-header">
             <div class="sidebar-brand">
-              <div class="brand-icon-box">🏛️</div>
+              <div class="brand-icon-box" style="display: flex; align-items: center; justify-content: center;">${Icons.logo(24)}</div>
               <div>
                 <div class="brand-title">NÚCLEO</div>
                 <div class="brand-subtitle">Claridad empresarial</div>
@@ -203,14 +204,14 @@ class App {
               <span class="tenant-badge-name">${tenant.name}</span>
               <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span class="tenant-badge-city">${tenant.city || 'Colombia'}</span>
-                <span class="badge" style="font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; ${
+                <span class="badge" style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px; ${
                   tenant.plan === 'intermedio'
-                    ? 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
+                    ? 'background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;'
                     : (tenant.plan === 'personalizado'
-                      ? 'background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;'
-                      : 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;')
+                      ? 'background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe;'
+                      : 'background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;')
                 }">
-                  ${tenant.plan === 'intermedio' ? '⭐ Plan Crecimiento' : (tenant.plan === 'personalizado' ? '⚡ Personalizado' : '🌱 Plan Básico')}
+                  ${tenant.plan === 'intermedio' ? 'Plan Crecimiento' : (tenant.plan === 'personalizado' ? 'Personalizado' : 'Plan Básico')}
                 </span>
               </div>
             </div>
@@ -235,7 +236,7 @@ class App {
 
         <!-- Área de Contenido Principal -->
         <main class="main-viewport">
-          <!-- Barra Superior (Topbar de Figma) -->
+          <!-- Barra Superior (Topbar) -->
           <header class="topbar">
             <div class="topbar-left">
               <button type="button" class="btn-hamburger" id="btn-hamburger" title="Abrir menú de navegación">☰</button>
@@ -244,59 +245,60 @@ class App {
                 <div class="topbar-view-subtitle">${tenant.name}</div>
               </div>
 
-              <!-- Píldora Selectora de Módulo (visible solo en escritorio para evitar colisiones en móvil) -->
+              <!-- Píldora Selectora de Módulo (visible en escritorio) -->
               ${
                 canSwitchModule
                   ? `
                 <button type="button" class="module-switcher-pill desktop-only ${isPosModule ? 'pos-mode' : ''}" id="topbar-module-pill" title="Alternar entre Gestión y Punto de Venta">
-                  <span>${isPosModule ? '☕ Punto de Venta' : '🌐 Gestión'}</span>
-                  <span style="font-size: 10px;">▼</span>
+                  <span>${isPosModule ? 'Punto de Venta' : 'Gestión'}</span>
+                  <span style="display: inline-flex; align-items: center; opacity: 0.7;">${Icons.chevronDown(12)}</span>
                 </button>
               `
                   : `
                 <div class="module-switcher-pill desktop-only ${isPosModule ? 'pos-mode' : ''}" style="cursor: default;" title="Módulo operativo">
-                  <span>${isPosModule ? '☕ Punto de Venta' : '🌐 Gestión'}</span>
+                  <span>${isPosModule ? 'Punto de Venta' : 'Gestión'}</span>
                 </div>
               `
               }
             </div>
 
             <div class="topbar-right">
-              <div class="topbar-location">
-                <span>📍</span>
+              <div class="topbar-location" style="display: flex; align-items: center; gap: 5px;">
+                ${Icons.mapPin(14)}
                 <span>${tenant.sucursales[0] || 'Sede Principal'}</span>
               </div>
 
-              <div class="topbar-timer">
-                <span>⏱</span>
-                <span>7h 57m</span>
+              <div class="topbar-timer" style="display: flex; align-items: center; gap: 5px;">
+                ${Icons.clock(14)}
+                <span>Turno Activo</span>
               </div>
 
               <!-- Selector Rápido de Tema (Claro / Oscuro / Sistema) -->
               <div class="theme-switcher-wrapper">
-                <button type="button" class="btn-theme-toggle" id="btn-theme-quick-toggle" title="Cambiar tema visual">
-                  <span id="theme-btn-icon">${themeIcon}</span>
+                <button type="button" class="btn-theme-toggle" id="btn-theme-quick-toggle" title="Cambiar tema visual" style="display: flex; align-items: center; gap: 5px;">
+                  <span id="theme-btn-icon" style="display: flex; align-items: center;">${themeIcon}</span>
                   <span id="theme-btn-label" class="desktop-only">${themeLabel}</span>
-                  <span class="desktop-only" style="font-size: 9px; opacity: 0.7;">▼</span>
+                  <span class="desktop-only" style="display: flex; align-items: center; opacity: 0.6;">${Icons.chevronDown(10)}</span>
                 </button>
                 <div class="theme-dropdown-menu" id="theme-dropdown-menu" style="display: none;">
-                  <div class="theme-dropdown-item ${themeSetting === 'light' ? 'active' : ''}" data-theme-val="light">
-                    <span>☀️</span> <span>Modo Claro</span>
+                  <div class="theme-dropdown-item ${themeSetting === 'light' ? 'active' : ''}" data-theme-val="light" style="display: flex; align-items: center; gap: 8px;">
+                    ${Icons.sun(15)} <span>Modo Claro</span>
                   </div>
-                  <div class="theme-dropdown-item ${themeSetting === 'dark' ? 'active' : ''}" data-theme-val="dark">
-                    <span>🌙</span> <span>Modo Oscuro</span>
+                  <div class="theme-dropdown-item ${themeSetting === 'dark' ? 'active' : ''}" data-theme-val="dark" style="display: flex; align-items: center; gap: 8px;">
+                    ${Icons.moon(15)} <span>Modo Oscuro</span>
                   </div>
-                  <div class="theme-dropdown-item ${themeSetting === 'system' ? 'active' : ''}" data-theme-val="system">
-                    <span>💻</span> <span>Sistema (Auto)</span>
+                  <div class="theme-dropdown-item ${themeSetting === 'system' ? 'active' : ''}" data-theme-val="system" style="display: flex; align-items: center; gap: 8px;">
+                    ${Icons.monitor(15)} <span>Sistema (Auto)</span>
                   </div>
                 </div>
               </div>
 
-              <button type="button" class="btn-icon desktop-only" id="btn-topbar-notifications" title="Notificaciones del Sistema">
-                🔔
+              <button type="button" class="btn-icon desktop-only" id="btn-topbar-notifications" title="Notificaciones" style="display: flex; align-items: center; justify-content: center;">
+                ${Icons.bell(17)}
               </button>
 
-              <button type="button" class="btn-logout" id="btn-topbar-logout" title="Cerrar Sesión">
+              <button type="button" class="btn-logout" id="btn-topbar-logout" title="Cerrar Sesión" style="display: flex; align-items: center; gap: 6px;">
+                ${Icons.logout(14)}
                 <span class="desktop-only">Cerrar Sesión</span>
                 <span class="mobile-only">Salir</span>
               </button>

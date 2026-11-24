@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class InventarioView {
   static async mount(container) {
@@ -35,7 +36,9 @@ export class InventarioView {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 18px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-              <span style="font-size: 28px;">📦</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                ${Icons.inventario(22)}
+              </span>
               <div>
                 <h1 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin: 0;">
                   Inventario & Control de Stock
@@ -47,7 +50,7 @@ export class InventarioView {
                       ? 'background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;'
                       : 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;'
                   }">
-                    ${isSmallBusiness ? '🌱 Modo Comercio Ágil' : '⭐ Modo Integral Multi-Bodega'}
+                    ${isSmallBusiness ? 'Modo Comercio Ágil' : 'Modo Integral Multi-Bodega'}
                   </span>
                 </div>
               </div>
@@ -57,13 +60,13 @@ export class InventarioView {
           <!-- Acciones Rápidas -->
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button type="button" id="btn-refresh-inv" style="background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 9px 15px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              🔄 Actualizar
+              ${Icons.refresh(15)} Actualizar
             </button>
             <button type="button" id="btn-movimiento-rapido" style="background: #059669; color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
-              📥 Entrada Rápida de Stock
+              ${Icons.download(15)} Entrada Rápida de Stock
             </button>
             <button type="button" id="btn-nuevo-producto" style="background: #2563eb; color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
-              + Nuevo Producto
+              ${Icons.plus(16)} Nuevo Producto
             </button>
           </div>
         </div>
@@ -71,7 +74,7 @@ export class InventarioView {
         <!-- Tarjetas de Métricas de Inventario -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 22px;">🏷️</div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center;">${Icons.package(20)}</div>
             <div>
               <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Productos Activos</div>
               <div id="stat-total-prods" style="font-size: 22px; font-weight: 900; color: var(--text-main);">-</div>
@@ -79,7 +82,7 @@ export class InventarioView {
           </div>
 
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 22px;">📊</div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center;">${Icons.chartBar(20)}</div>
             <div>
               <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Stock en Bodega</div>
               <div id="stat-total-stock" style="font-size: 22px; font-weight: 900; color: #059669;">-</div>
@@ -87,7 +90,7 @@ export class InventarioView {
           </div>
 
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef2f2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 22px;">⚠️</div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef2f2; color: #dc2626; display: flex; align-items: center; justify-content: center;">${Icons.alertCircle(20)}</div>
             <div>
               <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Stock Bajo / Agotado</div>
               <div id="stat-stock-bajo" style="font-size: 22px; font-weight: 900; color: #dc2626;">-</div>
@@ -95,7 +98,7 @@ export class InventarioView {
           </div>
 
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm);">
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: #faf5ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 22px;">🏢</div>
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #faf5ff; color: #7c3aed; display: flex; align-items: center; justify-content: center;">${Icons.building(20)}</div>
             <div style="flex: 1;">
               <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Bodega Activa</div>
               <select id="select-bodega-activa" style="width: 100%; font-size: 13px; font-weight: 700; color: var(--text-main); background: transparent; border: none; outline: none; cursor: pointer; padding: 2px 0;">
@@ -107,17 +110,17 @@ export class InventarioView {
 
         <!-- Pestañas de Navegación del Módulo -->
         <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 2px; overflow-x: auto;">
-          <button type="button" class="inv-tab-btn ${this.activeTab === 'catalogo' ? 'active' : ''}" data-tab="catalogo" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'catalogo' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'catalogo' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap;">
-            📦 Catálogo & Existencias
+          <button type="button" class="inv-tab-btn ${this.activeTab === 'catalogo' ? 'active' : ''}" data-tab="catalogo" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'catalogo' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'catalogo' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.package(15)} Catálogo & Existencias
           </button>
-          <button type="button" class="inv-tab-btn ${this.activeTab === 'kardex' ? 'active' : ''}" data-tab="kardex" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'kardex' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'kardex' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap;">
-            📜 Kardex de Movimientos
+          <button type="button" class="inv-tab-btn ${this.activeTab === 'kardex' ? 'active' : ''}" data-tab="kardex" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'kardex' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'kardex' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.fileText(15)} Kardex de Movimientos
           </button>
-          <button type="button" class="inv-tab-btn ${this.activeTab === 'ajustes' ? 'active' : ''}" data-tab="ajustes" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'ajustes' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'ajustes' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap;">
-            ⚖️ Ajustes & Cuadres Físicos
+          <button type="button" class="inv-tab-btn ${this.activeTab === 'ajustes' ? 'active' : ''}" data-tab="ajustes" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'ajustes' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'ajustes' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.ajustes(15)} Ajustes & Cuadres Físicos
           </button>
-          <button type="button" class="inv-tab-btn ${this.activeTab === 'bodegas' ? 'active' : ''}" data-tab="bodegas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'bodegas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'bodegas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap;">
-            🏢 Bodegas & Ubicaciones
+          <button type="button" class="inv-tab-btn ${this.activeTab === 'bodegas' ? 'active' : ''}" data-tab="bodegas" style="padding: 10px 18px; background: none; border: none; border-bottom: 3px solid ${this.activeTab === 'bodegas' ? '#2563eb' : 'transparent'}; font-size: 14px; font-weight: 700; color: ${this.activeTab === 'bodegas' ? '#2563eb' : 'var(--text-muted)'}; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;">
+            ${Icons.building(15)} Bodegas & Ubicaciones
           </button>
         </div>
 
@@ -194,7 +197,7 @@ export class InventarioView {
             <div style="margin-bottom: 14px; background: rgba(37, 99, 235, 0.08); border: 1px dashed rgba(37, 99, 235, 0.4); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" id="prod-es-servicio" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb;">
               <label for="prod-es-servicio" style="font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer;">
-                💼 Es un Servicio / Mano de Obra (No descuenta stock físico ni genera alertas)
+                Es un Servicio / Mano de Obra (No descuenta stock físico ni genera alertas)
               </label>
             </div>
 
@@ -212,7 +215,7 @@ export class InventarioView {
             <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
               <button type="button" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
               <button type="submit" id="btn-submit-producto" style="padding: 10px 22px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
-                ✓ Guardar Producto
+                Guardar Producto
               </button>
             </div>
           </form>
@@ -223,7 +226,9 @@ export class InventarioView {
       <div id="modal-movimiento-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2200; padding: 20px;">
         <div style="background: var(--bg-card); border-radius: 18px; width: 100%; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35); padding: 26px 30px; border: 1px solid var(--border-subtle); position: relative;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 18px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0;">📥 Entrada Directa de Mercancía</h3>
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+              ${Icons.download(18)} Entrada Directa de Mercancía
+            </h3>
             <button type="button" class="close-modal-btn" style="background: var(--bg-subtle); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--text-muted); cursor: pointer;">✕</button>
           </div>
 
@@ -253,8 +258,8 @@ export class InventarioView {
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
               <button type="button" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
-              <button type="submit" id="btn-submit-movimiento" style="padding: 10px 22px; border-radius: 10px; border: none; background: #059669; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
-                📥 Asentar Entrada en Kardex
+              <button type="submit" id="btn-submit-movimiento" style="padding: 10px 22px; border-radius: 10px; border: none; background: #059669; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); display: inline-flex; align-items: center; gap: 6px;">
+                ${Icons.download(16)} Asentar Entrada en Kardex
               </button>
             </div>
           </form>
@@ -300,7 +305,7 @@ export class InventarioView {
         <!-- Barra de Búsqueda y Filtros -->
         <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap;">
           <div style="display: flex; gap: 10px; flex: 1; max-width: 480px;">
-            <input type="text" id="inv-search-input" value="${this.searchTerm}" placeholder="🔍 Buscar por nombre o código SKU..." style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main);">
+            <input type="text" id="inv-search-input" value="${this.searchTerm}" placeholder="Buscar por nombre o código SKU..." style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main);">
             <select id="inv-filter-cat" style="padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600;">
               <option value="TODAS">Todas las Categorías</option>
               ${this.categorias.map(c => `
@@ -320,7 +325,7 @@ export class InventarioView {
         <!-- Tabla de Productos -->
         ${filtered.length === 0 ? `
           <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); padding: 50px; text-align: center;">
-            <span style="font-size: 36px; display: block; margin-bottom: 10px;">🏷️</span>
+            <div style="display: flex; justify-content: center; margin-bottom: 10px; color: var(--text-muted);">${Icons.package(36)}</div>
             <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">No se encontraron productos</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Crea el primer producto o ajusta los filtros de búsqueda.</p>
             <button type="button" class="btn-nuevo-prod-trigger" style="background: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; cursor: pointer;">
@@ -357,7 +362,7 @@ export class InventarioView {
                         <td style="padding: 12px 16px;">
                           <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                             ${p.nombre}
-                            ${isServicio ? `<span style="font-size: 10px; font-weight: 800; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 1px 6px;">💼 SERVICIO</span>` : ''}
+                            ${isServicio ? `<span style="font-size: 10px; font-weight: 800; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 1px 6px;">SERVICIO</span>` : ''}
                           </div>
                           ${p.descripcion ? `<div style="font-size: 11px; color: var(--text-muted);">${p.descripcion}</div>` : ''}
                         </td>
@@ -370,7 +375,7 @@ export class InventarioView {
                         <td style="padding: 12px 16px; text-align: center;">
                           ${isServicio ? `
                             <span class="badge" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-weight: 800;">
-                              💼 SERVICIO
+                              SERVICIO
                             </span>
                           ` : `
                             <span class="badge" style="${
@@ -378,7 +383,7 @@ export class InventarioView {
                                 ? 'background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800;'
                                 : 'background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-weight: 800;'
                             }">
-                              ${stock} ${isLow ? '⚠️' : '✓'}
+                              ${stock} ${isLow ? '(Bajo)' : ''}
                             </span>
                           `}
                         </td>
@@ -408,7 +413,7 @@ export class InventarioView {
       <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: var(--shadow-sm);">
         <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">📜 Historial Inmutable de Kardex</h3>
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">${Icons.fileText(16)} Historial Inmutable de Kardex</h3>
             <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Cada venta, compra, merma o ajuste queda registrado cronológicamente.</p>
           </div>
           <button type="button" id="btn-nuevo-mov-kardex" style="background: #059669; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
@@ -474,13 +479,13 @@ export class InventarioView {
       <div style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-subtle); overflow: hidden; box-shadow: var(--shadow-sm); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0;">⚖️ Cuadres Físicos de Fin de Día</h3>
+            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">${Icons.fileText(16)} Cuadres Físicos de Fin de Día</h3>
             <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Registra conteos reales a ciegas y concilia sobrantes o faltantes con el Kardex.</p>
           </div>
         </div>
 
         <div style="background: var(--bg-subtle); border-radius: 12px; padding: 20px; border: 1px dashed var(--border-subtle); text-align: center;">
-          <span style="font-size: 32px; display: block; margin-bottom: 8px;">📋</span>
+          <div style="display: flex; justify-content: center; margin-bottom: 8px; color: var(--text-muted);">${Icons.fileText(32)}</div>
           <h4 style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Cuadre de Inventario Rápido</h4>
           <p style="font-size: 12px; color: var(--text-muted); max-width: 440px; margin: 0 auto 14px auto;">
             Para pequeños negocios: ingresa el conteo físico al cerrar la jornada. El sistema ajustará automáticamente las diferencias en el Kardex.
@@ -500,7 +505,7 @@ export class InventarioView {
           <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <span style="font-size: 24px;">🏢</span>
+                <span style="display: inline-flex; color: #2563eb;">${Icons.building(22)}</span>
                 <span class="badge" style="background: #ecfdf5; color: #059669; font-weight: 700; font-size: 11px;">
                   CÓDIGO: ${b.codigo || 'BOD-01'}
                 </span>
@@ -693,16 +698,16 @@ export class InventarioView {
           });
 
           if (res.success) {
-            alert(`✅ ¡Producto "${nombre}" registrado con éxito!`);
+            alert(`Producto "${nombre}" registrado con éxito.`);
             document.getElementById('modal-producto-backdrop').style.display = 'none';
             formProd.reset();
             await this.loadInitialData();
           }
         } catch (err) {
-          alert(`❌ Error al crear producto: ${err.message}`);
+          alert(`Error al crear producto: ${err.message}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '✓ Guardar Producto';
+          submitBtn.innerHTML = `${Icons.save(16)} Guardar Producto`;
         }
       });
     }
@@ -714,7 +719,7 @@ export class InventarioView {
         e.preventDefault();
         const submitBtn = document.getElementById('btn-submit-movimiento');
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Asentando...';
+        submitBtn.textContent = 'Asentando...';
 
         try {
           const productoId = document.getElementById('mov-producto').value;
@@ -732,16 +737,16 @@ export class InventarioView {
           });
 
           if (res.success) {
-            alert(`✅ ¡Entrada de stock asentada en Kardex exitosamente!`);
+            alert(`Entrada de stock asentada en Kardex exitosamente.`);
             document.getElementById('modal-movimiento-backdrop').style.display = 'none';
             formMov.reset();
             await this.loadInitialData();
           }
         } catch (err) {
-          alert(`❌ Error al registrar entrada: ${err.message}`);
+          alert(`Error al registrar entrada: ${err.message}`);
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = '📥 Asentar Entrada en Kardex';
+          submitBtn.innerHTML = `${Icons.download(16)} Asentar Entrada en Kardex`;
         }
       });
     }

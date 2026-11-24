@@ -4,6 +4,7 @@
  */
 
 import { state } from '../state.js';
+import { Icons } from '../icons.js';
 
 export class PlaceholderView {
   static mount(container, moduleName) {
@@ -20,7 +21,9 @@ export class PlaceholderView {
         <!-- Banner de Módulo Corporativo -->
         <div style="background: var(--bg-subtle, #f8fafc); border: 1px solid var(--border-subtle, #e2e8f0); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-main, #0f172a);">
-            <span style="font-size: 22px;">💼</span>
+            <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+              ${Icons.building(20)}
+            </span>
             <div>
               <b>MÓDULO COMPLEMENTARIO EMPRESARIAL</b>
               <div style="font-size: 12px; color: var(--text-muted, #64748b);">
@@ -61,7 +64,7 @@ export class PlaceholderView {
       case 'clientes':
         return {
           title: 'Directorio de Clientes & Proveedores (CRM)',
-          icon: '👥',
+          icon: Icons.users(24),
           desc: 'Base de datos universal de terceros con validación de RUT y NIT',
           actionBtn: 'Nuevo Cliente',
           renderBody: () => `
@@ -105,7 +108,7 @@ export class PlaceholderView {
       case 'inventario':
         return {
           title: 'Gestión de Inventario & Kardex Multibodega',
-          icon: '📦',
+          icon: Icons.inventario(24),
           desc: 'Control de existencias, costos promedio ponderado y alertas de reposición',
           actionBtn: 'Ajuste de Stock',
           renderBody: () => `
@@ -133,12 +136,12 @@ export class PlaceholderView {
       default:
         return {
           title: 'Inteligencia de Negocio & Reportes Ejecutivos',
-          icon: '📊',
+          icon: Icons.chartBar(24),
           desc: 'Informes de rentabilidad, ventas por turnos, colaboradores y productos estrella',
           actionBtn: 'Generar Reporte',
           renderBody: () => `
             <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-              <span style="font-size: 48px; display: block; margin-bottom: 12px;">📊</span>
+              <span style="display: block; margin-bottom: 12px; color: #94a3b8;">${Icons.chartBar(48)}</span>
               <p style="font-size: 15px; font-weight: 700; color: #0f172a;">Consolidación de Indicadores y Analítica</p>
               <p style="font-size: 13px; max-width: 480px; margin: 8px auto;">
                 Reportes avanzados de flujo de caja libre, rentabilidad por línea y exportación contable bajo demanda institucional.

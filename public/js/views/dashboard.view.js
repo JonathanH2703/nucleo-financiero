@@ -4,6 +4,7 @@
 
 import { state } from '../state.js';
 import { ApiClient } from '../api.js';
+import { Icons } from '../icons.js';
 
 export class DashboardView {
   static async mount(container) {
@@ -119,7 +120,7 @@ export class DashboardView {
             <div class="quick-actions-card">
               <a href="#" class="quick-action-item green" id="action-nueva-venta">
                 <div class="action-left">
-                  <span class="action-icon">💳</span>
+                  <span class="action-icon">${Icons.creditCard(20)}</span>
                   <div class="action-text">
                     <h4>Nueva venta táctil</h4>
                     <p>Abrir caja y punto de venta POS</p>
@@ -131,7 +132,7 @@ export class DashboardView {
               ${state.currentTenant?.plan === 'basico' ? `
                 <a href="#" class="quick-action-item blue" id="action-gestionar-inv">
                   <div class="action-left">
-                    <span class="action-icon">📦</span>
+                    <span class="action-icon">${Icons.inventario(20)}</span>
                     <div class="action-text">
                       <h4>Control de Inventario</h4>
                       <p>Kardex, stock y entradas rápidas</p>
@@ -142,7 +143,7 @@ export class DashboardView {
 
                 <a href="#" class="quick-action-item yellow" id="action-sedes">
                   <div class="action-left">
-                    <span class="action-icon">📍</span>
+                    <span class="action-icon">${Icons.mapPin(20)}</span>
                     <div class="action-text">
                       <h4>Sedes y PINs</h4>
                       <p>Configurar cajas y accesos POS</p>
@@ -153,7 +154,7 @@ export class DashboardView {
               ` : `
                 <a href="#" class="quick-action-item blue" id="action-emitir-factura">
                   <div class="action-left">
-                    <span class="action-icon">📄</span>
+                    <span class="action-icon">${Icons.facturacion(20)}</span>
                     <div class="action-text">
                       <h4>Emitir Factura DIAN</h4>
                       <p>Facturación electrónica directa</p>
@@ -164,7 +165,7 @@ export class DashboardView {
 
                 <a href="#" class="quick-action-item yellow" id="action-declarar-dian">
                   <div class="action-left">
-                    <span class="action-icon">🏛️</span>
+                    <span class="action-icon">${Icons.contabilidad(20)}</span>
                     <div class="action-text">
                       <h4>Declarar DIAN</h4>
                       <p>Retenciones F-350, IVA F-300</p>
