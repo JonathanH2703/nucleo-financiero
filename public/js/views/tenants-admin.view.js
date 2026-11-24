@@ -329,16 +329,44 @@ export class TenantsAdminView {
     const paged = filtered.slice((validPage - 1) * pageSize, validPage * pageSize);
 
     // Barra de filtros (solo super admin)
+    const selectedTenant = this.sucFilter ? this.tenants.find(t => t.slug === this.sucFilter) : null;
+    const selectedTenantName = selectedTenant ? selectedTenant.name : '';
+
     const filterBar = isSuperAdmin ? `
       <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; background: var(--bg-card); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border-subtle);">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap;">Filtrar por empresa:</label>
-          <select id="suc-filter-empresa" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13px; font-weight: 600; min-width: 220px;">
-            <option value="">Todas las empresas</option>
-            ${this.tenants.map(t => `<option value="${t.slug}" ${this.sucFilter === t.slug ? 'selected' : ''}>${t.name}</option>`).join('')}
-          </select>
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px; flex-wrap: wrap;">
+          <label for="suc-filter-input" style="font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap;">Filtrar por empresa:</label>
+          <div style="position: relative; flex: 1; min-width: 240px; max-width: 360px;">
+            <div style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; display: flex; align-items: center;">
+              ${Icons.search(15)}
+            </div>
+            <input
+              type="text"
+              id="suc-filter-input"
+              placeholder="Buscar por nombre o NIT..."
+              value="${selectedTenantName}"
+              autocomplete="off"
+              style="width: 100%; padding: 8px 32px 8px 32px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-subtle); color: var(--text-main); font-size: 13px; font-weight: 600; outline: none; box-sizing: border-box;"
+            />
+            <button
+              type="button"
+              id="suc-filter-clear"
+              title="Limpiar filtro"
+              style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; display: ${this.sucFilter ? 'block' : 'none'}; line-height: 1;"
+            >✕</button>
+            <div
+              id="suc-filter-dropdown"
+              style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 250px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); z-index: 100;"
+            ></div>
+          </div>
+          ${selectedTenant ? `
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; white-space: nowrap;">
+              <span>Filtrado: ${selectedTenant.name}</span>
+              <button type="button" class="btn-remover-filtro-tag" style="background: none; border: none; color: #1d4ed8; cursor: pointer; font-size: 12px; padding: 0; line-height: 1; font-weight: 800;" title="Quitar filtro">✕</button>
+            </div>
+          ` : ''}
         </div>
-        <span style="font-size: 12px; color: var(--text-muted); margin-left: auto;">${filtered.length} sede${filtered.length !== 1 ? 's' : ''} registrada${filtered.length !== 1 ? 's' : ''}</span>
+        <span style="font-size: 12px; color: var(--text-muted); margin-left: auto; white-space: nowrap;">${filtered.length} sede${filtered.length !== 1 ? 's' : ''} ${this.sucFilter ? 'encontrada' : 'registrada'}${filtered.length !== 1 ? 's' : ''}</span>
       </div>
     ` : '';
 
@@ -875,23 +903,124 @@ export class TenantsAdminView {
       });
     });
 
-    // Filtro de empresa en sedes
-    const sucFilterSelect = document.getElementById('suc-filter-empresa');
-    if (sucFilterSelect) {
-      sucFilterSelect.addEventListener('change', (e) => {
-        this.sucFilter = e.target.value;
-        this.sucPage = 1;
-        const content = document.getElementById('admin-content-area');
-        if (content) {
-          content.innerHTML = this.renderSucursalesTab();
-          this.bindDynamicEvents();
+    // Filtro interactivo de empresa en sedes (búsqueda predictiva con coincidencias)
+    const filterInput = document.getElementById('suc-filter-input');
+    const filterClear = document.getElementById('suc-filter-clear');
+    const filterDropdown = document.getElementById('suc-filter-dropdown');
+    const tagRemover = document.querySelector('.btn-remover-filtro-tag');
+
+    const applyFilter = (newSlug) => {
+      this.sucFilter = newSlug || '';
+      this.sucPage = 1;
+      const content = document.getElementById('admin-content-area');
+      if (content) {
+        content.innerHTML = this.renderSucursalesTab();
+        this.bindDynamicEvents();
+      }
+      const tabSuc = document.getElementById('tab-count-sucursales');
+      if (tabSuc) {
+        const all = this.allSucursales || [];
+        const filtered = this.sucFilter ? all.filter(s => s.tenantSlug === this.sucFilter) : all;
+        tabSuc.textContent = filtered.length;
+      }
+    };
+
+    if (tagRemover) {
+      tagRemover.addEventListener('click', () => applyFilter(''));
+    }
+
+    if (filterClear) {
+      filterClear.addEventListener('click', () => applyFilter(''));
+    }
+
+    if (filterInput && filterDropdown) {
+      const renderDropdownOptions = (query = '') => {
+        const q = query.trim().toLowerCase();
+        const allTenants = this.tenants || [];
+        const matches = q
+          ? allTenants.filter(t =>
+              (t.name && t.name.toLowerCase().includes(q)) ||
+              (t.slug && t.slug.toLowerCase().includes(q)) ||
+              (t.nit && t.nit.toLowerCase().includes(q))
+            )
+          : allTenants;
+
+        let html = `
+          <div class="suc-filter-option" data-slug="" style="padding: 10px 14px; font-size: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; transition: background 0.15s;">
+            <span>Todas las empresas (ver todo)</span>
+            <span style="font-size: 11px; background: var(--bg-subtle); padding: 2px 7px; border-radius: 4px;">${(this.allSucursales || []).length} sedes</span>
+          </div>
+        `;
+
+        if (matches.length === 0) {
+          html += `
+            <div style="padding: 16px; font-size: 12px; color: var(--text-muted); text-align: center;">
+              No se encontraron empresas con "<strong>${query}</strong>"
+            </div>
+          `;
+        } else {
+          matches.forEach(t => {
+            const sedeCount = (this.allSucursales || []).filter(s => s.tenantSlug === t.slug).length;
+            const isSelected = this.sucFilter === t.slug;
+            html += `
+              <div class="suc-filter-option" data-slug="${t.slug}" data-name="${t.name}" style="padding: 10px 14px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: ${isSelected ? 'var(--bg-subtle)' : 'transparent'}; border-bottom: 1px solid var(--border-subtle); transition: background 0.15s;">
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-weight: 600; color: var(--text-main);">${t.name}</span>
+                  ${t.nit ? `<span style="font-size: 10px; color: var(--text-muted);">NIT: ${t.nit}</span>` : ''}
+                </div>
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); background: var(--bg-subtle); padding: 2px 7px; border-radius: 6px; white-space: nowrap;">
+                  ${sedeCount} sede${sedeCount !== 1 ? 's' : ''}
+                </span>
+              </div>
+            `;
+          });
         }
-        const tabSuc = document.getElementById('tab-count-sucursales');
-        if (tabSuc) {
-          const all = this.allSucursales || [];
-          const filtered = this.sucFilter ? all.filter(s => s.tenantSlug === this.sucFilter) : all;
-          tabSuc.textContent = filtered.length;
+
+        filterDropdown.innerHTML = html;
+        filterDropdown.style.display = 'block';
+
+        filterDropdown.querySelectorAll('.suc-filter-option').forEach(opt => {
+          opt.addEventListener('mouseenter', () => { opt.style.background = 'var(--bg-subtle)'; });
+          opt.addEventListener('mouseleave', () => {
+            const isSelected = this.sucFilter === opt.getAttribute('data-slug');
+            opt.style.background = isSelected ? 'var(--bg-subtle)' : 'transparent';
+          });
+          opt.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const slug = opt.getAttribute('data-slug') || '';
+            filterDropdown.style.display = 'none';
+            applyFilter(slug);
+          });
+        });
+      };
+
+      filterInput.addEventListener('focus', () => {
+        renderDropdownOptions(filterInput.value);
+      });
+
+      filterInput.addEventListener('input', () => {
+        if (filterClear) filterClear.style.display = filterInput.value ? 'block' : 'none';
+        renderDropdownOptions(filterInput.value);
+      });
+
+      filterInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const firstOption = filterDropdown.querySelector('.suc-filter-option');
+          if (firstOption) {
+            const slug = firstOption.getAttribute('data-slug') || '';
+            filterDropdown.style.display = 'none';
+            applyFilter(slug);
+          }
+        } else if (e.key === 'Escape') {
+          filterDropdown.style.display = 'none';
         }
+      });
+
+      filterInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (filterDropdown) filterDropdown.style.display = 'none';
+        }, 220);
       });
     }
 
