@@ -643,7 +643,7 @@ export class TenantsAdminView {
 
           <!-- Botón Guardar -->
           <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-            <button type="button" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
+            <button type="button" id="btn-cancelar-plan" class="close-modal-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-main); font-weight: 600; cursor: pointer;">Cancelar</button>
             <button type="button" id="btn-save-plan" data-id="${t.id}" style="padding: 10px 24px; border-radius: 10px; border: none; background: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); display: inline-flex; align-items: center; gap: 8px;">
               ${Icons.save(15)} Guardar Configuración de Módulos
             </button>
@@ -664,6 +664,14 @@ export class TenantsAdminView {
     const btnIntermedio = document.getElementById('btn-preset-intermedio');
     const checkboxes = Array.from(document.querySelectorAll('.mod-checkbox'));
     const btnSave = document.getElementById('btn-save-plan');
+    const btnCancel = document.getElementById('btn-cancelar-plan');
+
+    if (btnCancel) {
+      btnCancel.addEventListener('click', () => {
+        const modal = document.getElementById('modal-plan-backdrop');
+        if (modal) modal.style.display = 'none';
+      });
+    }
 
     let currentSelectedPlan = this.activeTenantDetail?.tenant?.plan || 'basico';
 
@@ -769,16 +777,38 @@ export class TenantsAdminView {
       });
     }
 
-    // Cerrar Modales
-    document.querySelectorAll('.close-modal-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const m1 = document.getElementById('modal-empresa-backdrop');
-        const m2 = document.getElementById('modal-sucursal-backdrop');
-        const m3 = document.getElementById('modal-plan-backdrop');
-        if (m1) m1.style.display = 'none';
-        if (m2) m2.style.display = 'none';
-        if (m3) m3.style.display = 'none';
+    // Cerrar Modales (botones, clics fuera en el backdrop y tecla Escape)
+    const modalIds = ['modal-empresa-backdrop', 'modal-sucursal-backdrop', 'modal-plan-backdrop'];
+
+    const closeAllModals = () => {
+      modalIds.forEach((id) => {
+        const m = document.getElementById(id);
+        if (m) m.style.display = 'none';
       });
+    };
+
+    // Botones estáticos y dinámicos para cerrar
+    document.querySelectorAll('.close-modal-btn').forEach((btn) => {
+      btn.addEventListener('click', closeAllModals);
+    });
+
+    // Cerrar al hacer clic en el backdrop exterior (fuera de la ventana modal)
+    modalIds.forEach((id) => {
+      const backdrop = document.getElementById(id);
+      if (backdrop) {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            backdrop.style.display = 'none';
+          }
+        });
+      }
+    });
+
+    // Cerrar modales con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllModals();
+      }
     });
 
     // Enviar Formulario de Crear Empresa

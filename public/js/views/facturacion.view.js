@@ -435,6 +435,16 @@ export class FacturacionView {
         this.openEmitirFacturaModal();
       });
     }
+
+    // Cerrar modales al hacer clic fuera (en el backdrop)
+    ['invoice-modal-backdrop', 'payment-modal-backdrop', 'anular-modal-backdrop', 'emitir-modal-backdrop'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', (e) => {
+          if (e.target === el) el.classList.remove('open');
+        });
+      }
+    });
   }
 
   /**
@@ -447,7 +457,7 @@ export class FacturacionView {
 
     modalContent.innerHTML = `
       <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-        ⏳ Consultando detalle fiscal y estado de pagos en la DIAN...
+        Consultando detalle fiscal y estado de pagos en la DIAN...
       </div>
     `;
     modalBackdrop.classList.add('open');

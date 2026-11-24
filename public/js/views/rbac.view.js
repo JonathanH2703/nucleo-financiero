@@ -243,6 +243,13 @@ export class RbacView {
     if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal);
     if (btnCancelar) btnCancelar.addEventListener('click', cerrarModal);
 
+    // Cerrar al hacer clic fuera en el backdrop
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrarModal();
+      });
+    }
+
     if (form) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();

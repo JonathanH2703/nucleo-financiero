@@ -654,14 +654,26 @@ export class InventarioView {
       });
     }
 
-    // Cerrar Modales
-    document.querySelectorAll('.close-modal-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const m1 = document.getElementById('modal-producto-backdrop');
-        const m2 = document.getElementById('modal-movimiento-backdrop');
-        if (m1) m1.style.display = 'none';
-        if (m2) m2.style.display = 'none';
+    // Cerrar Modales (botones y clic en el backdrop exterior)
+    const invModalIds = ['modal-producto-backdrop', 'modal-movimiento-backdrop'];
+    const closeAllInvModals = () => {
+      invModalIds.forEach(id => {
+        const m = document.getElementById(id);
+        if (m) m.style.display = 'none';
       });
+    };
+
+    document.querySelectorAll('.close-modal-btn').forEach(btn => {
+      btn.addEventListener('click', closeAllInvModals);
+    });
+
+    invModalIds.forEach(id => {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.style.display = 'none';
+        });
+      }
     });
 
     // Enviar Formulario Nuevo Producto
@@ -671,7 +683,7 @@ export class InventarioView {
         e.preventDefault();
         const submitBtn = document.getElementById('btn-submit-producto');
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Guardando...';
+        submitBtn.textContent = 'Guardando...';
 
         try {
           const codigo = document.getElementById('prod-codigo').value.trim();

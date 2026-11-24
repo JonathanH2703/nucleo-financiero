@@ -1157,6 +1157,7 @@ _Software POS Núcleo Financiero_`;
     if (btnHistorial) btnHistorial.addEventListener('click', () => this.openHistorialModal());
 
     // Cierre de Modales
+    const posModalIds = ['modal-ticket-backdrop', 'modal-caja-backdrop', 'modal-historial-backdrop'];
     document.querySelectorAll('.close-ticket-modal-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const m = document.getElementById('modal-ticket-backdrop');
@@ -1176,6 +1177,16 @@ _Software POS Núcleo Financiero_`;
         const m = document.getElementById('modal-historial-backdrop');
         if (m) m.style.display = 'none';
       });
+    });
+
+    // Cerrar al hacer clic en el fondo oscuro exterior (backdrop)
+    posModalIds.forEach((id) => {
+      const m = document.getElementById(id);
+      if (m) {
+        m.addEventListener('click', (e) => {
+          if (e.target === m) m.style.display = 'none';
+        });
+      }
     });
 
     // Acciones de la Tirilla (Imprimir y WhatsApp)
