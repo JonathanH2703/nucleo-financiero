@@ -1,4 +1,5 @@
 import { dbPool } from '../database/connection.js';
+import { logger } from '../../core/logger/logger.js';
 import {
   ITenantRepository,
   TenantStatsDTO,
@@ -218,7 +219,7 @@ export class PostgresTenantRepository implements ITenantRepository {
 
     try {
       const sucRes = await dbPool.query(
-        `SELECT id, nombre, codigo, direccion, telefono, ciudad, pin_acceso, activo 
+        `SELECT id, nombre, codigo, direccion, telefono, ciudad, pin_acceso, activa 
          FROM "${tenant.schemaName}".sucursales ORDER BY created_at ASC`
       );
       sucursales = sucRes.rows.map((r) => ({
@@ -229,10 +230,10 @@ export class PostgresTenantRepository implements ITenantRepository {
         telefono: r.telefono,
         ciudad: r.ciudad,
         pinAcceso: r.pin_acceso,
-        activo: r.activo,
+        activo: r.activa,
       }));
-    } catch {
-      // Ignorar si no existe tabla aún
+    } catch (err: any) {
+      logger.warn({ err: err?.message, schema: tenant.schemaName }, 'getTenantDetalle: error leyendo sucursales');
     }
 
     try {
@@ -251,8 +252,8 @@ export class PostgresTenantRepository implements ITenantRepository {
         rolNombre: r.rol_nombre,
         rolSlug: r.rol_slug,
       }));
-    } catch {
-      // Ignorar si no existe tabla aún
+    } catch (err: any) {
+      logger.warn({ err: err?.message, schema: tenant.schemaName }, 'getTenantDetalle: error leyendo usuarios');
     }
 
     return {
