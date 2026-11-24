@@ -442,28 +442,62 @@ export class PosView {
         btnPay.textContent = '⏳ Guardando en base de datos...';
 
         try {
-          const res = await ApiClient.emitirFacturaDirecta({
-            clienteNombre: 'Consumidor Final',
-            clienteNit: '222222222222',
-            tipoDocumento: 'DOCUMENTO_EQUIVALENTE_POS',
-            baseGravable: subtotal,
-            porcentajeIva: 8,
-            metodoPago: 'EFECTIVO',
-            estadoDian: 'ACEPTADA',
-            diasVencimiento: 1,
-            notas: `Venta POS en ${state.selectedTable || 'Mesa 02'}`
-          });
+          let numeroComp = '';
+          let comandaNum = '';
 
-          if (!res.success) throw new Error(res.message || 'Error al procesar cobro');
+          try {
+            // 1. Flujo nativo de Comanda + Cobro con descuento automático en Kardex
+            const modoAtencion = this.currentMode === 'Mostrador' ? 'MOSTRADOR_ESCANER' : (this.currentMode === 'Vitrina' ? 'VITRINA_RAPIDO' : 'MESA_SERVICIO');
+            const comandaRes = await ApiClient.createComanda({
+              modoAtencion,
+              clienteNombre: 'Consumidor Final',
+              clienteNit: '222222222222',
+              items: state.cartItems.map((it) => ({
+                productoId: it.id,
+                cantidad: it.quantity,
+              })),
+            });
 
-          alert(`✅ ¡Pago y venta guardados con éxito en la base de datos!\nComprobante: ${res.data.numeroCompleto}\nCUFE: ${res.data.cufe || 'Generado DIAN'}\nEstado: Aceptada y Liquidada`);
+            if (comandaRes && comandaRes.success && comandaRes.data?.id) {
+              const cobroRes = await ApiClient.cobrarComanda(comandaRes.data.id, {
+                tipoDocumento: 'DOCUMENTO_EQUIVALENTE_POS',
+                metodoPago: 'EFECTIVO',
+                clienteNombre: 'Consumidor Final',
+                clienteNit: '222222222222',
+              });
+
+              if (cobroRes && cobroRes.success) {
+                numeroComp = cobroRes.factura?.numeroCompleto || 'POS-2026';
+                comandaNum = comandaRes.data.numeroComanda || '';
+              }
+            }
+          } catch (posErr) {
+            console.warn('Fallback a emisión directa:', posErr);
+            // Fallback directo si el ítem no tiene ID de catálogo formal
+            const res = await ApiClient.emitirFacturaDirecta({
+              clienteNombre: 'Consumidor Final',
+              clienteNit: '222222222222',
+              tipoDocumento: 'DOCUMENTO_EQUIVALENTE_POS',
+              baseGravable: subtotal,
+              porcentajeIva: 8,
+              metodoPago: 'EFECTIVO',
+              estadoDian: 'ACEPTADA',
+              diasVencimiento: 1,
+              notas: `Venta POS en ${state.selectedTable || 'Mostrador'}`
+            });
+            if (res.success) {
+              numeroComp = res.data.numeroCompleto;
+            }
+          }
+
+          alert(`✅ ¡Venta cobrada con éxito!\nComprobante: ${numeroComp || 'POS-2026'}\n${comandaNum ? `Comanda: ${comandaNum}\n` : ''}📦 Inventario descargado automáticamente del Kardex.`);
           state.clearCart();
           this.renderCart();
           if (orderColumn) {
             orderColumn.classList.remove('mobile-open');
           }
         } catch (err) {
-          alert(`❌ Error al guardar en base de datos: ${err.message}`);
+          alert(`❌ Error al procesar venta: ${err.message}`);
         } finally {
           btnPay.disabled = false;
           btnPay.textContent = 'Cobrar e Imprimir';

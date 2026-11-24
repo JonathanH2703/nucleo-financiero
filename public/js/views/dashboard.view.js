@@ -115,7 +115,7 @@ export class DashboardView {
 
           <!-- Columna Lateral: Acciones Rápidas y Estadísticas del Día -->
           <div class="dashboard-side-column">
-            <!-- Acciones Rápidas (Estilo Figma) -->
+            <!-- Acciones Rápidas adaptadas por Plan -->
             <div class="quick-actions-card">
               <a href="#" class="quick-action-item green" id="action-nueva-venta">
                 <div class="action-left">
@@ -128,27 +128,51 @@ export class DashboardView {
                 <span class="action-arrow">↗</span>
               </a>
 
-              <a href="#" class="quick-action-item blue" id="action-emitir-factura">
-                <div class="action-left">
-                  <span class="action-icon">📄</span>
-                  <div class="action-text">
-                    <h4>Emitir Factura DIAN</h4>
-                    <p>Facturación electrónica directa</p>
+              ${state.currentTenant?.plan === 'basico' ? `
+                <a href="#" class="quick-action-item blue" id="action-gestionar-inv">
+                  <div class="action-left">
+                    <span class="action-icon">📦</span>
+                    <div class="action-text">
+                      <h4>Control de Inventario</h4>
+                      <p>Kardex, stock y entradas rápidas</p>
+                    </div>
                   </div>
-                </div>
-                <span class="action-arrow">↗</span>
-              </a>
+                  <span class="action-arrow">↗</span>
+                </a>
 
-              <a href="#" class="quick-action-item yellow" id="action-declarar-dian">
-                <div class="action-left">
-                  <span class="action-icon">🏛️</span>
-                  <div class="action-text">
-                    <h4>Declarar DIAN</h4>
-                    <p>Retenciones F-350, IVA F-300</p>
+                <a href="#" class="quick-action-item yellow" id="action-sedes">
+                  <div class="action-left">
+                    <span class="action-icon">📍</span>
+                    <div class="action-text">
+                      <h4>Sedes y PINs</h4>
+                      <p>Configurar cajas y accesos POS</p>
+                    </div>
                   </div>
-                </div>
-                <span class="action-arrow">↗</span>
-              </a>
+                  <span class="action-arrow">↗</span>
+                </a>
+              ` : `
+                <a href="#" class="quick-action-item blue" id="action-emitir-factura">
+                  <div class="action-left">
+                    <span class="action-icon">📄</span>
+                    <div class="action-text">
+                      <h4>Emitir Factura DIAN</h4>
+                      <p>Facturación electrónica directa</p>
+                    </div>
+                  </div>
+                  <span class="action-arrow">↗</span>
+                </a>
+
+                <a href="#" class="quick-action-item yellow" id="action-declarar-dian">
+                  <div class="action-left">
+                    <span class="action-icon">🏛️</span>
+                    <div class="action-text">
+                      <h4>Declarar DIAN</h4>
+                      <p>Retenciones F-350, IVA F-300</p>
+                    </div>
+                  </div>
+                  <span class="action-arrow">↗</span>
+                </a>
+              `}
             </div>
 
             <!-- Resumen de Hoy -->
@@ -219,12 +243,28 @@ export class DashboardView {
     const btnVenta = document.getElementById('action-nueva-venta');
     const btnFactura = document.getElementById('action-emitir-factura');
     const btnDian = document.getElementById('action-declarar-dian');
+    const btnInv = document.getElementById('action-gestionar-inv');
+    const btnSedes = document.getElementById('action-sedes');
 
     if (btnVenta) {
       btnVenta.addEventListener('click', (e) => {
         e.preventDefault();
         state.setModule('pos');
         state.setView('pos');
+      });
+    }
+
+    if (btnInv) {
+      btnInv.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.setView('inventario');
+      });
+    }
+
+    if (btnSedes) {
+      btnSedes.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.setView('tenants');
       });
     }
 

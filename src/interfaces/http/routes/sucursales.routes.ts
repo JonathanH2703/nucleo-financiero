@@ -13,6 +13,7 @@ sucursalesRouter.put('/:id', SucursalesController.updateSucursal);
 sucursalesRouter.delete('/:id', SucursalesController.deleteSucursal);
 
 // Bodegas
+sucursalesRouter.get('/bodegas', SucursalesController.listBodegas);
 sucursalesRouter.get('/bodegas/todas', SucursalesController.listBodegas);
 sucursalesRouter.post('/bodegas', SucursalesController.createBodega);
 sucursalesRouter.put('/bodegas/:id', SucursalesController.updateBodega);

@@ -251,10 +251,136 @@ export class ApiClient {
     return this.request('/pos/comandas');
   }
 
+  static async createComanda(comandaData) {
+    return this.request('/pos/comandas', {
+      method: 'POST',
+      body: JSON.stringify(comandaData),
+    });
+  }
+
   static async cobrarComanda(comandaId, pagoData) {
     return this.request(`/pos/comandas/${comandaId}/cobrar`, {
       method: 'POST',
       body: JSON.stringify(pagoData),
+    });
+  }
+
+  // ─── Catálogo y Productos ─────────────────────────────────
+  static async listProductos(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/catalogo/productos${query ? `?${query}` : ''}`);
+  }
+
+  static async getProducto(id) {
+    return this.request(`/catalogo/productos/${id}`);
+  }
+
+  static async createProducto(prodData) {
+    return this.request('/catalogo/productos', {
+      method: 'POST',
+      body: JSON.stringify(prodData),
+    });
+  }
+
+  static async updateProducto(id, prodData) {
+    return this.request(`/catalogo/productos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(prodData),
+    });
+  }
+
+  static async deleteProducto(id) {
+    return this.request(`/catalogo/productos/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  static async listCategorias() {
+    return this.request('/catalogo/categorias');
+  }
+
+  static async createCategoria(catData) {
+    return this.request('/catalogo/categorias', {
+      method: 'POST',
+      body: JSON.stringify(catData),
+    });
+  }
+
+  static async listVariantes(productoId) {
+    return this.request(`/catalogo/productos/${productoId}/variantes`);
+  }
+
+  static async createVariante(productoId, varData) {
+    return this.request(`/catalogo/productos/${productoId}/variantes`, {
+      method: 'POST',
+      body: JSON.stringify(varData),
+    });
+  }
+
+  static async setPrecioProducto(precioData) {
+    return this.request('/catalogo/precios', {
+      method: 'POST',
+      body: JSON.stringify(precioData),
+    });
+  }
+
+  // ─── Inventario, Kardex y Stock ───────────────────────────
+  static async getKardex(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/inventario/kardex${query ? `?${query}` : ''}`);
+  }
+
+  static async registrarMovimientoInventario(movData) {
+    return this.request('/inventario/movimientos', {
+      method: 'POST',
+      body: JSON.stringify(movData),
+    });
+  }
+
+  static async getStockProducto(productoId) {
+    return this.request(`/inventario/stock/${productoId}`);
+  }
+
+  static async getStockBajo() {
+    return this.request('/inventario/stock-bajo');
+  }
+
+  static async listAjustesInventario() {
+    return this.request('/inventario/ajustes');
+  }
+
+  static async createAjusteInventario(ajusteData) {
+    return this.request('/inventario/ajustes', {
+      method: 'POST',
+      body: JSON.stringify(ajusteData),
+    });
+  }
+
+  static async confirmarAjusteInventario(id) {
+    return this.request(`/inventario/ajustes/${id}/confirmar`, {
+      method: 'PUT',
+    });
+  }
+
+  static async revertirAjusteInventario(id) {
+    return this.request(`/inventario/ajustes/${id}/revertir`, {
+      method: 'PUT',
+    });
+  }
+
+  static async listLotesInventario() {
+    return this.request('/inventario/lotes');
+  }
+
+  // ─── Bodegas de Sucursal ─────────────────────────────────
+  static async listBodegas() {
+    return this.request('/sucursales/bodegas');
+  }
+
+  static async createBodega(bodegaData) {
+    return this.request('/sucursales/bodegas', {
+      method: 'POST',
+      body: JSON.stringify(bodegaData),
     });
   }
 }

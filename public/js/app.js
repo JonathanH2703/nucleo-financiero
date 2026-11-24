@@ -16,6 +16,7 @@ import { AjustesView } from './views/ajustes.view.js';
 import { RestrictedView } from './views/restricted.view.js';
 import { EmpresasView } from './views/empresas.view.js?v=3.5';
 import { TenantsAdminView } from './views/tenants-admin.view.js';
+import { InventarioView } from './views/inventario.view.js';
 import { ROLE_DEFINITIONS } from './demo-fixtures.js';
 
 // Catálogo maestro de navegación del sistema
@@ -74,7 +75,7 @@ const MASTER_NAV_ITEMS = [
     id: 'inventario',
     icon: '📦',
     title: 'Inventario',
-    badge: 'Próximamente',
+    badge: 'Activo',
     isCoreFinance: false,
     module: 'gestion',
   },
@@ -431,8 +432,10 @@ class App {
       case 'contabilidad':
         ContabilidadView.mount(mountPoint);
         break;
-      case 'clientes':
       case 'inventario':
+        InventarioView.mount(mountPoint);
+        break;
+      case 'clientes':
       case 'reportes':
         PlaceholderView.mount(mountPoint, view);
         break;
