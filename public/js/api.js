@@ -41,17 +41,24 @@ export class ApiClient {
     try {
       const response = await fetch(url, config);
       clearTimeout(timeout);
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(`El servidor respondió con un error (HTTP ${response.status}). Intente nuevamente.`);
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || `Error del servidor HTTP ${response.status}`);
+        const msg = data?.error?.message || data?.message || `Error del servidor HTTP ${response.status}`;
+        throw new Error(msg);
       }
 
       return data;
     } catch (err) {
       clearTimeout(timeout);
 
-      // Retry on network errors (not on HTTP 4xx/5xx business errors)
+      // Retry on network/timeout errors only (not on HTTP business errors)
       if (retries > 0 && (err.name === 'AbortError' || err.name === 'TypeError')) {
         console.warn(`[API Retry] ${endpoint} — intento ${MAX_RETRIES - retries + 1}`);
         await new Promise(r => setTimeout(r, 1000));

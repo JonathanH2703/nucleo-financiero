@@ -75,7 +75,7 @@ export class TenantsAdminView {
         <div id="admin-content-area">
           ${this.isLoading ? `
             <div style="padding: 60px; text-align: center; color: var(--text-muted);">
-              ⏳ Cargando catálogo de infraestructura y planes...
+              Cargando catálogo de infraestructura y planes...
             </div>
           ` : (this.activeTab === 'empresas' && isSuperAdmin ? this.renderEmpresasTab() : this.renderSucursalesTab())}
         </div>
@@ -397,7 +397,7 @@ export class TenantsAdminView {
     if (!modal || !content) return;
 
     modal.style.display = 'flex';
-    content.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">⏳ Cargando auditoría y módulos del cliente...</div>';
+    content.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Cargando auditoría y módulos del cliente...</div>';
 
     try {
       const res = await ApiClient.getTenantDetalle(tenantId);
@@ -580,7 +580,7 @@ export class TenantsAdminView {
     if (btnSave) {
       btnSave.addEventListener('click', async () => {
         btnSave.disabled = true;
-        btnSave.textContent = '⏳ Guardando módulos...';
+        btnSave.textContent = 'Guardando módulos...';
 
         const selectedModules = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
 
