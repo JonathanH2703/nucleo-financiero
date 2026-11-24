@@ -19,102 +19,69 @@ import { TenantsAdminView } from './views/tenants-admin.view.js';
 import { InventarioView } from './views/inventario.view.js';
 import { ROLE_DEFINITIONS } from './demo-fixtures.js';
 
-// Catálogo maestro de navegación del sistema
-// Catálogo maestro de navegación del sistema
+// Catálogo maestro de navegación del sistema (Estructura de Producción)
 const MASTER_NAV_ITEMS = [
-  // ─── FINANCIERO ────────────────────────
+  // ─── PRINCIPAL ──────────────────────────
   {
-    category: 'Financiero',
-    id: 'facturacion',
-    icon: '📑',
-    title: 'Facturación DIAN',
-    module: 'gestion',
-    isCoreFinance: true,
-    badge: 'Activo',
-  },
-  {
-    category: 'Financiero',
-    id: 'empresas',
-    icon: '🏢',
-    title: 'Empresas / Terceros',
-    module: 'gestion',
-    isCoreFinance: true,
-    badge: 'Activo',
-  },
-  {
-    category: 'Financiero',
-    id: 'contabilidad',
-    icon: '🏛️',
-    title: 'Contabilidad',
-    module: 'gestion',
-    isCoreFinance: true,
-    badge: 'Activo',
-  },
-  {
-    category: 'Financiero',
+    category: 'Principal',
     id: 'dashboard',
     icon: '📊',
     title: 'Dashboard',
     module: 'gestion',
-    isCoreFinance: true,
-    badge: 'Activo',
   },
 
-  // ─── OPERACIÓN ────────────────────────
+  // ─── OPERACIÓN Y VENTAS ────────────────
   {
-    category: 'Operación',
+    category: 'Operación & Ventas',
     id: 'pos',
-    icon: '☕',
-    title: 'Punto de Venta',
+    icon: '🛒',
+    title: 'Punto de Venta (POS)',
     module: 'pos',
-    isCoreFinance: false,
-    badge: 'Demo',
   },
   {
-    category: 'Operación',
+    category: 'Operación & Ventas',
     id: 'inventario',
     icon: '📦',
-    title: 'Inventario',
-    badge: 'Activo',
-    isCoreFinance: false,
-    module: 'gestion',
-  },
-  {
-    category: 'Operación',
-    id: 'clientes',
-    icon: '👥',
-    title: 'CRM Clientes',
-    badge: 'Próximamente',
-    isCoreFinance: false,
-    module: 'gestion',
-  },
-  {
-    category: 'Operación',
-    id: 'reportes',
-    icon: '📈',
-    title: 'Reportes BI',
-    badge: 'Próximamente',
-    isCoreFinance: false,
+    title: 'Inventario & Stock',
     module: 'gestion',
   },
 
-  // ─── CONFIGURACIÓN & ADMINISTRACIÓN ────
+  // ─── FINANZAS & FACTURACIÓN ────────────
+  {
+    category: 'Finanzas & Facturación',
+    id: 'facturacion',
+    icon: '📑',
+    title: 'Facturación DIAN',
+    module: 'gestion',
+  },
+  {
+    category: 'Finanzas & Facturación',
+    id: 'empresas',
+    icon: '🏢',
+    title: 'Terceros (Clientes / Prov.)',
+    module: 'gestion',
+  },
+  {
+    category: 'Finanzas & Facturación',
+    id: 'contabilidad',
+    icon: '🏛️',
+    title: 'Contabilidad Fiscal',
+    module: 'gestion',
+  },
+
+  // ─── ADMINISTRACIÓN & SISTEMA ──────────
   {
     category: 'Sistema',
     id: 'tenants',
     icon: '🏢',
-    title: 'Sedes y Empresas',
-    badge: 'Multi-Sede',
-    isCoreFinance: false,
+    title: 'Sedes y Sucursales',
     module: 'gestion',
   },
   {
     category: 'Sistema',
     id: 'rbac',
     icon: '🛡️',
-    title: 'Roles y Usuarios',
-    badge: 'Config',
-    isCoreFinance: false,
+    title: 'Usuarios y Roles',
     module: 'gestion',
   },
   {
@@ -122,8 +89,6 @@ const MASTER_NAV_ITEMS = [
     id: 'ajustes',
     icon: '⚙️',
     title: 'Ajustes',
-    badge: 'Config',
-    isCoreFinance: false,
     module: 'gestion',
   },
 ];
@@ -200,14 +165,11 @@ class App {
       navHtml += `<div class="nav-section-title">${catName}</div>`;
       for (const item of items) {
         const isActive = view === item.id;
-        const isCore = !!item.isCoreFinance;
-        const coreClass = isCore ? 'nav-core-finance' : 'nav-item-pale';
-        const badgeClass = isCore ? 'nav-badge-core' : 'nav-badge-pale';
         navHtml += `
-          <div class="nav-item ${coreClass} ${isActive ? 'active' : ''}" data-nav="${item.id}" data-mod="${item.module}" title="${item.title}">
+          <div class="nav-item ${isActive ? 'active' : ''}" data-nav="${item.id}" data-mod="${item.module}" title="${item.title}">
             <span class="nav-item-icon">${item.icon}</span>
-            <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: ${isCore ? '600' : '500'};">${item.title}</span>
-            ${item.badge ? `<span class="${badgeClass}">${item.badge}</span>` : ''}
+            <span class="nav-item-title">${item.title}</span>
+            ${item.badge ? `<span class="nav-item-badge">${item.badge}</span>` : ''}
           </div>
         `;
       }
@@ -465,14 +427,11 @@ class App {
   }
 
   static buildMobileBottomNav(currentView) {
-    // Tomar los primeros módulos permitidos para la barra inferior, priorizando facturación y contabilidad
     const allowed = MASTER_NAV_ITEMS.filter((item) => state.canAccessView(item.id));
-    const sorted = [...allowed].sort((a, b) => (b.isCoreFinance ? 1 : 0) - (a.isCoreFinance ? 1 : 0));
-    const mobileItems = sorted.slice(0, 4);
+    const mobileItems = allowed.slice(0, 4);
     return mobileItems.map((item) => {
-      const isCore = !!item.isCoreFinance;
       return `
-        <button class="mobile-nav-btn ${isCore ? 'nav-core' : 'nav-pale'} ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
+        <button class="mobile-nav-btn ${currentView === item.id ? 'active' : ''}" data-mobile-nav="${item.id}" data-mobile-mod="${item.module}">
           <span class="icon">${item.icon}</span>
           <span>${this.getShortNavTitle(item.id, item.title)}</span>
         </button>

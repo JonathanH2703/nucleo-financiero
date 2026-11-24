@@ -113,7 +113,7 @@ html, body {
 
 /* === SIDEBAR (LIMPIO Y COMPACTO) === */
 .sidebar {
-  width: 240px;
+  width: 256px;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-subtle);
   display: flex;
@@ -165,22 +165,24 @@ html, body {
 
 /* Tenant badge en sidebar */
 .sidebar-tenant-badge {
-  margin: 10px 12px 4px 12px;
-  padding: 8px 10px;
-  background-color: var(--bg-subtle);
+  margin: 12px 12px 6px 12px;
+  padding: 10px 12px;
+  background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .tenant-status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
   flex-shrink: 0;
 }
 
@@ -188,11 +190,13 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .tenant-badge-name {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
@@ -200,26 +204,27 @@ html, body {
 }
 
 .tenant-badge-city {
-  font-size: 10px;
-  color: var(--text-light);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-/* === NAVEGACIÓN SIDEBAR (COMPACTA Y LIMPIA) === */
+/* === NAVEGACIÓN SIDEBAR DE PRODUCCIÓN === */
 .sidebar-nav {
-  padding: 8px 10px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   flex-grow: 1;
 }
 
 .nav-section-title {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.8px;
-  color: var(--text-light);
+  color: var(--text-muted);
   text-transform: uppercase;
-  margin: 14px 8px 4px 8px;
+  margin: 16px 8px 6px 8px;
+  opacity: 0.85;
 }
 
 .nav-section-title:first-child {
@@ -230,8 +235,9 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 2px;
+  border-radius: 9px;
   color: var(--text-muted);
   text-decoration: none;
   font-size: 13px;
@@ -239,6 +245,7 @@ html, body {
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
+  border-left: 3px solid transparent;
 }
 
 .nav-item:hover {
@@ -247,26 +254,45 @@ html, body {
 }
 
 .nav-item.active {
-  background-color: var(--bg-sidebar-active);
-  color: var(--primary-600);
-  font-weight: 600;
+  background-color: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-weight: 700;
+  border-left-color: #2563eb;
 }
 
-.nav-item.active::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 20%;
-  height: 60%;
-  width: 3px;
-  background-color: var(--primary-600);
-  border-radius: 3px 0 0 3px;
+[data-theme="dark"] .nav-item.active {
+  background-color: rgba(59, 130, 246, 0.16);
+  color: #60a5fa;
+  border-left-color: #60a5fa;
 }
 
 .nav-item-icon {
-  font-size: 15px;
-  width: 18px;
-  text-align: center;
+  font-size: 16px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-item-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -278,74 +304,6 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* === DISTINCIÓN: FINANCIERO (ACTIVO) VS OTROS (EN DESARROLLO) === */
-.nav-item.nav-core-finance {
-  border-left: 2px solid var(--primary-500);
-}
-
-.nav-item.nav-core-finance:hover {
-  background: var(--primary-50);
-}
-
-.nav-item.nav-core-finance.active {
-  background-color: var(--bg-sidebar-active);
-  border-left-color: var(--primary-600);
-}
-
-.nav-item .nav-badge-core {
-  margin-left: auto;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 9999px;
-  background: var(--badge-green-bg);
-  color: var(--badge-green-text);
-  border: 1px solid var(--badge-green-border);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* Módulos no financieros: pálidos pero explorables */
-.nav-item.nav-item-pale {
-  opacity: 0.5;
-  filter: grayscale(30%);
-  transition: opacity var(--transition-fast), filter var(--transition-fast);
-}
-
-.nav-item.nav-item-pale:hover {
-  opacity: 0.85;
-  filter: none;
-}
-
-.nav-item.nav-item-pale.active {
-  opacity: 0.8;
-  filter: none;
-  background-color: var(--bg-subtle);
-  color: var(--text-main);
-}
-
-.nav-item .nav-badge-pale {
-  margin-left: auto;
-  font-size: 8px;
-  font-weight: 500;
-  padding: 2px 5px;
-  border-radius: 9999px;
-  background: var(--bg-subtle);
-  color: var(--text-light);
-  border: 1px dashed var(--border-subtle);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.mobile-nav-btn.nav-pale {
-  opacity: 0.5;
-}
-
-.mobile-nav-btn.nav-core {
-  opacity: 1;
-  font-weight: 700;
 }
 
 /* Pie del sidebar */
